@@ -8,9 +8,51 @@
 </head>
 <body>
   <div class="terminal-box">
-    <h1 class="glow">Welcome to Yancarlo's Portfolio</h1>
-    <p>Access my latest build:</p>
-    <a href="weight-tracker/login.html" class="terminal-button">🚀 Launch Weight Tracker</a>
+    <pre class="ascii-art">
+  ___       __              __           
+ / _ \___  / /__  ___  ____/ /___ _____ _
+/ , _/ _ \/ / _ \/ _ \/ __/  '_/ // / _ `/
+/_/|_|\___/_/\___/_//_/\__/_/\_\\_,_/\_,_/ 
+
+    </pre>
+    <div id="terminal-output">
+      <p>> Initializing Portfolio Interface<span class="cursor">█</span></p>
+    </div>
+    <div id="main-content" class="hidden">
+      <h1 class="glow">Welcome to Yancarlo's Portfolio</h1>
+      <p>Access my latest build:</p>
+      <a href="weight-tracker/login.html" class="terminal-button">🚀 Launch Weight Tracker</a>
+    </div>
   </div>
+
+  <script>
+    const output = document.getElementById('terminal-output');
+    const mainContent = document.getElementById('main-content');
+
+    const lines = [
+      '> Loading user profile...',
+      '> Authenticating access...',
+      '> Access granted.',
+      '> Welcome, Yancarlo.',
+    ];
+
+    let index = 0;
+    const delay = 1000;
+
+    function addLine() {
+      if (index < lines.length) {
+        const p = document.createElement('p');
+        p.textContent = lines[index];
+        output.appendChild(p);
+        index++;
+        setTimeout(addLine, delay);
+      } else {
+        document.querySelector('.cursor').remove();
+        mainContent.classList.remove('hidden');
+      }
+    }
+
+    setTimeout(addLine, delay);
+  </script>
 </body>
 </html>
