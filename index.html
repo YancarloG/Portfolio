@@ -3,26 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Weight Tracker</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Yancarlo's Portfolio</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      text-align: center;
+      padding: 50px;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    .project-link {
+      display: inline-block;
+      padding: 1rem 2rem;
+      background: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 1.2rem;
+    }
+    .project-link:hover {
+      background: #0056b3;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Weight Tracker</h1>
-    <form id="weightForm">
-      <input type="number" id="weightInput" placeholder="Enter weight (lbs)" required />
-      <button type="submit">Add Entry</button>
-    </form>
-    <table id="weightTable">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Weight (lbs)</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-  <script src="script.js"></script>
+  <h1>Welcome to Yancarlo's Portfolio</h1>
+  <p>Click below to try out my Weight Tracker web app:</p>
+  <a href="weight-tracker/login.html" class="project-link">Launch Weight Tracker</a>
 </body>
 </html>
