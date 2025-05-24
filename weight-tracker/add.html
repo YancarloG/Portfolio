@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add Weight</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container glass">
+    <h1>Add Weight</h1>
+    <form id="weightForm">
+      <input type="number" id="weightInput" placeholder="Enter weight (lbs)" required />
+      <button type="submit">Add Entry</button>
+    </form>
+    <div class="success-message" id="successMsg"></div>
+    <button onclick="logout()">Logout</button>
+    <a href="history.html">View History</a>
+  </div>
+  <script src="utils.js"></script>
+  <script src="add.js"></script>
+</body>
+</html>
