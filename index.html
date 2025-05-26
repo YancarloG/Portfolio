@@ -33,6 +33,17 @@ __   __          _       ____            _    __       _ _
   </audio>
 
   <script>
+  // Mouse-driven card movement
+  document.addEventListener('mousemove', (e) => {
+    const main = document.getElementById('main-content');
+    const x = (window.innerWidth / 2 - e.pageX) / 40;
+    const y = (window.innerHeight / 2 - e.pageY) / 40;
+    main.style.transform = `translate(${x}px, ${y}px)`;
+  });
+</script>
+
+  
+  <script>
     const output = document.getElementById('terminal-output');
     const enterBtn = document.getElementById('enter-btn');
     const mainContent = document.getElementById('main-content');
