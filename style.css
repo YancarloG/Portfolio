@@ -8,6 +8,32 @@ body {
   align-items: center;
   justify-content: center;
   height: 100vh;
+  overflow: hidden;
+  position: relative;
+  cursor: crosshair;
+}
+
+/* Scanline background effect */
+body::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 255, 136, 0.03) 0px,
+    rgba(0, 255, 136, 0.03) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  z-index: -1;
+  animation: scanlines 2s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes scanlines {
+  from { background-position: 0 0; }
+  to { background-position: 0 100%; }
 }
 
 .terminal-box {
@@ -34,6 +60,16 @@ body {
   text-shadow: 0 0 5px #00ff88, 0 0 10px #00ff88;
   margin-bottom: 1.5rem;
   text-align: center;
+  animation: pulseGlow 2s infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    text-shadow: 0 0 5px #00ff88, 0 0 10px #00ff88;
+  }
+  50% {
+    text-shadow: 0 0 15px #00ff88, 0 0 30px #00ff88;
+  }
 }
 
 .terminal-button {
@@ -48,6 +84,7 @@ body {
   font-size: 1.1rem;
   margin-top: 1rem;
   text-align: center;
+  cursor: crosshair;
 }
 
 .terminal-button:hover {
@@ -61,12 +98,8 @@ body {
 }
 
 @keyframes blink {
-  from, to {
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
+  from, to { opacity: 0; }
+  50% { opacity: 1; }
 }
 
 .hidden {
@@ -77,49 +110,42 @@ body {
   margin: 0.2rem 0;
 }
 
-/* Crosshair Cursor */
-body, a, button {
-  cursor: crosshair;
+/* Glitch Effect */
+.glitch {
+  position: relative;
+  color: #00ff88;
 }
 
-/* Glowing pulse */
-.glow {
-  animation: pulseGlow 2s infinite;
-}
-
-@keyframes pulseGlow {
-  0%, 100% {
-    text-shadow: 0 0 5px #00ff88, 0 0 10px #00ff88;
-  }
-  50% {
-    text-shadow: 0 0 15px #00ff88, 0 0 30px #00ff88;
-  }
-}
-
-/* Glitch background */
-body::before {
-  content: '';
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 255, 136, 0.03) 0px,
-    rgba(0, 255, 136, 0.03) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-  z-index: -1;
-  animation: scanlines 2s linear infinite;
-  pointer-events: none;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  color: #00ff88;
 }
 
-@keyframes scanlines {
-  from { background-position: 0 0; }
-  to { background-position: 0 100%; }
+.glitch::before {
+  top: -1px;
+  left: 2px;
+  text-shadow: -1px 0 red;
+  animation: glitchTop 1.5s infinite linear alternate-reverse;
 }
 
-/* Floating animation targets (main content) */
-#main-content {
-  transition: transform 0.2s ease;
+.glitch::after {
+  top: 1px;
+  left: -2px;
+  text-shadow: 1px 0 blue;
+  animation: glitchBottom 1.5s infinite linear alternate-reverse;
+}
+
+@keyframes glitchTop {
+  0% { clip-path: inset(0 0 80% 0); }
+  100% { clip-path: inset(0 0 40% 0); }
+}
+
+@keyframes glitchBottom {
+  0% { clip-path: inset(60% 0 0 0); }
+  100% { clip-path: inset(30% 0 0 0); }
 }
