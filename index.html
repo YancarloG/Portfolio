@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Yancarlo's Portfolio</title>
-  <link rel="stylesheet" href="style.css"/>
+  <title>Yan's Terminal</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="terminal-box">
+  <div class="terminal-box" id="terminal-box">
     <pre class="ascii-art">
 __   __          _       ____            _    __       _ _       
 \ \ / /_ _ _ __ ( )___  |  _ \ ___  _ __| |_ / _| ___ | (_) ___  
@@ -19,26 +19,35 @@ __   __          _       ____            _    __       _ _
     <div id="terminal-output">
       <p>> Initializing Portfolio Interface<span class="cursor">█</span></p>
     </div>
-    <div id="main-content" class="hidden">
-      <h1 class="glow">Welcome to Yan's Portfolio</h1>
-      <p>Access my latest build:</p>
-      <a href="weight-tracker/login.html" class="terminal-button">🚀 Launch Weight Tracker</a>
-    </div>
+    <button id="enter-btn" class="terminal-button hidden">Enter Site</button>
   </div>
+
+  <div id="main-content" class="hidden">
+    <h1 class="glow">Welcome to Yantento.com</h1>
+    <p>Access my latest build:</p>
+    <a href="weight-tracker/login.html" class="terminal-button">🚀 Launch Weight Tracker</a>
+  </div>
+
+  <audio id="bg-music" loop>
+    <source src="music/song1.mp3" type="audio/mpeg">
+  </audio>
 
   <script>
     const output = document.getElementById('terminal-output');
+    const enterBtn = document.getElementById('enter-btn');
     const mainContent = document.getElementById('main-content');
+    const cursor = document.querySelector('.cursor');
+    const music = document.getElementById('bg-music');
 
     const lines = [
-      '> Loading user profile...',
-      '> Authenticating access...',
-      '> Access granted.',
-      '> Welcome!!',
+      '> Loading system modules...',
+      '> Verifying integrity...',
+      '> Establishing connection to github.io...',
+      '> Preparing secure interface...',
+      '> Launch ready.'
     ];
 
     let index = 0;
-    const delay = 1000;
 
     function addLine() {
       if (index < lines.length) {
@@ -46,14 +55,20 @@ __   __          _       ____            _    __       _ _
         p.textContent = lines[index];
         output.appendChild(p);
         index++;
-        setTimeout(addLine, delay);
+        setTimeout(addLine, 900);
       } else {
-        document.querySelector('.cursor').remove();
-        mainContent.classList.remove('hidden');
+        cursor.remove();
+        enterBtn.classList.remove('hidden');
       }
     }
 
-    setTimeout(addLine, delay);
+    enterBtn.addEventListener('click', () => {
+      document.getElementById('terminal-box').classList.add('hidden');
+      mainContent.classList.remove('hidden');
+      music.play();
+    });
+
+    setTimeout(addLine, 800);
   </script>
 </body>
 </html>
