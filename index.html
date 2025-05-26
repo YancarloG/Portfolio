@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Yan's Terminal</title>
+  <title>Yantento's Terminal</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -23,7 +23,7 @@ __   __          _       ____            _    __       _ _
   </div>
 
   <div id="main-content" class="hidden">
-    <h1 class="glow">Welcome to Yantento.com</h1>
+    <h1 class="glitch glow" data-text="Welcome to Yantento.com">Welcome to Yantento.com</h1>
     <p>Access my latest build:</p>
     <a href="weight-tracker/login.html" class="terminal-button">🚀 Launch Weight Tracker</a>
   </div>
@@ -32,17 +32,6 @@ __   __          _       ____            _    __       _ _
     <source src="music/song1.mp3" type="audio/mpeg">
   </audio>
 
-  <script>
-  // Mouse-driven card movement
-  document.addEventListener('mousemove', (e) => {
-    const main = document.getElementById('main-content');
-    const x = (window.innerWidth / 2 - e.pageX) / 40;
-    const y = (window.innerHeight / 2 - e.pageY) / 40;
-    main.style.transform = `translate(${x}px, ${y}px)`;
-  });
-</script>
-
-  
   <script>
     const output = document.getElementById('terminal-output');
     const enterBtn = document.getElementById('enter-btn');
@@ -80,6 +69,13 @@ __   __          _       ____            _    __       _ _
     });
 
     setTimeout(addLine, 800);
+
+    // Mouse-driven parallax effect
+    document.addEventListener('mousemove', (e) => {
+      const x = (window.innerWidth / 2 - e.pageX) / 40;
+      const y = (window.innerHeight / 2 - e.pageY) / 40;
+      mainContent.style.transform = `translate(${x}px, ${y}px)`;
+    });
   </script>
 </body>
 </html>
