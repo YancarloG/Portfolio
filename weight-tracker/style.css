@@ -1,9 +1,10 @@
-
+/* Importing better-style font */
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
+/* === Base Page Setup === */
 body {
-  font-family: 'Share Tech Mono', monospace;
-  background: radial-gradient(circle, #0f0f0f, #000000);
+  font-family: 'Share Tech Mono', monospace; /* Cyber-themed font */
+  background: radial-gradient(circle, #0f0f0f, #000000); /* Terminal-style gradient */
   color: #00ffcc;
   margin: 0;
   padding: 0;
@@ -11,20 +12,22 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  cursor: crosshair;
+  cursor: crosshair; /* better cursor can change later */
 }
 
+/* === Container for page content === */
 .container {
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.85); /* Transparent black for terminal look */
   padding: 2rem;
   border-radius: 10px;
   border: 1px solid #00ffcc;
   box-shadow: 0 0 30px #00ffcc;
   width: 95%;
-  max-width: 600px;
+  max-width: 800px; /* Increased for graph and table */
   overflow-x: auto;
 }
 
+/* === Title Styling with Animated Glow === */
 h1 {
   text-align: center;
   margin-bottom: 1rem;
@@ -41,6 +44,7 @@ h1 {
   }
 }
 
+/* === Table Layout and Behavior === */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -51,8 +55,10 @@ th, td {
   padding: 0.75rem;
   border: 1px solid #00ffcc;
   text-align: center;
+  word-break: break-word;
 }
 
+/* === Colored weight change indicators === */
 .increase {
   color: #ff4444;
   font-weight: bold;
@@ -63,6 +69,7 @@ th, td {
   font-weight: bold;
 }
 
+/* === Message display styles === */
 .success-message, .error-message {
   text-align: center;
   margin-top: 1rem;
@@ -73,6 +80,7 @@ th, td {
   color: #ff4444;
 }
 
+/* === Button styling === */
 button {
   padding: 0.5rem;
   cursor: pointer;
@@ -82,12 +90,56 @@ button {
   margin-top: 1rem;
   display: block;
   width: 100%;
+  transition: background-color 0.3s ease;
 }
 
+button:hover {
+  background-color: #005555;
+}
+
+/* === Link styling === */
 a {
   display: block;
   margin-top: 1rem;
   color: #00ccff;
   text-align: center;
   text-decoration: none;
+}
+
+/* === Chart Canvas Styling === */
+#weightChart {
+  width: 100%;
+  margin-top: 2rem;
+  background-color: #111;
+  border-radius: 8px;
+  border: 1px solid #00ffcc;
+  box-shadow: 0 0 15px #00ffcc;
+}
+
+/* === Scrollable Table Wrapper for Mobile Devices === */
+.table-wrapper {
+  max-height: 300px; /* Prevent overflow */
+  overflow-y: auto;
+  margin-bottom: 2rem;
+  border-radius: 6px;
+  border: 1px solid #00ffcc;
+}
+
+/* === Responsive Design Tweaks === */
+@media (max-width: 600px) {
+  .container {
+    padding: 1rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  button {
+    font-size: 1rem;
+  }
+
+  th, td {
+    font-size: 0.9rem;
+  }
 }
