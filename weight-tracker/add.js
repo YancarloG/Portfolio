@@ -1,25 +1,41 @@
+// Redirect to login if not authenticated
 if (localStorage.getItem('loggedIn') !== 'true') {
   window.location.href = 'login.html';
 }
 
+// Logout function clears login state
+function logout() {
+  localStorage.removeItem('loggedIn');
+  window.location.href = 'login.html';
+}
+
+// Event listener for weight form submission
 document.getElementById('weightForm').addEventListener('submit', function(e) {
   e.preventDefault();
-  const weight = parseFloat(document.getElementById('weightInput').value);
-  const successMsg = document.getElementById('successMsg');
 
-  if (!validateWeight(weight)) {
-    successMsg.textContent = 'Invalid weight. Please enter a value between 1 and 2000.';
-    successMsg.style.color = '#ff4444';
-    return;
-  }
+  // Retrieve weight from form input
+  const weight = document.getElementById('weightInput').value;
 
-  const date = new Date().toLocaleDateString();
-  const newEntry = { date, weight };
+  // Get current date and time
+  const now = new Date();
+  const date = now.toLocaleDateString();
+  const time = now.toLocaleTimeString();
 
+  // Create a new entry object with date, time, and weight
+  const newEntry = { date, time, weight };
+
+  // Retrieve existing entries or initialize empty array
   const entries = JSON.parse(localStorage.getItem('weights') || '[]');
+
+  // Add new entry to array
   entries.push(newEntry);
+
+  // Save updated entries array to localStorage
   localStorage.setItem('weights', JSON.stringify(entries));
+
+  // Clear form input
   document.getElementById('weightInput').value = '';
-  successMsg.textContent = 'Entry added!';
-  successMsg.style.color = '#00ff00';
+
+  // Feedback to user
+  alert('Entry added!');
 });
