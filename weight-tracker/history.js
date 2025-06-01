@@ -1,81 +1,108 @@
-// Redirect to login if user not authenticated
+// Redirect to login if not authenticated
 if (localStorage.getItem('loggedIn') !== 'true') {
   window.location.href = 'login.html';
 }
 
-// Logout logic
+// Logout function
 function logout() {
   localStorage.removeItem('loggedIn');
   window.location.href = 'login.html';
 }
 
-// Access table body where entries will be rendered
+// Access table body for inserting rows
 const tableBody = document.querySelector('#weightTable tbody');
 
-// Fetch weight entries from localStorage
+// Retrieve and parse entries or use empty array
 const entries = JSON.parse(localStorage.getItem('weights') || '[]');
 
-// Render table rows with conditional formatting
+// Prepare data arrays for chart
+const labels = [];
+const weights = [];
+
+// Clear any existing table content
 tableBody.innerHTML = '';
+
+// Track previous weight for comparison
 let previousWeight = null;
 
+// Loop through each entry to display in table and collect data for chart
 entries.forEach(entry => {
   const row = document.createElement('tr');
 
-  // Conditional color logic: red if gain, green if loss, default black
-  let color = '';
+  // Push data for chart display
+  labels.push(`${entry.date} ${entry.time}`);
+  weights.push(Number(entry.weight));
+
+  // Conditionally color rows: green for weight loss, red for gain
   if (previousWeight !== null) {
-    color = entry.weight > previousWeight ? 'red' : 'green';
+    const change = Number(entry.weight) - Number(previousWeight);
+    if (change < 0) {
+      row.style.color = 'green'; // weight dropped
+    } else if (change > 0) {
+      row.style.color = 'red'; // weight increased
+    }
   }
 
-  row.innerHTML = `
-    <td>${entry.date}</td>
-    <td>${entry.time || 'N/A'}</td>
-    <td style="color:${color}">${entry.weight}</td>
-  `;
+  // Fill table row with entry details
+  row.innerHTML = `<td>${entry.date}</td><td>${entry.time || '—'}</td><td>${entry.weight}</td>`;
   tableBody.appendChild(row);
+
   previousWeight = entry.weight;
 });
 
-
-// === Chart.js Visualization ===
-
-// Combine date + time for X-axis labels
-const chartLabels = entries.map(entry => `${entry.date} ${entry.time || ''}`);
-
-// Parse weight values for Y-axis data
-const chartData = entries.map(entry => parseFloat(entry.weight));
-
-// Get canvas context and create a Chart.js line graph
+// Create a line chart using Chart.js
 const ctx = document.getElementById('weightChart').getContext('2d');
 const weightChart = new Chart(ctx, {
   type: 'line',
   data: {
-    labels: chartLabels,
+    labels: labels, // x-axis labels: date + time
     datasets: [{
       label: 'Weight Over Time',
-      data: chartData,
-      borderColor: '#00ff88',  // Neon line
-      backgroundColor: 'rgba(0, 255, 136, 0.1)',
-      borderWidth: 2,
-      tension: 0.3,
-      pointRadius: 4,
-      pointBackgroundColor: '#00ff88'
+      data: weights,
+      fill: false,
+      borderColor: 'blue',
+      backgroundColor: 'blue',
+      tension: 0.2, // smooth curve
+      pointRadius: 5,
+      pointHoverRadius: 7,
     }]
   },
   options: {
     responsive: true,
-    scales: {
-      y: {
-        title: {
-          display: true,
-          text: 'Weight (lbs)'
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            const i = context.dataIndex;
+            const prev = weights[i - 1];
+            const curr = weights[i];
+            const change = prev !== undefined ? (curr - prev).toFixed(1) : '0';
+            const direction = change > 0 ? '+' : '';
+            return `Weight: ${curr} lbs (${direction}${change})`;
+          }
         }
       },
+      legend: {
+        labels: {
+          color: '#000',
+          font: { size: 14 }
+        }
+      }
+    },
+    scales: {
       x: {
-        title: {
-          display: true,
-          text: 'Date & Time'
+        ticks: {
+          color: '#000',
+          maxRotation: 45,
+          minRotation: 45,
+          autoSkip: true,
+          maxTicksLimit: 10,
+        }
+      },
+      y: {
+        beginAtZero: false,
+        ticks: {
+          color: '#000'
         }
       }
     }
