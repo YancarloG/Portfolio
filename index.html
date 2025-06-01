@@ -7,31 +7,44 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="terminal-box" id="terminal-box">
-    <pre class="ascii-art">
+  <!-- 🔁 Fullscreen animated background video -->
+  <video id="background" autoplay muted loop>
+    <source src="assets/cyber-bg.mp4" type="video/mp4" />
+    <!-- Fallback text if video doesn't load -->
+    Your browser does not support the video tag.
+  </video>
+
+  <!-- 💻 Transparent content overlay holding the terminal UI -->
+  <div id="overlay">
+    <!-- Terminal boot box -->
+    <div class="terminal-box" id="terminal-box">
+      <pre class="ascii-art">
 __   __          _       ____            _    __       _ _       
 \ \ / /_ _ _ __ ( )___  |  _ \ ___  _ __| |_ / _| ___ | (_) ___  
  \ V / _` | '_ \|// __| | |_) / _ \| '__| __| |_ / _ \| | |/ _ \ 
   | | (_| | | | | \__ \ |  __/ (_) | |  | |_|  _| (_) | | | (_) |
   |_|\__,_|_| |_| |___/ |_|   \___/|_|   \__|_|  \___/|_|_|\___/ 
-
-    </pre>
-    <div id="terminal-output">
-      <p>> Initializing Portfolio Interface<span class="cursor">█</span></p>
+      </pre>
+      <div id="terminal-output">
+        <p>> Initializing Portfolio Interface<span class="cursor">█</span></p>
+      </div>
+      <button id="enter-btn" class="terminal-button hidden">Enter Site</button>
     </div>
-    <button id="enter-btn" class="terminal-button hidden">Enter Site</button>
+
+    <!-- Main portfolio content -->
+    <div id="main-content" class="hidden">
+      <h1 class="glitch glow" data-text="Welcome to Yantento.com">Welcome to Yantento.com</h1>
+      <p>Access my latest build:</p>
+      <a href="weight-tracker/login.html" class="terminal-button">🚀 Launch Weight Tracker</a>
+    </div>
   </div>
 
-  <div id="main-content" class="hidden">
-    <h1 class="glitch glow" data-text="Welcome to Yantento.com">Welcome to Yantento.com</h1>
-    <p>Access my latest build:</p>
-    <a href="weight-tracker/login.html" class="terminal-button">🚀 Launch Weight Tracker</a>
-  </div>
-
+  <!-- 🔊 Background music -->
   <audio id="bg-music" loop>
     <source src="music/song1.mp3" type="audio/mpeg">
   </audio>
 
+  <!-- 🧠 JavaScript to simulate terminal boot and animations -->
   <script>
     const output = document.getElementById('terminal-output');
     const enterBtn = document.getElementById('enter-btn');
@@ -70,7 +83,7 @@ __   __          _       ____            _    __       _ _
 
     setTimeout(addLine, 800);
 
-    // Mouse-driven parallax effect
+    // 🌀 Mouse-driven parallax motion effect
     document.addEventListener('mousemove', (e) => {
       const x = (window.innerWidth / 2 - e.pageX) / 40;
       const y = (window.innerHeight / 2 - e.pageY) / 40;
