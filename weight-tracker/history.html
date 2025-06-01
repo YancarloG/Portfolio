@@ -5,18 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Weight History</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Chart.js library for weight trend graph -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="container">
     <h1>History</h1>
+    
+    <!-- Chart for visual weight trends -->
+    <canvas id="weightChart" width="400" height="200"></canvas>
 
-    <!-- Trend Graph -->
-    <h2>Weight Trend</h2>
-    <canvas id="weightChart" width="300" height="200"></canvas>
-
-    <!-- Weight Log Table -->
+    <!-- Table to show history of entries -->
     <table id="weightTable">
       <thead>
         <tr>
@@ -31,6 +28,10 @@
     <button onclick="logout()">Logout</button>
     <a href="add.html">Add New Weight</a>
   </div>
+
+  <!-- Include Chart.js via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="history.js"></script>
 </body>
 </html>
+
