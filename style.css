@@ -37,32 +37,34 @@ body::before {
   to { background-position: 0 100%; }
 }
 
-/* === Fullscreen background video === */
+/* === Fullscreen animated background video === */
 #background {
   position: fixed;
   top: 0; left: 0;
   width: 100vw;
   height: 100vh;
   object-fit: cover;
-  z-index: -10; /* stay at bottom */
-  filter: brightness(0.25) contrast(1.3) saturate(0.85);
+  z-index: -10;
+
+  /* ✅ Brighter, higher contrast, more saturation */
+  filter: brightness(0.7) contrast(1.8) saturate(1.6);
 }
 
-/* === Transparent terminal UI overlay === */
+/* === Transparent content overlay === */
 #overlay {
   position: relative;
   z-index: 2;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* dark overlay */
-  backdrop-filter: blur(3px); /* optional frosted glass effect */
+  background-color: rgba(0, 0, 0, 0.5); /* dark translucent */
+  backdrop-filter: blur(3px); /* softens background slightly */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 
-/* === Terminal box and layout === */
+/* === Terminal box layout === */
 .terminal-box {
   text-align: left;
   border: 2px solid #00ff88;
@@ -81,7 +83,7 @@ body::before {
   text-align: center;
 }
 
-/* === Glowing and glitch text effects === */
+/* === Glowing header text === */
 .glow {
   font-size: 1.8rem;
   color: #00ff88;
@@ -100,7 +102,7 @@ body::before {
   }
 }
 
-/* === Terminal-styled buttons === */
+/* === Terminal button styling === */
 .terminal-button {
   display: inline-block;
   padding: 0.8rem 1.6rem;
@@ -122,7 +124,7 @@ body::before {
   box-shadow: 0 0 10px #00ff88;
 }
 
-/* === Blinking terminal cursor === */
+/* === Blinking cursor for terminal feel === */
 .cursor {
   animation: blink 1s step-end infinite;
 }
@@ -132,7 +134,7 @@ body::before {
   50% { opacity: 1; }
 }
 
-/* === Utility and visual effects === */
+/* === Utility Classes === */
 .hidden {
   display: none;
 }
@@ -141,7 +143,7 @@ body::before {
   margin: 0.2rem 0;
 }
 
-/* === Glitch effect with ::before and ::after === */
+/* === Glitch Text Effect === */
 .glitch {
   position: relative;
   color: #00ff88;
