@@ -3,7 +3,7 @@ if (localStorage.getItem('loggedIn') !== 'true') {
   window.location.href = 'login.html';
 }
 
-// Logout function clears login state
+// Logout function
 function logout() {
   localStorage.removeItem('loggedIn');
   window.location.href = 'login.html';
@@ -11,31 +11,31 @@ function logout() {
 
 // Event listener for weight form submission
 document.getElementById('weightForm').addEventListener('submit', function(e) {
-  e.preventDefault();
+  e.preventDefault(); // Prevent form from reloading the page
 
-  // Retrieve weight from form input
+  // Get weight from input field
   const weight = document.getElementById('weightInput').value;
 
-  // Get current date and time
+  // Get the current date and time
   const now = new Date();
-  const date = now.toLocaleDateString();
-  const time = now.toLocaleTimeString();
+  const date = now.toLocaleDateString(); // e.g. 5/24/2025
+  const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); // e.g. 10:42 AM
 
-  // Create a new entry object with date, time, and weight
+  // Create a new entry object
   const newEntry = { date, time, weight };
 
-  // Retrieve existing entries or initialize empty array
+  // Retrieve existing entries from localStorage, or start with an empty array
   const entries = JSON.parse(localStorage.getItem('weights') || '[]');
 
-  // Add new entry to array
+  // Add new entry to entries array
   entries.push(newEntry);
 
-  // Save updated entries array to localStorage
+  // Save updated array back to localStorage
   localStorage.setItem('weights', JSON.stringify(entries));
 
-  // Clear form input
+  // Clear the input field
   document.getElementById('weightInput').value = '';
 
-  // Feedback to user
+  // Notify user
   alert('Entry added!');
 });
