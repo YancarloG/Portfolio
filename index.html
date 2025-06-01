@@ -7,14 +7,14 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- 🔁 Fullscreen animated background video -->
+  <!--  Fullscreen animated background video -->
   <video id="background" autoplay muted loop>
     <source src="assets/cyber-bg.mp4" type="video/mp4" />
     <!-- Fallback text if video doesn't load -->
     Your browser does not support the video tag.
   </video>
 
-  <!-- 💻 Transparent content overlay holding the terminal UI -->
+  <!--  Transparent content overlay holding the terminal UI -->
   <div id="overlay">
     <!-- Terminal boot box -->
     <div class="terminal-box" id="terminal-box">
@@ -44,7 +44,7 @@ __   __          _       ____            _    __       _ _
     <source src="music/song1.mp3" type="audio/mpeg">
   </audio>
 
-  <!-- 🧠 JavaScript to simulate terminal boot and animations -->
+  <!--  JavaScript to simulate terminal boot and animations -->
   <script>
     const output = document.getElementById('terminal-output');
     const enterBtn = document.getElementById('enter-btn');
@@ -83,7 +83,7 @@ __   __          _       ____            _    __       _ _
 
     setTimeout(addLine, 800);
 
-    // 🌀 Mouse-driven parallax motion effect
+    // Mouse-driven parallax motion effect
     document.addEventListener('mousemove', (e) => {
       const x = (window.innerWidth / 2 - e.pageX) / 40;
       const y = (window.innerHeight / 2 - e.pageY) / 40;
