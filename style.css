@@ -1,96 +1,70 @@
-/* === Base Body Setup === */
+/* === Base Page Setup === */
 body {
   margin: 0;
   padding: 0;
-  background-color: #0d0d0d;
+  background: black;
   color: #00ff88;
   font-family: 'Courier New', Courier, monospace;
+  height: 100vh;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  overflow: hidden;
-  position: relative;
+  flex-direction: column;
   cursor: crosshair;
 }
 
-/* === Animated scanline effect (retro CRT) === */
-body::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 255, 136, 0.03) 0px,
-    rgba(0, 255, 136, 0.03) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-  z-index: 1;
-  animation: scanlines 2s linear infinite;
-  pointer-events: none;
-}
-
-@keyframes scanlines {
-  from { background-position: 0 0; }
-  to { background-position: 0 100%; }
-}
-
-/* === Fullscreen animated background video === */
-#background {
+/* === Fullscreen Background Video === */
+#bg-video {
   position: fixed;
   top: 0; left: 0;
   width: 100vw;
   height: 100vh;
   object-fit: cover;
   z-index: -10;
-
-  /* ✅ Brighter, higher contrast, more saturation */
   filter: brightness(0.7) contrast(1.8) saturate(1.6);
 }
 
-/* === Transparent content overlay === */
-#overlay {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* dark translucent */
-  backdrop-filter: blur(3px); /* softens background slightly */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-/* === Terminal box layout === */
-.terminal-box {
-  text-align: left;
+/* === Glassy Intro Overlay === */
+#intro-screen {
+  position: absolute;
+  z-index: 10;
+  background-color: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  padding: 2rem 3rem;
   border: 2px solid #00ff88;
-  padding: 2rem;
   border-radius: 10px;
-  box-shadow: 0 0 20px #00ff88;
-  max-width: 800px;
-  width: 90%;
-  background-color: #000;
-}
-
-.ascii-art {
-  color: #00ff88;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
+  box-shadow: 0 0 30px #00ff88;
   text-align: center;
 }
 
-/* === Glowing header text === */
+/* === Neon "Enter" Button === */
+.neon-button {
+  margin-top: 1.5rem;
+  padding: 0.75rem 2rem;
+  font-size: 1.1rem;
+  background: transparent;
+  color: #00ff88;
+  border: 2px solid #00ff88;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s ease;
+  text-shadow: 0 0 5px #00ff88;
+}
+
+.neon-button:hover {
+  background: #00ff88;
+  color: black;
+  box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
+}
+
+/* === Glowing Animated Heading === */
 .glow {
-  font-size: 1.8rem;
-  color: #00ff88;
-  text-shadow: 0 0 5px #00ff88, 0 0 10px #00ff88;
+  font-size: 2rem;
   margin-bottom: 1.5rem;
-  text-align: center;
   animation: pulseGlow 2s infinite;
+  text-align: center;
+  text-shadow: 0 0 5px #00ff88, 0 0 10px #00ff88;
 }
 
 @keyframes pulseGlow {
@@ -102,51 +76,10 @@ body::before {
   }
 }
 
-/* === Terminal button styling === */
-.terminal-button {
-  display: inline-block;
-  padding: 0.8rem 1.6rem;
-  background-color: transparent;
-  border: 2px solid #00ff88;
-  color: #00ff88;
-  text-decoration: none;
-  border-radius: 5px;
-  transition: all 0.3s ease;
-  font-size: 1.1rem;
-  margin-top: 1rem;
-  text-align: center;
-  cursor: crosshair;
-}
-
-.terminal-button:hover {
-  background-color: #00ff88;
-  color: #000;
-  box-shadow: 0 0 10px #00ff88;
-}
-
-/* === Blinking cursor for terminal feel === */
-.cursor {
-  animation: blink 1s step-end infinite;
-}
-
-@keyframes blink {
-  from, to { opacity: 0; }
-  50% { opacity: 1; }
-}
-
-/* === Utility Classes === */
-.hidden {
-  display: none;
-}
-
-#terminal-output p {
-  margin: 0.2rem 0;
-}
-
-/* === Glitch Text Effect === */
+/* === Glitch Effect Styling === */
 .glitch {
   position: relative;
-  color: #00ff88;
+  display: inline-block;
 }
 
 .glitch::before,
@@ -160,17 +93,17 @@ body::before {
 }
 
 .glitch::before {
-  top: -1px;
+  top: -2px;
   left: 2px;
-  text-shadow: -1px 0 red;
-  animation: glitchTop 1.5s infinite linear alternate-reverse;
+  text-shadow: -2px 0 red;
+  animation: glitchTop 1.2s infinite linear alternate-reverse;
 }
 
 .glitch::after {
-  top: 1px;
+  top: 2px;
   left: -2px;
-  text-shadow: 1px 0 blue;
-  animation: glitchBottom 1.5s infinite linear alternate-reverse;
+  text-shadow: 2px 0 blue;
+  animation: glitchBottom 1.2s infinite linear alternate-reverse;
 }
 
 @keyframes glitchTop {
@@ -181,4 +114,21 @@ body::before {
 @keyframes glitchBottom {
   0% { clip-path: inset(60% 0 0 0); }
   100% { clip-path: inset(30% 0 0 0); }
+}
+
+/* === Hidden Utility === */
+.hidden {
+  display: none;
+}
+
+/* === Title on Intro Screen === */
+.intro-title {
+  font-size: 2rem;
+  color: #00ff88;
+  text-shadow: 0 0 10px #00ff88;
+}
+
+.glitch-highlight {
+  color: #F97316;
+  text-shadow: 0 0 10px #F97316, 0 0 20px #F97316;
 }
