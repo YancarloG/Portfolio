@@ -3,71 +3,81 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Yantento Terminal</title>
+  <title>Yantento.com</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- Background music (autoplay starts after enter click) -->
+  <!-- 🔊 Background music -->
   <audio id="bg-music" loop>
     <source src="music/song1.mp3" type="audio/mpeg" />
   </audio>
 
-  <!-- Fullscreen background video -->
+  <!-- 🎥 Fullscreen background video -->
   <video id="bg-video" autoplay muted loop playsinline>
     <source src="assets/cyber-bg.mp4" type="video/mp4" />
   </video>
 
-  <!-- Glassy overlay with central "Enter" button -->
+  <!-- 💻 Intro glass panel with enter button -->
   <div id="intro-screen" class="glass">
     <h1 class="intro-title">YANTENTO <span class="glitch-highlight">||</span> Click to Enter</h1>
     <button id="enter-btn" class="neon-button">ENTER SITE</button>
   </div>
 
-  <!-- Main site content hidden at first -->
+  <!-- 🌐 Hidden main content section -->
   <main id="main-content" class="hidden">
     <h1 class="glitch glow" data-text="Welcome to Yantento.com">Welcome to Yantento.com</h1>
     <p>Access my latest build:</p>
     <a href="weight-tracker/login.html" class="neon-button">🚀 Launch Weight Tracker</a>
   </main>
 
-  <!-- Script handles enter button and music -->
+  <!-- ⚙️ JavaScript for transitions and glitch effect -->
   <script>
+    // === Audio + Visibility Logic ===
     const enterBtn = document.getElementById('enter-btn');
     const introScreen = document.getElementById('intro-screen');
     const mainContent = document.getElementById('main-content');
     const music = document.getElementById('bg-music');
 
     enterBtn.addEventListener('click', () => {
-      introScreen.classList.add('hidden');   // Hide intro
-      mainContent.classList.remove('hidden'); // Show main
-      music.play();                          // Start music
+      introScreen.classList.add('hidden');       // Hide intro screen
+      mainContent.classList.remove('hidden');    // Show main site
+      music.play();                              // Start music
     });
+
+    // === Tab Title Glitch Effect ===
+    const glitchTitles = [
+      "Y4ntent0", "Y@nt3nt0", "Yan7en7o", "Yant3n70", "Yant3nt0",
+      "Y@ntento", "Y4n73n70", "Y4N7EN70", "YANT3NT0", "y4nt3nt0"
+    ];
+
+    let glitchIndex = 0;
+    let glitchInterval;
+    let isGlitching = false;
+    const stableTitle = "Yantento.com";
+
+    function startGlitchLoop(duration = 3000) {
+      if (isGlitching) return;
+
+      isGlitching = true;
+      glitchInterval = setInterval(() => {
+        document.title = glitchTitles[glitchIndex % glitchTitles.length];
+        glitchIndex++;
+      }, 100);
+
+      setTimeout(() => {
+        clearInterval(glitchInterval);
+        document.title = stableTitle;
+        isGlitching = false;
+
+        // Re-trigger randomly after 3–7 seconds
+        const delay = Math.floor(Math.random() * 4000) + 3000;
+        setTimeout(startGlitchLoop, delay);
+      }, duration);
+    }
+
+    // Start glitching after site load
+    startGlitchLoop();
   </script>
-
-  <script>
-  // Array of glitchy name variations
-  const glitchTitles = [
-    "Y4ntent0",
-    "Y@nt3nt0",
-    "Yan7en7o",
-    "Yant3n70",
-    "Yant3nt0",
-    "Y@ntento",
-    "Y4n73n70",
-    "Y4N7EN70",
-    "YANT3NT0",
-    "y4nt3nt0"
-  ];
-
-  let glitchIndex = 0;
-
-  // Change the tab title rapidly to simulate glitch effect
-  setInterval(() => {
-    document.title = glitchTitles[glitchIndex % glitchTitles.length];
-    glitchIndex++;
-  }, 120); // Speed of change in milliseconds
-</script>
-
 </body>
 </html>
