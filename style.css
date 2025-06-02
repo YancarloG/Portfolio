@@ -1,4 +1,4 @@
-/* === Base Page Setup === */
+/* === Base Body Setup === */
 body {
   margin: 0;
   padding: 0;
@@ -25,7 +25,7 @@ body {
   filter: brightness(0.7) contrast(1.8) saturate(1.6);
 }
 
-/* === Glassy Intro Overlay === */
+/* === Glassmorphic Intro Overlay === */
 #intro-screen {
   position: absolute;
   z-index: 10;
@@ -38,7 +38,7 @@ body {
   text-align: center;
 }
 
-/* === Neon "Enter" Button === */
+/* === Neon Button === */
 .neon-button {
   margin-top: 1.5rem;
   padding: 0.75rem 2rem;
@@ -58,7 +58,7 @@ body {
   box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
 }
 
-/* === Glowing Animated Heading === */
+/* === Glitch + Glow Effects === */
 .glow {
   font-size: 2rem;
   margin-bottom: 1.5rem;
@@ -76,7 +76,6 @@ body {
   }
 }
 
-/* === Glitch Effect Styling === */
 .glitch {
   position: relative;
   display: inline-block;
@@ -116,12 +115,11 @@ body {
   100% { clip-path: inset(30% 0 0 0); }
 }
 
-/* === Hidden Utility === */
+/* === Utility + Intro Title === */
 .hidden {
   display: none;
 }
 
-/* === Title on Intro Screen === */
 .intro-title {
   font-size: 2rem;
   color: #00ff88;
