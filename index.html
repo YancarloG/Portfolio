@@ -45,5 +45,29 @@
     });
   </script>
 
+  <script>
+  // Array of glitchy name variations
+  const glitchTitles = [
+    "Y4ntent0",
+    "Y@nt3nt0",
+    "Yan7en7o",
+    "Yant3n70",
+    "Yant3nt0",
+    "Y@ntento",
+    "Y4n73n70",
+    "Y4N7EN70",
+    "YANT3NT0",
+    "y4nt3nt0"
+  ];
+
+  let glitchIndex = 0;
+
+  // Change the tab title rapidly to simulate glitch effect
+  setInterval(() => {
+    document.title = glitchTitles[glitchIndex % glitchTitles.length];
+    glitchIndex++;
+  }, 120); // Speed of change in milliseconds
+</script>
+
 </body>
 </html>
