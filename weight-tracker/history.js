@@ -1,6 +1,6 @@
-// history.js By: Yancarlo
+// === history.js ===
 
-// Redirect to login if not authenticated
+// If user isn't logged in, redirect to login page
 if (localStorage.getItem('loggedIn') !== 'true') {
   window.location.href = 'login.html';
 }
@@ -11,48 +11,51 @@ function logout() {
   window.location.href = 'login.html';
 }
 
-// Get DOM reference for the table body
+// Get the part of the HTML where we'll add the weight rows
 const tableBody = document.querySelector('#weightTable tbody');
 
-// Parse weight entries or initialize an empty array
-let entries = JSON.parse(localStorage.getItem('weights') || '[]');
+// Fetch all saved weight entries (sorted by time)
+let entries = StorageService.getAll();
 
-// Sort entries using utility function
+// Sort just to be sure
 entries = sortEntries(entries);
 
-// Clear table first
+// Clear any existing table rows
 tableBody.innerHTML = '';
 
-// Prepare data for chart
-const labels = [];
-const weights = [];
-let previousWeight = null;
+// Arrays to hold chart data
+const labels = [];  // e.g., "6/5/2025 3:15 PM"
+const weights = []; // Actual weight numbers
+let previousWeight = null; // Used to compare changes
 
+// Loop through all entries to display them
 entries.forEach(entry => {
-  const row = document.createElement('tr');
+  const row = document.createElement('tr'); // New table row
 
-  // Push date/time to labels and weight to dataset
+  // Add date + time to the chart labels
   labels.push(`${entry.date} ${entry.time}`);
-  weights.push(Number(entry.weight));
+  weights.push(Number(entry.weight)); // Convert weight string to number
 
-  // Assign increase/decrease color
+  // Determine if weight increased or decreased
   let className = '';
   if (previousWeight !== null) {
     const change = Number(entry.weight) - Number(previousWeight);
-    if (change > 0) className = 'increase';
-    else if (change < 0) className = 'decrease';
+    if (change > 0) className = 'increase';    // Red
+    else if (change < 0) className = 'decrease'; // Green
   }
 
+  // Apply CSS class for red or green styling
   row.className = className;
 
-  // Table row: date | time | weight
+  // Add the row data to the table
   row.innerHTML = `<td>${entry.date}</td><td>${entry.time}</td><td>${entry.weight}</td>`;
   tableBody.appendChild(row);
 
+  // Store current weight for next loop comparison
   previousWeight = entry.weight;
 });
 
-// Chart.js chart display
+// Create a line chart using Chart.js
 const ctx = document.getElementById('weightChart').getContext('2d');
 new Chart(ctx, {
   type: 'line',
@@ -85,11 +88,11 @@ new Chart(ctx, {
     },
     scales: {
       x: {
-        ticks: { color: '#00ffcc' }
+        ticks: { color: '#00ffcc' } // Make x-axis text visible
       },
       y: {
         beginAtZero: false,
-        ticks: { color: '#00ffcc' }
+        ticks: { color: '#00ffcc' } // Make y-axis text visible
       }
     }
   }
