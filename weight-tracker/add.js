@@ -1,29 +1,34 @@
-// add.js
+// === add.js ===
 
-// Redirect to login if not authenticated
+// Redirect to login page if the user isn't marked as logged in
 if (localStorage.getItem('loggedIn') !== 'true') {
   window.location.href = 'login.html';
 }
 
-// Logout function
+// Logout function to clear login status and redirect to login page
 function logout() {
   localStorage.removeItem('loggedIn');
   window.location.href = 'login.html';
 }
 
-// On form submission, store weight with date and time
+// When the form is submitted (user adds weight)
 document.getElementById('weightForm').addEventListener('submit', function(e) {
-  e.preventDefault();
+  e.preventDefault(); // Prevent the page from refreshing
 
   const weight = document.getElementById('weightInput').value;
-  const date = new Date().toLocaleDateString();
-  const time = getCurrentTime(); // from utils.js
-  const newEntry = { date, time, weight };
 
-  const entries = JSON.parse(localStorage.getItem('weights') || '[]');
-  entries.push(newEntry);
-  localStorage.setItem('weights', JSON.stringify(entries));
+  if (!weight) return; // If the input is empty, do nothing
 
+  // Save the weight using our custom StorageService
+  StorageService.add(weight);
+
+  // Clear the input box after saving
   document.getElementById('weightInput').value = '';
-  alert('Entry added!');
+
+  // Show a confirmation message
+  const successMsg = document.getElementById('successMsg');
+  successMsg.textContent = 'Entry added!';
+
+  // Hide the message after 3 seconds
+  setTimeout(() => successMsg.textContent = '', 3000);
 });
