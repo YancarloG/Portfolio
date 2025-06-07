@@ -5,31 +5,45 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Weight History</title>
+
+  <!-- Styling for the app -->
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Chart.js library to display the weight graph -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="container">
     <h1>Weight History</h1>
 
+    <!-- This is where the graph will appear -->
     <canvas id="weightChart" width="400" height="200"></canvas>
 
+    <!-- This is the table where weight entries will be listed -->
     <table id="weightTable">
       <thead>
         <tr>
           <th>Date</th>
           <th>Time</th>
           <th>Weight (lbs)</th>
+          <th>Action</th> <!-- New column for the Delete button -->
         </tr>
       </thead>
       <tbody></tbody>
     </table>
 
+    <!-- Button to clear all data -->
+    <button onclick="clearAllEntries()">Clear All Entries</button>
+
+    <!-- Logout button -->
     <button onclick="logout()">Logout</button>
+
+    <!-- Link to go back to add weight screen -->
     <a href="add.html">Add New Entry</a>
   </div>
 
-  <script src="utils.js"></script>
-  <script src="history.js"></script>
+  <!-- Scripts at the bottom of the page -->
+  <script src="utils.js"></script>   <!-- Contains helper functions and data handling class -->
+  <script src="history.js"></script> <!-- Logic to display and interact with saved entries -->
 </body>
 </html>
