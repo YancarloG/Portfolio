@@ -1,4 +1,3 @@
-/* General layout */
 body {
   margin: 0;
   padding: 0;
@@ -11,7 +10,7 @@ body {
   position: relative;
 }
 
-/* Background video settings */
+/* Fullscreen video */
 #bg-video {
   position: fixed;
   top: 0;
@@ -22,7 +21,7 @@ body {
   z-index: -1;
 }
 
-/* Glass panel appearance */
+/* Shared glass style */
 .glass {
   background: rgba(0, 0, 0, 0.6);
   border-radius: 15px;
@@ -32,19 +31,19 @@ body {
   color: #00ff88;
 }
 
-/* Hide elements initially */
+/* Hide content until shown */
 .hidden {
   display: none;
 }
 
-/* Content box after intro */
+/* Main content layout */
 .content-box {
   max-width: 600px;
   margin: 100px auto;
   text-align: center;
 }
 
-/* Center the intro screen and its content */
+/* Center intro content */
 #intro-screen {
   position: absolute;
   top: 50%;
@@ -60,18 +59,16 @@ body {
   text-align: center;
 }
 
-/* Glitch-style text */
+/* Glitch and glow text */
 .glitch {
   position: relative;
   font-size: 2rem;
 }
-
-/* Glow effect for text */
 .glow {
   text-shadow: 0 0 5px #00ff88, 0 0 10px #00ff88;
 }
 
-/* Neon-styled button */
+/* Neon button styles */
 .neon-button {
   background-color: transparent;
   border: 2px solid #00ff88;
@@ -87,19 +84,19 @@ body {
   transform: scale(0.95);
 }
 
-/* Triggers fade-in and glow effect */
+/* When .visible is applied, fade in the button */
 .neon-button.visible {
   animation: fadeInGlow 2s forwards;
 }
 
-/* Hover styling for the button */
+/* Hover effect for buttons */
 .neon-button:hover {
   background-color: #00ff88;
   color: #000;
   box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
 }
 
-/* Animation keyframes for fade-in with glowing effect */
+/* Animation for fade and glow */
 @keyframes fadeInGlow {
   0% {
     opacity: 0;
@@ -111,4 +108,24 @@ body {
     transform: scale(1);
     box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
   }
+}
+
+/* Bottom-centered glitch gif styling */
+#gif-trigger {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  cursor: pointer;
+}
+
+#gif-trigger img {
+  width: 100px;
+  height: auto;
+  transition: transform 0.3s ease;
+}
+
+#gif-trigger img:hover {
+  transform: scale(1.1);
 }
