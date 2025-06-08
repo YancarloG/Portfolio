@@ -4,48 +4,57 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Yantento.com</title>
+  <!-- This line connects the custom styles I made in a separate file called style.css -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!--  Background music -->
+  <!-- 🎵 This tag is for background music that starts when I enter the site -->
   <audio id="bg-music" loop>
     <source src="music/song1.mp3" type="audio/mpeg" />
   </audio>
 
-  <!--  Fullscreen background video -->
+  <!-- 🎥 This is my looping fullscreen background video -->
   <video id="bg-video" autoplay muted loop playsinline>
     <source src="assets/cyber-bg.mp4" type="video/mp4" />
   </video>
 
-  <!--  Intro glass panel with enter button -->
+  <!-- 🔷 This is the first thing people see: a frosted glass intro box with a button -->
   <div id="intro-screen" class="glass">
     <h1 class="intro-title">YANTENTO.COM <span class="glitch-highlight">||</span> Click to Enter</h1>
+    <!-- When someone clicks this button, the real site opens -->
     <button id="enter-btn" class="neon-button">ENTER SITE</button>
   </div>
 
-  <!--  Hidden main content section -->
+  <!-- 🌐 This part is hidden at first and only shows after clicking "ENTER" -->
   <main id="main-content" class="hidden">
-    <h1 class="glitch glow" data-text="Welcome to Yantento.com">Welcome to Yantento.com</h1>
-    <p>Access my latest build:</p>
-    <a href="weight-tracker/login.html" class="neon-button">🚀 Launch Weight Tracker</a>
+    <!-- This glass box makes my content easier to read over the background -->
+    <div class="glass content-box">
+      <!-- This is the welcome title that has a glowing glitch effect -->
+      <h1 class="glitch glow" data-text="Welcome to Yantento.com">Welcome to Yantento.com</h1>
+      <!-- This short message tells people where to click -->
+      <p style="font-size: 1.2rem;">Access my latest build:</p>
+      <!-- Clicking this button takes visitors to my actual web app -->
+      <a href="weight-tracker/login.html" class="neon-button">🚀 Launch Weight Tracker</a>
+    </div>
   </main>
 
-  <!-- ⚙ All JS at end to prevent overwrite issues -->
+  <!-- 🧠 JavaScript that controls transitions and tab animation -->
   <script>
-    // === Audio and screen transition ===
+    // Grab elements I want to control with JavaScript
     const enterBtn = document.getElementById('enter-btn');
     const introScreen = document.getElementById('intro-screen');
     const mainContent = document.getElementById('main-content');
     const music = document.getElementById('bg-music');
 
+    // When someone clicks "ENTER SITE", I hide the intro and show the main content
     enterBtn.addEventListener('click', () => {
-      introScreen.classList.add('hidden');
-      mainContent.classList.remove('hidden');
-      music.play();
+      introScreen.classList.add('hidden'); // hides the intro panel
+      mainContent.classList.remove('hidden'); // reveals the rest of the site
+      music.play(); // plays my background song
     });
 
-    // === Tab title glitch effect ===
+    // 🎮 Glitchy tab title animation that cycles through weird versions of "Yantento"
     window.addEventListener("DOMContentLoaded", () => {
       const glitchTitles = [
         "Y4ntent0", "Y@nt3nt0", "Yan7en7o", "Yant3n70", "Yant3nt0",
@@ -55,29 +64,33 @@
       let glitchIndex = 0;
       let glitchInterval;
       let isGlitching = false;
-      const stableTitle = "Yantento.com";
+      const stableTitle = "Yantento.com"; // This is the normal title
 
+      // This function starts and stops the glitch loop
       function startGlitchLoop(duration = 3000) {
-        if (isGlitching) return;
+        if (isGlitching) return; // If already glitching, skip
 
         isGlitching = true;
+
+        // Changes the tab name really fast to create a glitch effect
         glitchInterval = setInterval(() => {
           document.title = glitchTitles[glitchIndex % glitchTitles.length];
           glitchIndex++;
         }, 100);
 
+        // After a few seconds, reset the title back to normal
         setTimeout(() => {
           clearInterval(glitchInterval);
           document.title = stableTitle;
           isGlitching = false;
 
-          // Randomly restart glitch after 3–7 seconds
+          // Random wait, then start glitching again automatically
           const delay = Math.floor(Math.random() * 4000) + 3000;
           setTimeout(() => startGlitchLoop(), delay);
         }, duration);
       }
 
-      // Start glitching after load
+      // Start the glitching once my site loads
       startGlitchLoop();
     });
   </script>
