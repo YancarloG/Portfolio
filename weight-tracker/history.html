@@ -6,44 +6,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Weight History</title>
 
-  <!-- Styling for the app -->
+  <!-- Link to your app’s styling -->
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Chart.js library to display the weight graph -->
+  <!-- Chart.js library for line graphs -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="container">
     <h1>Weight History</h1>
 
-    <!-- This is where the graph will appear -->
+    <!-- Weight Trend Chart Area -->
     <canvas id="weightChart" width="400" height="200"></canvas>
 
-    <!-- This is the table where weight entries will be listed -->
+    <!-- Table for displaying saved entries -->
     <table id="weightTable">
       <thead>
         <tr>
           <th>Date</th>
           <th>Time</th>
           <th>Weight (lbs)</th>
-          <th>Action</th> <!-- New column for the Delete button -->
+          <th>Action</th> <!-- For delete buttons -->
         </tr>
       </thead>
       <tbody></tbody>
     </table>
 
-    <!-- Button to clear all data -->
+    <!-- Clear All Button to wipe everything -->
     <button onclick="clearAllEntries()">Clear All Entries</button>
+
+    <!-- Export Button to download data as a file -->
+    <button onclick="exportData()">Export Data</button>
+
+    <!-- Upload Field to re-import saved data -->
+    <label style="margin-top: 1rem; display: block; color: #00ffcc;">
+      Import JSON:
+      <input type="file" id="importFile" accept=".json" onchange="importData(event)" />
+    </label>
 
     <!-- Logout button -->
     <button onclick="logout()">Logout</button>
 
-    <!-- Link to go back to add weight screen -->
+    <!-- Link to return to add-entry page -->
     <a href="add.html">Add New Entry</a>
   </div>
 
-  <!-- Scripts at the bottom of the page -->
-  <script src="utils.js"></script>   <!-- Contains helper functions and data handling class -->
-  <script src="history.js"></script> <!-- Logic to display and interact with saved entries -->
+  <!-- Scripts (logic and helper functions) -->
+  <script src="utils.js"></script>
+  <script src="history.js"></script>
 </body>
 </html>
