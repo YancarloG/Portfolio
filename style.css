@@ -1,3 +1,4 @@
+/* Full page layout */
 body {
   margin: 0;
   padding: 0;
@@ -10,6 +11,7 @@ body {
   position: relative;
 }
 
+/* Fullscreen background video sits behind everything */
 #bg-video {
   position: fixed;
   top: 0;
@@ -20,6 +22,7 @@ body {
   z-index: -1;
 }
 
+/* Frosted-glass styled panels */
 .glass {
   background: rgba(0, 0, 0, 0.6);
   border-radius: 15px;
@@ -29,16 +32,35 @@ body {
   color: #00ff88;
 }
 
+/* Hidden state used for main content until revealed */
 .hidden {
   display: none;
 }
 
+/* Main content layout */
 .content-box {
   max-width: 600px;
   margin: 100px auto;
   text-align: center;
 }
 
+/* Ensure main content shows above the background video */
+main#main-content {
+  position: relative;
+  z-index: 5;
+}
+
+/* Glitchy animated headline */
+.glitch {
+  position: relative;
+  font-size: 2rem;
+}
+
+.glow {
+  text-shadow: 0 0 5px #00ff88, 0 0 10px #00ff88;
+}
+
+/* Intro screen layout, centered */
 #intro-screen {
   position: absolute;
   top: 50%;
@@ -54,15 +76,7 @@ body {
   text-align: center;
 }
 
-.glitch {
-  position: relative;
-  font-size: 2rem;
-}
-
-.glow {
-  text-shadow: 0 0 5px #00ff88, 0 0 10px #00ff88;
-}
-
+/* Neon style for buttons */
 .neon-button {
   background-color: transparent;
   border: 2px solid #00ff88;
@@ -78,16 +92,19 @@ body {
   transform: scale(0.95);
 }
 
+/* When visible class is applied, fade and glow in */
 .neon-button.visible {
   animation: fadeInGlow 2s forwards;
 }
 
+/* Button hover effect */
 .neon-button:hover {
   background-color: #00ff88;
   color: #000;
   box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
 }
 
+/* Fade + glow animation for entrance */
 @keyframes fadeInGlow {
   0% {
     opacity: 0;
@@ -101,6 +118,7 @@ body {
   }
 }
 
+/* Bottom glitch gif container */
 #gif-trigger {
   position: fixed;
   bottom: 20px;
@@ -110,6 +128,7 @@ body {
   cursor: pointer;
 }
 
+/* Clickable glitch gif image styling */
 #gif-trigger img {
   width: 100px;
   height: auto;
