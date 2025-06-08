@@ -10,7 +10,6 @@ body {
   position: relative;
 }
 
-/* Fullscreen video */
 #bg-video {
   position: fixed;
   top: 0;
@@ -21,7 +20,6 @@ body {
   z-index: -1;
 }
 
-/* Shared glass style */
 .glass {
   background: rgba(0, 0, 0, 0.6);
   border-radius: 15px;
@@ -31,19 +29,16 @@ body {
   color: #00ff88;
 }
 
-/* Hide content until shown */
 .hidden {
   display: none;
 }
 
-/* Main content layout */
 .content-box {
   max-width: 600px;
   margin: 100px auto;
   text-align: center;
 }
 
-/* Center intro content */
 #intro-screen {
   position: absolute;
   top: 50%;
@@ -59,16 +54,15 @@ body {
   text-align: center;
 }
 
-/* Glitch and glow text */
 .glitch {
   position: relative;
   font-size: 2rem;
 }
+
 .glow {
   text-shadow: 0 0 5px #00ff88, 0 0 10px #00ff88;
 }
 
-/* Neon button styles */
 .neon-button {
   background-color: transparent;
   border: 2px solid #00ff88;
@@ -84,19 +78,16 @@ body {
   transform: scale(0.95);
 }
 
-/* When .visible is applied, fade in the button */
 .neon-button.visible {
   animation: fadeInGlow 2s forwards;
 }
 
-/* Hover effect for buttons */
 .neon-button:hover {
   background-color: #00ff88;
   color: #000;
   box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
 }
 
-/* Animation for fade and glow */
 @keyframes fadeInGlow {
   0% {
     opacity: 0;
@@ -110,7 +101,6 @@ body {
   }
 }
 
-/* Bottom-centered glitch gif styling */
 #gif-trigger {
   position: fixed;
   bottom: 20px;
