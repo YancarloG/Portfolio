@@ -8,7 +8,7 @@
 </head>
 <body>
 
-  <!-- Background music that plays when clicking the glitch GIF only -->
+  <!-- Main music only starts when user clicks the glitch GIF -->
   <audio id="bg-music" loop>
     <source src="music/song1.mp3" type="audio/mpeg" />
   </audio>
@@ -18,30 +18,29 @@
     <source src="assets/cyber-bg.mp4" type="video/mp4" />
   </video>
 
-  <!-- Intro screen with site title and enter button -->
+  <!-- Intro screen with glitchy title and enter button -->
   <div id="intro-screen" class="glass">
     <h1 class="intro-title">YANTENTO.COM <span class="glitch-highlight">||</span> Click to Enter</h1>
-    <!-- Button will fade in and trigger the site reveal -->
+    <!-- Fade-in enter button (will animate in via JavaScript) -->
     <button id="enter-btn" class="neon-button">ENTER SITE</button>
   </div>
 
-  <!-- Main site content is hidden until "Enter Site" is clicked -->
+  <!-- Main content hidden initially until "Enter Site" is clicked -->
   <main id="main-content" class="hidden">
     <div class="glass content-box">
-      <!-- Welcome header -->
       <h1 class="glitch glow" data-text="Welcome to Yantento.com">Welcome to Yantento.com</h1>
       <p style="font-size: 1.2rem;">Access my latest build:</p>
-      <!-- This button links to your app -->
-      <a href="weight-tracker/login.html" class="neon-button">Launch Weight Tracker</a>
+      <!-- This is the launch button (it will animate in after clicking ENTER) -->
+      <a id="launch-btn" href="weight-tracker/login.html" class="neon-button">Launch Weight Tracker</a>
     </div>
   </main>
 
-  <!-- Bottom-centered glitch GIF that plays music and changes image -->
+  <!-- Clickable glitch GIF at the bottom of the screen -->
   <div id="gif-trigger">
     <img id="glitch-gif" src="assets/gif1.gif" alt="Glitch Button" />
   </div>
 
-  <!-- JavaScript controls behavior of button, music, gif, and tab title -->
+  <!-- JavaScript to handle site transitions, glitch effect, and music -->
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       const enterBtn = document.getElementById('enter-btn');
@@ -49,29 +48,31 @@
       const mainContent = document.getElementById('main-content');
       const glitchGif = document.getElementById('glitch-gif');
       const music = document.getElementById('bg-music');
+      const launchBtn = document.getElementById('launch-btn');
 
-      // Delay fade-in for the enter button (smooth appearance)
+      // Fade-in the "Enter Site" button when the page loads
       setTimeout(() => {
         enterBtn.classList.add('visible');
       }, 300);
 
-      // When "Enter Site" is clicked
+      // When the user clicks "Enter Site"
       enterBtn.addEventListener('click', () => {
-        introScreen.remove(); // Removes intro screen from DOM entirely
-        mainContent.classList.remove('hidden'); // Reveals main content
+        introScreen.remove(); // Remove intro from the DOM entirely
+        mainContent.classList.remove('hidden'); // Show the main site
+        launchBtn.classList.add('fade-in-button'); // Animate in the launch button
       });
 
-      // When glitch GIF is clicked, change image and play music
+      // When user clicks glitch GIF, swap image and start music
       glitchGif.addEventListener('click', () => {
         glitchGif.src = 'assets/gif2.gif';
-        music.play(); // Plays main background track
+        music.play();
       });
 
-      // Start glitching tab title
+      // Start the glitching tab title effect
       startGlitchLoop();
     });
 
-    // Rotates tab titles with glitch effect every few seconds
+    // Repeatedly glitches the tab title with fake hacker names
     function startGlitchLoop(duration = 3000) {
       const glitchTitles = [
         "Y4ntent0", "Y@nt3nt0", "Yan7en7o", "Yant3n70", "Yant3nt0",
