@@ -1,4 +1,4 @@
-/* Full page layout */
+/* Base layout for full screen setup */
 body {
   margin: 0;
   padding: 0;
@@ -22,7 +22,7 @@ body {
   z-index: -1;
 }
 
-/* Glass style used for intro and content panels */
+/* Glass background style for panels */
 .glass {
   background: rgba(0, 0, 0, 0.6);
   border-radius: 15px;
@@ -32,35 +32,34 @@ body {
   color: #00ff88;
 }
 
-/* Hide elements until shown */
+/* Used to hide main content before entering */
 .hidden {
   display: none;
 }
 
-/* Main content layout */
+/* Layout for the main content box */
 .content-box {
   max-width: 600px;
   margin: 100px auto;
   text-align: center;
 }
 
-/* Make sure main content appears above the background */
+/* Make sure main content appears above the video */
 main#main-content {
   position: relative;
   z-index: 5;
 }
 
-/* Glitch effect text */
+/* Glitch and glowing header styles */
 .glitch {
   position: relative;
   font-size: 2rem;
 }
-
 .glow {
   text-shadow: 0 0 5px #00ff88, 0 0 10px #00ff88;
 }
 
-/* Intro screen layout centered on page */
+/* Center intro screen contents */
 #intro-screen {
   position: absolute;
   top: 50%;
@@ -76,7 +75,7 @@ main#main-content {
   text-align: center;
 }
 
-/* All neon buttons look consistent by default */
+/* Shared button style */
 .neon-button {
   background-color: transparent;
   border: 2px solid #00ff88;
@@ -90,25 +89,25 @@ main#main-content {
   margin-top: 1.5rem;
 }
 
-/* Only the ENTER SITE button should start hidden and fade in */
+/* Only the ENTER button starts hidden and fades in on load */
 #enter-btn {
   opacity: 0;
   transform: scale(0.95);
 }
 
-/* Fade-in and glow effect applied only to ENTER button */
+/* ENTER button animation class */
 #enter-btn.visible {
   animation: fadeInGlow 2s forwards;
 }
 
-/* Hover glow effect for all neon buttons */
+/* Hover style for all neon buttons */
 .neon-button:hover {
   background-color: #00ff88;
   color: #000;
   box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
 }
 
-/* Fade-in keyframes animation */
+/* Animation for fade-in with glow */
 @keyframes fadeInGlow {
   0% {
     opacity: 0;
@@ -122,7 +121,14 @@ main#main-content {
   }
 }
 
-/* Glitch GIF trigger at bottom of screen */
+/* Animation class for the Launch button after clicking ENTER */
+.fade-in-button {
+  opacity: 0;
+  animation: fadeInGlow 1.5s forwards;
+  transform: scale(0.95);
+}
+
+/* Glitch gif container at bottom center */
 #gif-trigger {
   position: fixed;
   bottom: 20px;
@@ -132,7 +138,7 @@ main#main-content {
   cursor: pointer;
 }
 
-/* Glitch GIF styling */
+/* Styling for glitch gif */
 #gif-trigger img {
   width: 100px;
   height: auto;
