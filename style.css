@@ -1,63 +1,73 @@
-/*  This controls the basic layout of my whole page */
+/* General page layout */
 body {
   margin: 0;
   padding: 0;
-  background-color: #0d0d0d; /* fallback if video doesn't load */
-  color: #00ff88; /* glowing green text */
+  background-color: #0d0d0d;
+  color: #00ff88;
   font-family: 'Courier New', Courier, monospace;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   height: 100vh;
+  width: 100vw;
   overflow: hidden;
+  position: relative;
 }
 
-/*  This makes sure my video stretches to the whole screen */
+/* Fullscreen background video setup */
 #bg-video {
   position: fixed;
   top: 0;
   left: 0;
   min-width: 100%;
   min-height: 100%;
-  object-fit: cover; /* makes the video fit nicely */
-  z-index: -1; /* sends it behind everything */
+  object-fit: cover;
+  z-index: -1;
 }
 
-/*  Glassy overlay that I use for both the intro and main content box */
+/* Frosted glass appearance used for intro and content panels */
 .glass {
-  background: rgba(0, 0, 0, 0.6); /* semi-transparent dark background */
+  background: rgba(0, 0, 0, 0.6);
   border-radius: 15px;
   padding: 2rem;
-  box-shadow: 0 0 20px rgba(0, 255, 136, 0.5); /* adds a green glow */
-  backdrop-filter: blur(8px); /* adds a frosted glass effect */
-  color: #00ff88; /* keeps my text neon green */
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+  backdrop-filter: blur(10px);
+  color: #00ff88;
 }
 
-/* This class hides things like the main content until I want to show it */
+/* Hides elements when this class is applied */
 .hidden {
   display: none;
 }
 
-/*  My content box with centered layout and max width */
+/* Main content container */
 .content-box {
   max-width: 600px;
   margin: 100px auto;
   text-align: center;
 }
 
-/* ✨ This makes my titles look like they’re glitching */
+/* Centers the intro screen perfectly */
+#intro-screen {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 2;
+  width: 90%;
+  max-width: 500px;
+}
+
+/* Glitch effect text styling */
 .glitch {
   position: relative;
   font-size: 2rem;
 }
 
-/* 💡 Makes my glitchy titles glow a bit */
+/* Adds a glowing text effect */
 .glow {
   text-shadow: 0 0 5px #00ff88, 0 0 10px #00ff88;
 }
 
-/* 🔲 Button style that looks like glowing neon */
+/* Base neon button style */
 .neon-button {
   background-color: transparent;
   border: 2px solid #00ff88;
@@ -69,11 +79,32 @@ body {
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-top: 1rem;
+  opacity: 0;
+  transform: scale(0.95);
 }
 
-/*  What happens when you hover over my buttons */
+/* Makes the button visible and triggers animation */
+.neon-button.visible {
+  animation: fadeInGlow 2s forwards;
+}
+
+/* Button hover effect */
 .neon-button:hover {
   background-color: #00ff88;
-  color: #000; /* flips text color to black for contrast */
+  color: #000;
   box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
+}
+
+/* Fade-in with glow animation for the button */
+@keyframes fadeInGlow {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+    box-shadow: none;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
+  }
 }
