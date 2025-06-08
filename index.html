@@ -8,24 +8,29 @@
 </head>
 <body>
 
-  <!-- Background music that plays after entering -->
+  <!-- Background music for the main site -->
   <audio id="bg-music" loop>
     <source src="music/song1.mp3" type="audio/mpeg" />
   </audio>
 
-  <!-- Fullscreen looping background video -->
+  <!-- Music triggered by clicking the bottom glitch GIF -->
+  <audio id="gif-music">
+    <source src="music/click-music.mp3" type="audio/mpeg" />
+  </audio>
+
+  <!-- Fullscreen background video -->
   <video id="bg-video" autoplay muted loop playsinline>
     <source src="assets/cyber-bg.mp4" type="video/mp4" />
   </video>
 
-  <!-- Frosted glass intro panel with centered title and fade-in button -->
+  <!-- Intro glass screen with title and enter button -->
   <div id="intro-screen" class="glass">
     <h1 class="intro-title">YANTENTO.COM <span class="glitch-highlight">||</span> Click to Enter</h1>
-    <!-- Start without the 'visible' class; it will be added by JavaScript -->
+    <!-- "Enter Site" button that fades in and glows -->
     <button id="enter-btn" class="neon-button">ENTER SITE</button>
   </div>
 
-  <!-- Hidden main section revealed after entering -->
+  <!-- Main site content hidden until button is clicked -->
   <main id="main-content" class="hidden">
     <div class="glass content-box">
       <h1 class="glitch glow" data-text="Welcome to Yantento.com">Welcome to Yantento.com</h1>
@@ -34,20 +39,70 @@
     </div>
   </main>
 
-  <!-- JavaScript that handles transitions and tab glitch -->
-  <script>
-    const enterBtn = document.getElementById('enter-btn');
-    const introScreen = document.getElementById('intro-screen');
-    const mainContent = document.getElementById('main-content');
-    const music = document.getElementById('bg-music');
+  <!-- Clickable glitch gif at the bottom of the screen -->
+  <div id="gif-trigger">
+    <img id="glitch-gif" src="assets/gif1.gif" alt="Glitch Button" />
+  </div>
 
-    // On page load, make the button fade in by adding the "visible" class
+  <!-- JavaScript to control transitions, tab glitching, and gif click -->
+  <script>
     window.addEventListener('DOMContentLoaded', () => {
-      enterBtn.classList.add('visible');
+      const enterBtn = document.getElementById('enter-btn');
+      const introScreen = document.getElementById('intro-screen');
+      const mainContent = document.getElementById('main-content');
+      const music = document.getElementById('bg-music');
+      const gifMusic = document.getElementById('gif-music');
+      const glitchGif = document.getElementById('glitch-gif');
+
+      // Fade in the button by applying the class AFTER DOM is ready
+      setTimeout(() => {
+        enterBtn.classList.add('visible');
+      }, 300); // Delay makes the animation smoother
+
+      // When user clicks "Enter Site", hide intro and play background music
+      enterBtn.addEventListener('click', () => {
+        introScreen.classList.add('hidden');
+        mainContent.classList.remove('hidden');
+        music.play();
+      });
+
+      // Handle clicking the glitch gif
+      glitchGif.addEventListener('click', () => {
+        gifMusic.play();
+        glitchGif.src = 'assets/gif2.gif'; // Switch to the second gif
+      });
+
+      // Glitching tab title loop
       startGlitchLoop();
     });
 
-    // When the button is clicked, transition to main content and start music
-    enterBtn.addEventListener('click', () => {
-      introScreen.classList.add('hidden');
-      mainContent.clas
+    function startGlitchLoop(duration = 3000) {
+      const glitchTitles = [
+        "Y4ntent0", "Y@nt3nt0", "Yan7en7o", "Yant3n70", "Yant3nt0",
+        "Y@ntento", "Y4n73n70", "Y4N7EN70", "YANT3NT0", "y4nt3nt0"
+      ];
+
+      let glitchIndex = 0;
+      let glitchInterval;
+      let isGlitching = false;
+      const stableTitle = "Yantento.com";
+
+      if (isGlitching) return;
+      isGlitching = true;
+
+      glitchInterval = setInterval(() => {
+        document.title = glitchTitles[glitchIndex % glitchTitles.length];
+        glitchIndex++;
+      }, 100);
+
+      setTimeout(() => {
+        clearInterval(glitchInterval);
+        document.title = stableTitle;
+        isGlitching = false;
+        const delay = Math.floor(Math.random() * 4000) + 3000;
+        setTimeout(() => startGlitchLoop(), delay);
+      }, duration);
+    }
+  </script>
+</body>
+</html>
