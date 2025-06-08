@@ -1,132 +1,79 @@
-/* === Base Body Setup === */
+/*  This controls the basic layout of my whole page */
 body {
   margin: 0;
   padding: 0;
-  background: black;
-  color: #00ff88;
+  background-color: #0d0d0d; /* fallback if video doesn't load */
+  color: #00ff88; /* glowing green text */
   font-family: 'Courier New', Courier, monospace;
-  height: 100vh;
-  overflow: hidden;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
-  cursor: crosshair;
+  height: 100vh;
+  overflow: hidden;
 }
 
-/* === Fullscreen Background Video === */
+/*  This makes sure my video stretches to the whole screen */
 #bg-video {
   position: fixed;
-  top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
-  object-fit: cover;
-  z-index: -10;
-  filter: brightness(0.7) contrast(1.8) saturate(1.6);
-}
-
-/* === Glassmorphic Intro Overlay === */
-#intro-screen {
-  position: absolute;
-  z-index: 10;
-  background-color: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(8px);
-  padding: 2rem 3rem;
-  border: 2px solid #00ff88;
-  border-radius: 10px;
-  box-shadow: 0 0 30px #00ff88;
-  text-align: center;
-}
-
-/* === Neon Button === */
-.neon-button {
-  margin-top: 1.5rem;
-  padding: 0.75rem 2rem;
-  font-size: 1.1rem;
-  background: transparent;
-  color: #00ff88;
-  border: 2px solid #00ff88;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: 0.3s ease;
-  text-shadow: 0 0 5px #00ff88;
-}
-
-.neon-button:hover {
-  background: #00ff88;
-  color: black;
-  box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
-}
-
-/* === Glitch + Glow Effects === */
-.glow {
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-  animation: pulseGlow 2s infinite;
-  text-align: center;
-  text-shadow: 0 0 5px #00ff88, 0 0 10px #00ff88;
-}
-
-@keyframes pulseGlow {
-  0%, 100% {
-    text-shadow: 0 0 5px #00ff88, 0 0 10px #00ff88;
-  }
-  50% {
-    text-shadow: 0 0 15px #00ff88, 0 0 30px #00ff88;
-  }
-}
-
-.glitch {
-  position: relative;
-  display: inline-block;
-}
-
-.glitch::before,
-.glitch::after {
-  content: attr(data-text);
-  position: absolute;
+  top: 0;
   left: 0;
-  width: 100%;
-  overflow: hidden;
-  color: #00ff88;
+  min-width: 100%;
+  min-height: 100%;
+  object-fit: cover; /* makes the video fit nicely */
+  z-index: -1; /* sends it behind everything */
 }
 
-.glitch::before {
-  top: -2px;
-  left: 2px;
-  text-shadow: -2px 0 red;
-  animation: glitchTop 1.2s infinite linear alternate-reverse;
+/*  Glassy overlay that I use for both the intro and main content box */
+.glass {
+  background: rgba(0, 0, 0, 0.6); /* semi-transparent dark background */
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.5); /* adds a green glow */
+  backdrop-filter: blur(8px); /* adds a frosted glass effect */
+  color: #00ff88; /* keeps my text neon green */
 }
 
-.glitch::after {
-  top: 2px;
-  left: -2px;
-  text-shadow: 2px 0 blue;
-  animation: glitchBottom 1.2s infinite linear alternate-reverse;
-}
-
-@keyframes glitchTop {
-  0% { clip-path: inset(0 0 80% 0); }
-  100% { clip-path: inset(0 0 40% 0); }
-}
-
-@keyframes glitchBottom {
-  0% { clip-path: inset(60% 0 0 0); }
-  100% { clip-path: inset(30% 0 0 0); }
-}
-
-/* === Utility + Intro Title === */
+/* This class hides things like the main content until I want to show it */
 .hidden {
   display: none;
 }
 
-.intro-title {
-  font-size: 2rem;
-  color: #00ff88;
-  text-shadow: 0 0 10px #00ff88;
+/*  My content box with centered layout and max width */
+.content-box {
+  max-width: 600px;
+  margin: 100px auto;
+  text-align: center;
 }
 
-.glitch-highlight {
-  color: #F97316;
-  text-shadow: 0 0 10px #F97316, 0 0 20px #F97316;
+/* ✨ This makes my titles look like they’re glitching */
+.glitch {
+  position: relative;
+  font-size: 2rem;
+}
+
+/* 💡 Makes my glitchy titles glow a bit */
+.glow {
+  text-shadow: 0 0 5px #00ff88, 0 0 10px #00ff88;
+}
+
+/* 🔲 Button style that looks like glowing neon */
+.neon-button {
+  background-color: transparent;
+  border: 2px solid #00ff88;
+  color: #00ff88;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 1rem;
+}
+
+/*  What happens when you hover over my buttons */
+.neon-button:hover {
+  background-color: #00ff88;
+  color: #000; /* flips text color to black for contrast */
+  box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
 }
