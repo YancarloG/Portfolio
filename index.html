@@ -8,29 +8,23 @@
 </head>
 <body>
 
-  <!-- Background music for the main site -->
+  <!-- Music will only play when GIF is clicked -->
   <audio id="bg-music" loop>
     <source src="music/song1.mp3" type="audio/mpeg" />
   </audio>
 
-  <!-- Music triggered by clicking the bottom glitch GIF -->
-  <audio id="gif-music">
-    <source src="music/click-music.mp3" type="audio/mpeg" />
-  </audio>
-
-  <!-- Fullscreen background video -->
+  <!-- Fullscreen cyber background video -->
   <video id="bg-video" autoplay muted loop playsinline>
     <source src="assets/cyber-bg.mp4" type="video/mp4" />
   </video>
 
-  <!-- Intro glass screen with title and enter button -->
+  <!-- Intro screen with enter button -->
   <div id="intro-screen" class="glass">
     <h1 class="intro-title">YANTENTO.COM <span class="glitch-highlight">||</span> Click to Enter</h1>
-    <!-- "Enter Site" button that fades in and glows -->
     <button id="enter-btn" class="neon-button">ENTER SITE</button>
   </div>
 
-  <!-- Main site content hidden until button is clicked -->
+  <!-- Hidden main content -->
   <main id="main-content" class="hidden">
     <div class="glass content-box">
       <h1 class="glitch glow" data-text="Welcome to Yantento.com">Welcome to Yantento.com</h1>
@@ -39,40 +33,38 @@
     </div>
   </main>
 
-  <!-- Clickable glitch gif at the bottom of the screen -->
+  <!-- Bottom clickable GIF that starts music and switches gif1 to gif2 -->
   <div id="gif-trigger">
     <img id="glitch-gif" src="assets/gif1.gif" alt="Glitch Button" />
   </div>
 
-  <!-- JavaScript to control transitions, tab glitching, and gif click -->
+  <!-- Script for enter, music, gif, and glitch effect -->
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       const enterBtn = document.getElementById('enter-btn');
       const introScreen = document.getElementById('intro-screen');
       const mainContent = document.getElementById('main-content');
-      const music = document.getElementById('bg-music');
-      const gifMusic = document.getElementById('gif-music');
       const glitchGif = document.getElementById('glitch-gif');
+      const music = document.getElementById('bg-music');
 
-      // Fade in the button by applying the class AFTER DOM is ready
+      // Make the button fade in after DOM loads
       setTimeout(() => {
         enterBtn.classList.add('visible');
-      }, 300); // Delay makes the animation smoother
+      }, 300);
 
-      // When user clicks "Enter Site", hide intro and play background music
+      // When "Enter Site" is clicked, hide the intro and show main content
       enterBtn.addEventListener('click', () => {
-        introScreen.classList.add('hidden');
+        introScreen.remove(); // Completely removes the intro screen from the DOM
         mainContent.classList.remove('hidden');
+      });
+
+      // When GIF is clicked, switch the image and play music
+      glitchGif.addEventListener('click', () => {
+        glitchGif.src = 'assets/gif2.gif';
         music.play();
       });
 
-      // Handle clicking the glitch gif
-      glitchGif.addEventListener('click', () => {
-        gifMusic.play();
-        glitchGif.src = 'assets/gif2.gif'; // Switch to the second gif
-      });
-
-      // Glitching tab title loop
+      // Start tab title glitch effect
       startGlitchLoop();
     });
 
@@ -106,3 +98,4 @@
   </script>
 </body>
 </html>
+
