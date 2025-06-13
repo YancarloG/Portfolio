@@ -2,55 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>BankezeCalculator</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-        }
-        .form-container, .results-container {
-            background-color: white;
-            padding: 20px;
-            max-width: 600px;
-            margin: 20px auto;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label, select, input {
-            display: block;
-            width: 100%;
-            margin-bottom: 5px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: left;
-        }
-        .btn {
-            width: 100%;
-            padding: 10px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        .btn:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if ((e.ctrlKey && ['u','s','c','j'].includes(e.key)) || e.key === 'F12') e.preventDefault();
+        });
+    </script>
 </head>
 <body>
     <h1>BankezeCalculator</h1>
@@ -87,26 +47,13 @@
     <div class="results-container" id="results" style="display:none">
         <table id="resultsTable">
             <thead>
-                <tr>
-                    <th>Payment Type</th>
-                    <th># of Slips</th>
-                    <th>$ Revenue</th>
-                </tr>
+                <tr><th>Payment Type</th><th># of Slips</th><th>$ Revenue</th></tr>
             </thead>
             <tbody></tbody>
         </table>
-        <div class="form-group">
-            <label>Total in Cash Transactions:</label>
-            <div id="totalCash"></div>
-        </div>
-        <div class="form-group">
-            <label>Less Charge Tips:</label>
-            <div id="lessTips"></div>
-        </div>
-        <div class="form-group">
-            <label>Total Cash Responsibility:</label>
-            <div id="cashResponsibility"></div>
-        </div>
+        <div class="form-group"><label>Total in Cash Transactions:</label><div id="totalCash"></div></div>
+        <div class="form-group"><label>Less Charge Tips:</label><div id="lessTips"></div></div>
+        <div class="form-group"><label>Total Cash Responsibility:</label><div id="cashResponsibility"></div></div>
     </div>
 
     <script>
@@ -116,31 +63,17 @@
         function addPayment() {
             const type = document.getElementById('paymentType').value;
             const amount = parseFloat(document.getElementById('amount').value);
-            const tipInput = document.getElementById('tip').value;
-            const tip = tipInput === '' ? 0 : parseFloat(tipInput);
+            const tip = document.getElementById('tip').value === '' ? 0 : parseFloat(document.getElementById('tip').value);
 
-            // Prevent negative or zero charge amount
-            if (amount <= 0 || isNaN(amount)) {
-                alert('Please enter a charge amount greater than 0.');
-                return;
-            }
+            if (amount <= 0 || isNaN(amount)) return alert('Charge must be greater than 0.');
+            if (tip < 0 || isNaN(tip)) return alert('Tip cannot be negative.');
 
-            // Prevent negative tips only
-            if (tip < 0 || isNaN(tip)) {
-                alert('Tip amount cannot be negative.');
-                return;
-            }
-
-            if (!data[type]) {
-                data[type] = { count: 0, revenue: 0, tips: 0 };
-            }
-
+            if (!data[type]) data[type] = { count: 0, revenue: 0, tips: 0 };
             data[type].count++;
             data[type].revenue += amount;
             data[type].tips += tip;
 
             localStorage.setItem(storageKey, JSON.stringify(data));
-
             document.getElementById('amount').value = '';
             document.getElementById('tip').value = '';
             alert('Payment added!');
@@ -149,29 +82,17 @@
         function showResults() {
             const tbody = document.querySelector('#resultsTable tbody');
             tbody.innerHTML = '';
-
-            let totalCash = 0;
-            let totalTips = 0;
-            let totalChargeCash = 0;
+            let totalCash = 0, totalTips = 0;
 
             for (const [type, entry] of Object.entries(data)) {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${type}</td><td>${entry.count}</td><td>$${entry.revenue.toFixed(2)}</td>`;
-                tbody.appendChild(tr);
-
-                if (type === 'Cash') {
-                    totalCash += entry.revenue;
-                } else {
-                    totalChargeCash += entry.revenue;
-                }
+                tbody.innerHTML += `<tr><td>${type}</td><td>${entry.count}</td><td>$${entry.revenue.toFixed(2)}</td></tr>`;
+                if (type === 'Cash') totalCash += entry.revenue;
                 totalTips += entry.tips;
             }
 
-            const cashResponsibility = totalCash - totalTips;
             document.getElementById('totalCash').innerText = `$${totalCash.toFixed(2)}`;
             document.getElementById('lessTips').innerText = `$${totalTips.toFixed(2)}`;
-            document.getElementById('cashResponsibility').innerText = `$${cashResponsibility.toFixed(2)}`;
-
+            document.getElementById('cashResponsibility').innerText = `$${(totalCash - totalTips).toFixed(2)}`;
             document.getElementById('results').style.display = 'block';
         }
     </script>
