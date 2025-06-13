@@ -1,82 +1,111 @@
 html, body {
-    margin: 0;
-    padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: linear-gradient(180deg, #f7f8fa, #e2e6ea);
-    color: #1c1c1e;
-    -webkit-tap-highlight-color: transparent;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: linear-gradient(180deg, #e2f4dd, #b6d4a8);
+  color: #1c1c1e;
+  -webkit-tap-highlight-color: transparent;
 }
+
 body {
-    padding: 16px;
+  padding: 16px;
 }
+
+.logo {
+  width: 140px;
+  display: block;
+  margin: 0 auto 16px auto;
+  transition: transform 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.shake {
+  animation: shake 0.3s;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  50% { transform: translateX(10px); }
+  75% { transform: translateX(-10px); }
+  100% { transform: translateX(0); }
+}
+
 h1 {
-    text-align: center;
-    font-weight: 600;
-    margin-bottom: 24px;
-    color: #0a84ff;
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: #cfae61;
 }
+
 .form-container, .results-container {
-    background-color: #fff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-radius: 16px;
-    padding: 20px;
-    max-width: 100%;
-    margin: 0 auto 24px auto;
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+  max-width: 100%;
+  margin: 0 auto 24px auto;
 }
+
 .form-group {
-    margin-bottom: 16px;
+  margin-bottom: 16px;
 }
+
 label {
-    font-weight: 500;
-    margin-bottom: 6px;
-    display: block;
+  font-weight: 500;
+  margin-bottom: 6px;
+  display: block;
 }
+
 select, input {
-    width: 100%;
-    padding: 12px;
-    border-radius: 12px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-    box-sizing: border-box;
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  box-sizing: border-box;
 }
+
 table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 16px;
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
 }
+
 th {
-    background-color: #f1f1f1;
-    color: #333;
+  background-color: #f1f1f1;
+  color: #333;
 }
+
 th, td {
-    padding: 10px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
 }
+
 .btn {
-    width: 100%;
-    padding: 14px;
-    background-color: #0a84ff;
-    color: white;
-    font-weight: 600;
-    border: none;
-    border-radius: 12px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 8px;
+  width: 100%;
+  padding: 14px;
+  background-color: #88b04b;
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 8px;
 }
+
 .btn:hover {
-    background-color: #006edc;
+  background-color: #6f9740;
 }
+
 .form-group div {
-    font-weight: 500;
-    padding: 6px 0;
+  font-weight: 500;
+  padding: 6px 0;
 }
+
 @media (max-width: 480px) {
-    h1 {
-        font-size: 22px;
-    }
-    .btn, select, input {
-        font-size: 15px;
-    }
+  h1 { font-size: 22px; }
+  .btn, select, input { font-size: 15px; }
 }
