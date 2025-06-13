@@ -111,3 +111,29 @@ th, td {
   h1 { font-size: 22px; }
   .btn, select, input { font-size: 15px; }
 }
+
+.donate-btn {
+  display: inline-block;
+  background: #00c244;
+  color: white;
+  font-weight: bold;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 18px;
+  text-decoration: none;
+  box-shadow: 0 0 12px #00c244, 0 0 24px #00c244;
+  transition: all 0.3s ease;
+  animation: pulse 1.5s infinite;
+}
+
+.donate-btn:hover {
+  background: #00a639;
+  box-shadow: 0 0 16px #00ff5a, 0 0 32px #00ff5a;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 10px #00c244; }
+  50% { box-shadow: 0 0 24px #00ff5a; }
+  100% { box-shadow: 0 0 10px #00c244; }
+}
+
