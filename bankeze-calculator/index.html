@@ -1,100 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>BankezeCalculator</title>
-    <link rel="stylesheet" href="styles.css">
-    <script>
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.addEventListener('keydown', e => {
-            if ((e.ctrlKey && ['u','s','c','j'].includes(e.key)) || e.key === 'F12') e.preventDefault();
-        });
-    </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>BankezeCalculator</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script>
+    // Disable right-click and inspect shortcuts
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey && ['u', 's', 'c', 'j'].includes(e.key)) || e.key === 'F12') e.preventDefault();
+    });
+  </script>
 </head>
 <body>
-    <h1>BankezeCalculator</h1>
-    <div class="form-container">
-        <div class="form-group">
-            <label for="paymentType">Payment Type</label>
-            <select id="paymentType">
-                <option value="American Express">American Express</option>
-                <option value="Discover">Discover</option>
-                <option value="Disney Rewards Card">Disney Rewards Card</option>
-                <option value="Guest ID">Guest ID</option>
-                <option value="JCB Card">JCB Card</option>
-                <option value="Mastercard">Mastercard</option>
-                <option value="Value Card">Value Card</option>
-                <option value="Visa">Visa</option>
-                <option value="Adult Dining Plan">Adult Dining Plan</option>
-                <option value="Child Dining Plan">Child Dining Plan</option>
-                <option value="Coupons">Coupons</option>
-                <option value="Cash">Cash</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="amount">Charge Amount ($)</label>
-            <input type="number" id="amount" step="0.01">
-        </div>
-        <div class="form-group">
-            <label for="tip">Tip Amount ($)</label>
-            <input type="number" id="tip" step="0.01">
-        </div>
-        <button class="btn" onclick="addPayment()">Add Payment</button>
-        <button class="btn" onclick="showResults()">Show Totals</button>
+  <img src="Bank-eze.png" alt="Bankeze Logo" class="logo" onclick="shakePage()" />
+  <h1>BankezeCalculator</h1>
+
+  <div class="form-container">
+    <div class="form-group">
+      <label for="paymentType">Payment Type</label>
+      <select id="paymentType">
+        <option>American Express</option>
+        <option>Discover</option>
+        <option>Disney Rewards Card</option>
+        <option>Guest ID</option>
+        <option>JCB Card</option>
+        <option>Mastercard</option>
+        <option>Value Card</option>
+        <option>Visa</option>
+        <option>Adult Dining Plan</option>
+        <option>Child Dining Plan</option>
+        <option>Coupons</option>
+        <option>Cash</option>
+      </select>
     </div>
 
-    <div class="results-container" id="results" style="display:none">
-        <table id="resultsTable">
-            <thead>
-                <tr><th>Payment Type</th><th># of Slips</th><th>$ Revenue</th></tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-        <div class="form-group"><label>Total in Cash Transactions:</label><div id="totalCash"></div></div>
-        <div class="form-group"><label>Less Charge Tips:</label><div id="lessTips"></div></div>
-        <div class="form-group"><label>Total Cash Responsibility:</label><div id="cashResponsibility"></div></div>
+    <div class="form-group">
+      <label for="amount">Charge Amount ($)</label>
+      <input type="number" id="amount" step="0.01" />
     </div>
 
-    <script>
-        const storageKey = 'bankezeData';
-        let data = JSON.parse(localStorage.getItem(storageKey)) || {};
+    <div class="form-group">
+      <label for="tip">Tip Amount ($)</label>
+      <input type="number" id="tip" step="0.01" />
+    </div>
 
-        function addPayment() {
-            const type = document.getElementById('paymentType').value;
-            const amount = parseFloat(document.getElementById('amount').value);
-            const tip = document.getElementById('tip').value === '' ? 0 : parseFloat(document.getElementById('tip').value);
+    <button class="btn" onclick="addPayment()">Add Payment</button>
+    <button class="btn" onclick="showResults()">Show Totals</button>
+  </div>
 
-            if (amount <= 0 || isNaN(amount)) return alert('Charge must be greater than 0.');
-            if (tip < 0 || isNaN(tip)) return alert('Tip cannot be negative.');
+  <div class="results-container" id="results" style="display: none">
+    <table id="resultsTable">
+      <thead>
+        <tr><th>Payment Type</th><th># of Slips</th><th>$ Revenue</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div class="form-group"><label>Total in Cash Transactions:</label><div id="totalCash"></div></div>
+    <div class="form-group"><label>Less Charge Tips:</label><div id="lessTips"></div></div>
+    <div class="form-group"><label>Total Cash Responsibility:</label><div id="cashResponsibility"></div></div>
+  </div>
 
-            if (!data[type]) data[type] = { count: 0, revenue: 0, tips: 0 };
-            data[type].count++;
-            data[type].revenue += amount;
-            data[type].tips += tip;
+  <script>
+    const storageKey = 'bankezeData';
+    let data = JSON.parse(localStorage.getItem(storageKey)) || {};
 
-            localStorage.setItem(storageKey, JSON.stringify(data));
-            document.getElementById('amount').value = '';
-            document.getElementById('tip').value = '';
-            alert('Payment added!');
-        }
+    function addPayment() {
+      const type = document.getElementById('paymentType').value;
+      const amount = parseFloat(document.getElementById('amount').value);
+      const tip = document.getElementById('tip').value === '' ? 0 : parseFloat(document.getElementById('tip').value);
 
-        function showResults() {
-            const tbody = document.querySelector('#resultsTable tbody');
-            tbody.innerHTML = '';
-            let totalCash = 0, totalTips = 0;
+      if (amount <= 0 || isNaN(amount)) return alert('Please enter a charge amount greater than 0.');
+      if (tip < 0 || isNaN(tip)) return alert('Tip amount cannot be negative.');
 
-            for (const [type, entry] of Object.entries(data)) {
-                tbody.innerHTML += `<tr><td>${type}</td><td>${entry.count}</td><td>$${entry.revenue.toFixed(2)}</td></tr>`;
-                if (type === 'Cash') totalCash += entry.revenue;
-                totalTips += entry.tips;
-            }
+      if (!data[type]) data[type] = { count: 0, revenue: 0, tips: 0 };
+      data[type].count++;
+      data[type].revenue += amount;
+      data[type].tips += tip;
 
-            document.getElementById('totalCash').innerText = `$${totalCash.toFixed(2)}`;
-            document.getElementById('lessTips').innerText = `$${totalTips.toFixed(2)}`;
-            document.getElementById('cashResponsibility').innerText = `$${(totalCash - totalTips).toFixed(2)}`;
-            document.getElementById('results').style.display = 'block';
-        }
-    </script>
+      localStorage.setItem(storageKey, JSON.stringify(data));
+      document.getElementById('amount').value = '';
+      document.getElementById('tip').value = '';
+      alert('Payment added!');
+    }
+
+    function showResults() {
+      const tbody = document.querySelector('#resultsTable tbody');
+      tbody.innerHTML = '';
+      let totalCash = 0, totalTips = 0;
+
+      for (const [type, entry] of Object.entries(data)) {
+        tbody.innerHTML += `<tr><td>${type}</td><td>${entry.count}</td><td>$${entry.revenue.toFixed(2)}</td></tr>`;
+        if (type === 'Cash') totalCash += entry.revenue;
+        totalTips += entry.tips;
+      }
+
+      document.getElementById('totalCash').innerText = `$${totalCash.toFixed(2)}`;
+      document.getElementById('lessTips').innerText = `$${totalTips.toFixed(2)}`;
+      document.getElementById('cashResponsibility').innerText = `$${(totalCash - totalTips).toFixed(2)}`;
+      document.getElementById('results').style.display = 'block';
+    }
+
+    function shakePage() {
+      document.body.classList.add('shake');
+      setTimeout(() => document.body.classList.remove('shake'), 300);
+    }
+  </script>
 </body>
 </html>
