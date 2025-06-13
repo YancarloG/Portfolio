@@ -107,9 +107,13 @@
     }
 
     function shakePage() {
-      document.body.classList.add('shake');
-      setTimeout(() => document.body.classList.remove('shake'), 300);
-    }
+  document.body.classList.add('shake');
+  setTimeout(() => {
+    document.body.classList.remove('shake');
+    document.getElementById('donateWrapper').style.display = 'block';
+  }, 300);
+}
+
   </script>
 </body>
 </html>
