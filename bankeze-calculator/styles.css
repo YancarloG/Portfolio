@@ -12,12 +12,14 @@ body {
 }
 
 .logo {
+  background: transparent;
+  border-radius: 50%;
   width: 140px;
   display: block;
   margin: 0 auto 16px auto;
-  transition: transform 0.2s ease-in-out;
   cursor: pointer;
 }
+
 
 .shake {
   animation: shake 0.3s;
