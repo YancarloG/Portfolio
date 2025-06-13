@@ -115,12 +115,26 @@
 
         function addPayment() {
             const type = document.getElementById('paymentType').value;
-            const amount = parseFloat(document.getElementById('amount').value) || 0;
-            const tip = parseFloat(document.getElementById('tip').value) || 0;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const tipInput = document.getElementById('tip').value;
+            const tip = tipInput === '' ? 0 : parseFloat(tipInput);
+
+            // Prevent negative or zero charge amount
+            if (amount <= 0 || isNaN(amount)) {
+                alert('Please enter a charge amount greater than 0.');
+                return;
+            }
+
+            // Prevent negative tips only
+            if (tip < 0 || isNaN(tip)) {
+                alert('Tip amount cannot be negative.');
+                return;
+            }
 
             if (!data[type]) {
                 data[type] = { count: 0, revenue: 0, tips: 0 };
             }
+
             data[type].count++;
             data[type].revenue += amount;
             data[type].tips += tip;
