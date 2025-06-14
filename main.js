@@ -1,4 +1,4 @@
-// Wait for DOM to be ready
+// DOM fully loaded
 window.addEventListener('DOMContentLoaded', () => {
   const enterBtn = document.getElementById('enter-btn');
   const introScreen = document.getElementById('intro-screen');
@@ -9,12 +9,12 @@ window.addEventListener('DOMContentLoaded', () => {
   const wtBtn = document.getElementById('launch-wt-btn');
   const bankBtn = document.getElementById('launch-bank-btn');
 
-  // Fade in "Enter Site" button after load
+  // Fade in "Enter Site" button after short delay
   setTimeout(() => {
     enterBtn.classList.add('visible');
   }, 300);
 
-  // Clicking Enter transitions to main site
+  // When "Enter Site" clicked
   enterBtn.addEventListener('click', () => {
     introScreen.remove();
     mainContent.classList.remove('hidden');
@@ -22,17 +22,17 @@ window.addEventListener('DOMContentLoaded', () => {
     bankBtn.classList.add('fade-in-button');
   });
 
-  // Clicking glitch gif starts music
+  // Play music and change gif on click
   glitchGif.addEventListener('click', () => {
     glitchGif.src = 'assets/gif2.gif';
     music.play();
   });
 
-  // Glitching tab title loop
+  // Start glitching the tab title
   startGlitchLoop();
 });
 
-// Glitch tab title every few seconds
+// Simulates glitching title in browser tab
 function startGlitchLoop(duration = 3000) {
   const glitchTitles = [
     "Y4ntent0", "Y@nt3nt0", "Yan7en7o", "Yant3n70", "Yant3nt0",
