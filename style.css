@@ -1,4 +1,4 @@
-/* Base layout for full screen setup */
+/* Base layout and theme */
 body {
   margin: 0;
   padding: 0;
@@ -22,7 +22,7 @@ body {
   z-index: -1;
 }
 
-/* Glass background style for panels */
+/* Glassmorphism style for overlays */
 .glass {
   background: rgba(0, 0, 0, 0.6);
   border-radius: 15px;
@@ -32,25 +32,25 @@ body {
   color: #00ff88;
 }
 
-/* Used to hide main content before entering */
+/* Hide content until 'Enter Site' is clicked */
 .hidden {
   display: none;
 }
 
-/* Layout for the main content box */
+/* Center content area */
 .content-box {
   max-width: 600px;
   margin: 100px auto;
   text-align: center;
 }
 
-/* Make sure main content appears above the video */
+/* Ensure content appears over video */
 main#main-content {
   position: relative;
   z-index: 5;
 }
 
-/* Glitch and glowing header styles */
+/* Glitch and glowing title styles */
 .glitch {
   position: relative;
   font-size: 2rem;
@@ -59,7 +59,7 @@ main#main-content {
   text-shadow: 0 0 5px #00ff88, 0 0 10px #00ff88;
 }
 
-/* Center intro screen contents */
+/* Center intro screen overlay */
 #intro-screen {
   position: absolute;
   top: 50%;
@@ -75,7 +75,7 @@ main#main-content {
   text-align: center;
 }
 
-/* Shared button style */
+/* Shared neon button styles */
 .neon-button {
   background-color: transparent;
   border: 2px solid #00ff88;
@@ -86,16 +86,15 @@ main#main-content {
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-top: 1.5rem;
 }
 
-/* Only the ENTER button starts hidden and fades in on load */
+/* ENTER button hidden initially */
 #enter-btn {
   opacity: 0;
   transform: scale(0.95);
 }
 
-/* ENTER button animation class */
+/* Fade-in effect for ENTER button */
 #enter-btn.visible {
   animation: fadeInGlow 2s forwards;
 }
@@ -107,7 +106,7 @@ main#main-content {
   box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
 }
 
-/* Animation for fade-in with glow */
+/* Fade-in glow animation */
 @keyframes fadeInGlow {
   0% {
     opacity: 0;
@@ -121,14 +120,30 @@ main#main-content {
   }
 }
 
-/* Animation class for the Launch button after clicking ENTER */
+/* Launch buttons appear after click */
 .fade-in-button {
   opacity: 0;
   animation: fadeInGlow 1.5s forwards;
   transform: scale(0.95);
 }
 
-/* Glitch gif container at bottom center */
+/* Vertical stack for launch buttons */
+.button-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin-top: 2rem;
+}
+
+/* Make launch buttons fit nicely on all devices */
+.button-stack .neon-button {
+  width: 80%;
+  max-width: 300px;
+  text-align: center;
+}
+
+/* Glitch gif container */
 #gif-trigger {
   position: fixed;
   bottom: 20px;
@@ -138,7 +153,7 @@ main#main-content {
   cursor: pointer;
 }
 
-/* Styling for glitch gif */
+/* Glitch gif styling */
 #gif-trigger img {
   width: 100px;
   height: auto;
@@ -147,41 +162,4 @@ main#main-content {
 
 #gif-trigger img:hover {
   transform: scale(1.1);
-}
-
-/* Fade-in effect for both launch buttons */
-.fade-in-button {
-  opacity: 0;
-  animation: fadeInGlow 1.5s forwards;
-  transform: scale(0.95);
-}
-
-/* Animation reused for buttons glowing in */
-@keyframes fadeInGlow {
-  0% {
-    opacity: 0;
-    transform: scale(0.95);
-    box-shadow: none;
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-    box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
-  }
-}
-
-/* Wrap buttons in a flex column with spacing */
-.button-list {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem; /* spacing between buttons */
-  margin-top: 2rem;
-  width: 100%;
-}
-
-/* Make sure neon buttons fit within container on all screens */
-.button-list .neon-button {
-  width: 80%;
-  max-width: 300px;
 }
