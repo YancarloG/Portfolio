@@ -87,3 +87,15 @@ function shakePage() {
     if (donate) donate.classList.remove('hidden');
   }, 300);
 }
+
+// Apply dark mode if saved in localStorage
+if (localStorage.getItem('darkMode') === 'enabled') {
+  document.body.classList.add('dark-mode');
+}
+
+// Toggle dark mode and store preference
+function toggleDarkMode() {
+  const body = document.body;
+  const isDark = body.classList.toggle('dark-mode');
+  localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
+}
