@@ -2,82 +2,104 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>BankezeCalculator</title>
-  <link rel="stylesheet" href="styles.css" />
-  <script src="main.js" defer></script>
-  <script>
-    document.addEventListener('contextmenu', e => e.preventDefault());
-    document.addEventListener('keydown', e => {
-      if ((e.ctrlKey && ['u', 's', 'c', 'j'].includes(e.key)) || e.key === 'F12') e.preventDefault();
-    });
-  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Yantento.com</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <img src="Bank-eze.png" alt="Bankeze Logo" class="logo" onclick="shakePage()" />
-  <h1>BankezeCalculator</h1>
 
-  <div class="form-container">
-    <div class="form-group">
-      <label for="paymentType">Payment Type</label>
-      <select id="paymentType">
-        <option>American Express</option>
-        <option>Discover</option>
-        <option>Disney Rewards Card</option>
-        <option>Guest ID</option>
-        <option>JCB Card</option>
-        <option>Mastercard</option>
-        <option>Value Card</option>
-        <option>Visa</option>
-        <option>Adult Dining Plan</option>
-        <option>Child Dining Plan</option>
-        <option>Coupons</option>
-        <option>Cash</option>
-      </select>
+  <!-- Main music only starts when user clicks the glitch GIF -->
+  <audio id="bg-music" loop>
+    <source src="music/song1.mp3" type="audio/mpeg" />
+  </audio>
+
+  <!-- Fullscreen looping background video -->
+  <video id="bg-video" autoplay muted loop playsinline>
+    <source src="assets/cyber-bg.mp4" type="video/mp4" />
+  </video>
+
+  <!-- Intro screen with glitchy title and enter button -->
+  <div id="intro-screen" class="glass">
+    <h1 class="intro-title">YANTENTO.COM <span class="glitch-highlight">||</span> Click to Enter</h1>
+    <!-- Fade-in enter button (will animate in via JavaScript) -->
+    <button id="enter-btn" class="neon-button">ENTER SITE</button>
+  </div>
+
+  <!-- Main content hidden initially until "Enter Site" is clicked -->
+  <main id="main-content" class="hidden">
+    <div class="glass content-box">
+      <h1 class="glitch glow" data-text="Welcome to Yantento.com">Welcome to Yantento.com</h1>
+      <p style="font-size: 1.2rem;">Access my latest build:</p>
+      <!-- This is the launch button (it will animate in after clicking ENTER) -->
+      <a id="launch-btn" href="weight-tracker/login.html" class="neon-button">Launch Weight Tracker</a>
     </div>
-    <div class="form-group">
-      <label for="amount">Charge Amount ($)</label>
-      <input type="number" id="amount" step="0.01" />
-    </div>
-    <div class="form-group">
-      <label for="tip">Tip Amount ($)</label>
-      <input type="number" id="tip" step="0.01" />
-    </div>
-    <button class="btn" onclick="addPayment()">Add Payment</button>
-    <button class="btn" onclick="showResults()">Show Totals</button>
-    <button class="btn" onclick="viewAllEntries()">View All Entries</button>
+  </main>
+
+  <!-- Clickable glitch GIF at the bottom of the screen -->
+  <div id="gif-trigger">
+    <img id="glitch-gif" src="assets/gif1.gif" alt="Glitch Button" />
   </div>
 
-  <div class="results-container" id="results" style="display: none">
-    <table id="resultsTable">
-      <thead>
-        <tr>
-          <th>Payment Type</th>
-          <th># of Slips</th>
-          <th>$ Revenue</th>
-          <th>Total w/ Tips</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <div class="form-group"><label>Total in Cash Transactions:</label><div id="totalCash"></div></div>
-    <div class="form-group"><label>Cash Tips (Do Not Reduce Cash):</label><div id="cashTips"></div></div>
-    <div class="form-group"><label>Less Charge Tips:</label><div id="lessTips"></div></div>
-    <div class="form-group"><label>Total Cash Responsibility:</label><div id="cashResponsibility"></div></div>
-    <div class="form-group"><label>Average Tip %:</label><div id="avgTip"></div></div>
-  </div>
+  <!-- JavaScript to handle site transitions, glitch effect, and music -->
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const enterBtn = document.getElementById('enter-btn');
+      const introScreen = document.getElementById('intro-screen');
+      const mainContent = document.getElementById('main-content');
+      const glitchGif = document.getElementById('glitch-gif');
+      const music = document.getElementById('bg-music');
+      const launchBtn = document.getElementById('launch-btn');
 
-  <div class="results-container" id="entryLog" style="display:none">
-    <h3 style="text-align:center">All Entries</h3>
-    <ul id="entryList"></ul>
-  </div>
+      // Fade-in the "Enter Site" button when the page loads
+      setTimeout(() => {
+        enterBtn.classList.add('visible');
+      }, 300);
 
-  <div id="donateWrapper" class="hidden">
-    <a href="https://cash.app/$Yantento" target="_blank" class="donate-btn">💸Donate💸</a>
-  </div>
+      // When the user clicks "Enter Site"
+      enterBtn.addEventListener('click', () => {
+        introScreen.remove(); // Remove intro from the DOM entirely
+        mainContent.classList.remove('hidden'); // Show the main site
+        launchBtn.classList.add('fade-in-button'); // Animate in the launch button
+      });
 
-  <footer style="text-align:center; margin-top: 40px; font-size: 14px; opacity: 0.6;">
-    &copy; 2025 Bankeze Calculator | Designed by <strong>Yantento</strong>
-  </footer>
+      // When user clicks glitch GIF, swap image and start music
+      glitchGif.addEventListener('click', () => {
+        glitchGif.src = 'assets/gif2.gif';
+        music.play();
+      });
+
+      // Start the glitching tab title effect
+      startGlitchLoop();
+    });
+
+    // Repeatedly glitches the tab title with fake hacker names
+    function startGlitchLoop(duration = 3000) {
+      const glitchTitles = [
+        "Y4ntent0", "Y@nt3nt0", "Yan7en7o", "Yant3n70", "Yant3nt0",
+        "Y@ntento", "Y4n73n70", "Y4N7EN70", "YANT3NT0", "y4nt3nt0"
+      ];
+
+      let glitchIndex = 0;
+      let glitchInterval;
+      let isGlitching = false;
+      const stableTitle = "Yantento.com";
+
+      if (isGlitching) return;
+      isGlitching = true;
+
+      glitchInterval = setInterval(() => {
+        document.title = glitchTitles[glitchIndex % glitchTitles.length];
+        glitchIndex++;
+      }, 100);
+
+      setTimeout(() => {
+        clearInterval(glitchInterval);
+        document.title = stableTitle;
+        isGlitching = false;
+        const delay = Math.floor(Math.random() * 4000) + 3000;
+        setTimeout(() => startGlitchLoop(), delay);
+      }, duration);
+    }
+  </script>
 </body>
 </html>
