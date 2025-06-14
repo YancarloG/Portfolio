@@ -4,103 +4,45 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Yantento.com</title>
+  <!-- Link to your external stylesheet -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- Main music only starts when user clicks the glitch GIF -->
+  <!-- Music plays only after user interacts -->
   <audio id="bg-music" loop>
     <source src="music/song1.mp3" type="audio/mpeg" />
   </audio>
 
-  <!-- Fullscreen looping background video -->
+  <!-- Background video that fills the screen -->
   <video id="bg-video" autoplay muted loop playsinline>
     <source src="assets/cyber-bg.mp4" type="video/mp4" />
   </video>
 
-  <!-- Intro screen with glitchy title and enter button -->
+  <!-- Intro screen shown first -->
   <div id="intro-screen" class="glass">
     <h1 class="intro-title">YANTENTO.COM <span class="glitch-highlight">||</span> Click to Enter</h1>
-    <!-- Fade-in enter button (will animate in via JavaScript) -->
     <button id="enter-btn" class="neon-button">ENTER SITE</button>
   </div>
 
-  <!-- Main content hidden initially until "Enter Site" is clicked -->
+  <!-- Main site content hidden until 'Enter Site' is clicked -->
   <main id="main-content" class="hidden">
     <div class="glass content-box">
       <h1 class="glitch glow" data-text="Welcome to Yantento.com">Welcome to Yantento.com</h1>
       <p style="font-size: 1.2rem;">Access my latest builds:</p>
-      <!-- This is the launch button (it will animate in after clicking ENTER) -->
-      <a id="launch-btn" href="weight-tracker/login.html" class="neon-button">Launch Weight Tracker</a>
-      <a id="launch-btn" href="bankeze-calculator/index.html" class="neon-button">Launch Bankeze Calculator</a>
+
+      <!-- Each button must have a unique ID -->
+      <a id="launch-wt-btn" href="weight-tracker/login.html" class="neon-button">Launch Weight Tracker</a>
+      <a id="launch-bank-btn" href="bankeze-calculator/index.html" class="neon-button">Launch Bankeze Calculator</a>
     </div>
   </main>
 
-  <!-- Clickable glitch GIF at the bottom of the screen -->
+  <!-- Glitch GIF that starts music -->
   <div id="gif-trigger">
     <img id="glitch-gif" src="assets/gif1.gif" alt="Glitch Button" />
   </div>
 
-  <!-- JavaScript to handle site transitions, glitch effect, and music -->
-  <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      const enterBtn = document.getElementById('enter-btn');
-      const introScreen = document.getElementById('intro-screen');
-      const mainContent = document.getElementById('main-content');
-      const glitchGif = document.getElementById('glitch-gif');
-      const music = document.getElementById('bg-music');
-      const launchBtn = document.getElementById('launch-btn');
-
-      // Fade-in the "Enter Site" button when the page loads
-      setTimeout(() => {
-        enterBtn.classList.add('visible');
-      }, 300);
-
-      // When the user clicks "Enter Site"
-      enterBtn.addEventListener('click', () => {
-        introScreen.remove(); // Remove intro from the DOM entirely
-        mainContent.classList.remove('hidden'); // Show the main site
-        launchBtn.classList.add('fade-in-button'); // Animate in the launch button
-      });
-
-      // When user clicks glitch GIF, swap image and start music
-      glitchGif.addEventListener('click', () => {
-        glitchGif.src = 'assets/gif2.gif';
-        music.play();
-      });
-
-      // Start the glitching tab title effect
-      startGlitchLoop();
-    });
-
-    // Repeatedly glitches the tab title with fake hacker names
-    function startGlitchLoop(duration = 3000) {
-      const glitchTitles = [
-        "Y4ntent0", "Y@nt3nt0", "Yan7en7o", "Yant3n70", "Yant3nt0",
-        "Y@ntento", "Y4n73n70", "Y4N7EN70", "YANT3NT0", "y4nt3nt0"
-      ];
-
-      let glitchIndex = 0;
-      let glitchInterval;
-      let isGlitching = false;
-      const stableTitle = "Yantento.com";
-
-      if (isGlitching) return;
-      isGlitching = true;
-
-      glitchInterval = setInterval(() => {
-        document.title = glitchTitles[glitchIndex % glitchTitles.length];
-        glitchIndex++;
-      }, 100);
-
-      setTimeout(() => {
-        clearInterval(glitchInterval);
-        document.title = stableTitle;
-        isGlitching = false;
-        const delay = Math.floor(Math.random() * 4000) + 3000;
-        setTimeout(() => startGlitchLoop(), delay);
-      }, duration);
-    }
-  </script>
+  <!-- External JS file for logic -->
+  <script src="main.js"></script>
 </body>
 </html>
