@@ -27,6 +27,10 @@ body {
   100% { transform: translateX(0); }
 }
 
+.hidden {
+  display: none !important;
+}
+
 h1 {
   text-align: center;
   font-weight: 600;
