@@ -1,4 +1,4 @@
-/* Base layout and theme */
+/* Fullscreen cyber terminal layout */
 body {
   margin: 0;
   padding: 0;
@@ -11,7 +11,7 @@ body {
   position: relative;
 }
 
-/* Fullscreen background video */
+/* Background video behind all content */
 #bg-video {
   position: fixed;
   top: 0;
@@ -22,7 +22,7 @@ body {
   z-index: -1;
 }
 
-/* Glassmorphism style for overlays */
+/* Frosted glass look for boxes */
 .glass {
   background: rgba(0, 0, 0, 0.6);
   border-radius: 15px;
@@ -32,25 +32,29 @@ body {
   color: #00ff88;
 }
 
-/* Hide content until 'Enter Site' is clicked */
+/* Hide main until triggered */
 .hidden {
   display: none;
 }
 
-/* Center content area */
+/* Center the glass content container */
 .content-box {
-  max-width: 600px;
+  width: 90%;
+  max-width: 500px;
   margin: 100px auto;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* Ensure content appears over video */
+/* Prevent overlapping on top of video */
 main#main-content {
   position: relative;
   z-index: 5;
 }
 
-/* Glitch and glowing title styles */
+/* Glitchy and glowing text headers */
 .glitch {
   position: relative;
   font-size: 2rem;
@@ -59,7 +63,7 @@ main#main-content {
   text-shadow: 0 0 5px #00ff88, 0 0 10px #00ff88;
 }
 
-/* Center intro screen overlay */
+/* Intro overlay centered on screen */
 #intro-screen {
   position: absolute;
   top: 50%;
@@ -75,7 +79,7 @@ main#main-content {
   text-align: center;
 }
 
-/* Shared neon button styles */
+/* Cyber-styled glowing buttons */
 .neon-button {
   background-color: transparent;
   border: 2px solid #00ff88;
@@ -86,27 +90,37 @@ main#main-content {
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 1px;
+  margin-top: 1rem;
+  box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
 }
 
-/* ENTER button hidden initially */
+/* Neon hover glow */
+.neon-button:hover {
+  background-color: #00ff88;
+  color: #000;
+  box-shadow: 0 0 12px #00ff88, 0 0 24px #00ff88;
+}
+
+/* Enter button fade-in */
 #enter-btn {
   opacity: 0;
   transform: scale(0.95);
 }
-
-/* Fade-in effect for ENTER button */
 #enter-btn.visible {
   animation: fadeInGlow 2s forwards;
 }
 
-/* Hover style for all neon buttons */
-.neon-button:hover {
-  background-color: #00ff88;
-  color: #000;
-  box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
+/* Animate launch buttons */
+.fade-in-button {
+  opacity: 0;
+  animation: fadeInGlow 1.5s forwards;
+  transform: scale(0.95);
 }
 
-/* Fade-in glow animation */
+/* Glow animation used across elements */
 @keyframes fadeInGlow {
   0% {
     opacity: 0;
@@ -120,30 +134,16 @@ main#main-content {
   }
 }
 
-/* Launch buttons appear after click */
-.fade-in-button {
-  opacity: 0;
-  animation: fadeInGlow 1.5s forwards;
-  transform: scale(0.95);
-}
-
-/* Vertical stack for launch buttons */
+/* Force vertical stacking of buttons */
 .button-stack {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  margin-top: 2rem;
+  width: 100%;
 }
 
-/* Make launch buttons fit nicely on all devices */
-.button-stack .neon-button {
-  width: 80%;
-  max-width: 300px;
-  text-align: center;
-}
-
-/* Glitch gif container */
+/* Glitch GIF fixed at bottom center */
 #gif-trigger {
   position: fixed;
   bottom: 20px;
@@ -153,13 +153,11 @@ main#main-content {
   cursor: pointer;
 }
 
-/* Glitch gif styling */
 #gif-trigger img {
   width: 100px;
   height: auto;
   transition: transform 0.3s ease;
 }
-
 #gif-trigger img:hover {
   transform: scale(1.1);
 }
