@@ -169,3 +169,19 @@ main#main-content {
     box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
   }
 }
+
+/* Wrap buttons in a flex column with spacing */
+.button-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem; /* spacing between buttons */
+  margin-top: 2rem;
+  width: 100%;
+}
+
+/* Make sure neon buttons fit within container on all screens */
+.button-list .neon-button {
+  width: 80%;
+  max-width: 300px;
+}
