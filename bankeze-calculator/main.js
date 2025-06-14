@@ -27,25 +27,34 @@ function showResults() {
   tbody.innerHTML = '';
 
   const summary = {};
-  let totalCash = 0, totalTips = 0, totalAmount = 0;
+  let totalCash = 0, totalChargeTips = 0, totalCashTips = 0, totalAmount = 0, totalTips = 0;
 
   data.entries.forEach(({ type, amount, tip }) => {
-    if (!summary[type]) summary[type] = { count: 0, revenue: 0 };
+    if (!summary[type]) summary[type] = { count: 0, revenue: 0, total: 0 };
     summary[type].count++;
     summary[type].revenue += amount;
-    if (type === 'Cash') totalCash += amount;
+    summary[type].total += amount + tip;
+
+    if (type === 'Cash') {
+      totalCash += amount;
+      totalCashTips += tip;
+    } else {
+      totalChargeTips += tip;
+    }
+
     totalTips += tip;
     totalAmount += amount;
   });
 
   Object.entries(summary).forEach(([type, info]) => {
-    const row = `<tr><td>${type}</td><td>${info.count}</td><td>$${info.revenue.toFixed(2)}</td></tr>`;
+    const row = `<tr><td>${type}</td><td>${info.count}</td><td>$${info.revenue.toFixed(2)}</td><td>$${info.total.toFixed(2)}</td></tr>`;
     tbody.innerHTML += row;
   });
 
   document.getElementById('totalCash').innerText = `$${totalCash.toFixed(2)}`;
-  document.getElementById('lessTips').innerText = `$${totalTips.toFixed(2)}`;
-  document.getElementById('cashResponsibility').innerText = `$${(totalCash - totalTips).toFixed(2)}`;
+  document.getElementById('cashTips').innerText = `$${totalCashTips.toFixed(2)}`;
+  document.getElementById('lessTips').innerText = `$${totalChargeTips.toFixed(2)}`;
+  document.getElementById('cashResponsibility').innerText = `$${(totalCash - totalChargeTips).toFixed(2)}`;
   document.getElementById('avgTip').innerText = totalAmount ? `${((totalTips / totalAmount) * 100).toFixed(2)}%` : '0%';
   document.getElementById('results').style.display = 'block';
 }
@@ -78,4 +87,3 @@ function shakePage() {
     if (donate) donate.classList.remove('hidden');
   }, 300);
 }
-
