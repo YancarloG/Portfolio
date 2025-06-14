@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>BankezeCalculator</title>
   <link rel="stylesheet" href="styles.css" />
+  <script src="main.js" defer></script>
   <script>
-    // Developed by Yan Guzman
     document.addEventListener('contextmenu', e => e.preventDefault());
     document.addEventListener('keydown', e => {
       if ((e.ctrlKey && ['u', 's', 'c', 'j'].includes(e.key)) || e.key === 'F12') e.preventDefault();
@@ -14,12 +14,7 @@
   </script>
 </head>
 <body>
-  <img src="Bank-eze.png" alt="Bankeze Logo" class="logo" onclick="shakePage()" />
-  <div id="donateWrapper" style="display: none; text-align: center; margin-top: 10px;">
-  <a href="https://cash.app/$Yantento" target="_blank" class="donate-btn">💸 Donate</a>
-</div>
-<!-- Bank-eze Calculator by Yantento (Yan G) | Original Source | github.com/hidden/bankeze-calculator -->
-
+  <img src="bankeze-logo.png" alt="Bankeze Logo" class="logo" onclick="shakePage()" />
   <h1>BankezeCalculator</h1>
 
   <div class="form-container">
@@ -40,87 +35,41 @@
         <option>Cash</option>
       </select>
     </div>
-
     <div class="form-group">
       <label for="amount">Charge Amount ($)</label>
       <input type="number" id="amount" step="0.01" />
     </div>
-
     <div class="form-group">
       <label for="tip">Tip Amount ($)</label>
       <input type="number" id="tip" step="0.01" />
     </div>
-
     <button class="btn" onclick="addPayment()">Add Payment</button>
     <button class="btn" onclick="showResults()">Show Totals</button>
+    <button class="btn" onclick="viewAllEntries()">View All Entries</button>
   </div>
 
   <div class="results-container" id="results" style="display: none">
     <table id="resultsTable">
-      <thead>
-        <tr><th>Payment Type</th><th># of Slips</th><th>$ Revenue</th></tr>
-      </thead>
+      <thead><tr><th>Payment Type</th><th># of Slips</th><th>$ Revenue</th></tr></thead>
       <tbody></tbody>
     </table>
     <div class="form-group"><label>Total in Cash Transactions:</label><div id="totalCash"></div></div>
     <div class="form-group"><label>Less Charge Tips:</label><div id="lessTips"></div></div>
     <div class="form-group"><label>Total Cash Responsibility:</label><div id="cashResponsibility"></div></div>
+    <div class="form-group"><label>Average Tip %:</label><div id="avgTip"></div></div>
   </div>
 
-  <script>
-    const storageKey = 'bankezeData';
-    let data = JSON.parse(localStorage.getItem(storageKey)) || {};
+  <div class="results-container" id="entryLog" style="display:none">
+    <h3 style="text-align:center">All Entries</h3>
+    <ul id="entryList"></ul>
+  </div>
 
-    function addPayment() {
-      const type = document.getElementById('paymentType').value;
-      const amount = parseFloat(document.getElementById('amount').value);
-      const tip = document.getElementById('tip').value === '' ? 0 : parseFloat(document.getElementById('tip').value);
+  <div id="donateWrapper" style="display:none; text-align:center; margin-top:20px;">
+    <a href="https://cash.app/$YourCashTag" target="_blank" class="donate-btn">💸 Donate</a>
+  </div>
 
-      if (amount <= 0 || isNaN(amount)) return alert('Please enter a charge amount greater than 0.');
-      if (tip < 0 || isNaN(tip)) return alert('Tip amount cannot be negative.');
-
-      if (!data[type]) data[type] = { count: 0, revenue: 0, tips: 0 };
-      data[type].count++;
-      data[type].revenue += amount;
-      data[type].tips += tip;
-
-      localStorage.setItem(storageKey, JSON.stringify(data));
-      document.getElementById('amount').value = '';
-      document.getElementById('tip').value = '';
-      alert('Payment added!');
-    }
-
-    function showResults() {
-      const tbody = document.querySelector('#resultsTable tbody');
-      tbody.innerHTML = '';
-      let totalCash = 0, totalTips = 0;
-
-      for (const [type, entry] of Object.entries(data)) {
-        tbody.innerHTML += `<tr><td>${type}</td><td>${entry.count}</td><td>$${entry.revenue.toFixed(2)}</td></tr>`;
-        if (type === 'Cash') totalCash += entry.revenue;
-        totalTips += entry.tips;
-      }
-
-      document.getElementById('totalCash').innerText = `$${totalCash.toFixed(2)}`;
-      document.getElementById('lessTips').innerText = `$${totalTips.toFixed(2)}`;
-      document.getElementById('cashResponsibility').innerText = `$${(totalCash - totalTips).toFixed(2)}`;
-      document.getElementById('results').style.display = 'block';
-    }
-
-    function shakePage() {
-  document.body.classList.add('shake');
-  setTimeout(() => {
-    document.body.classList.remove('shake');
-    document.getElementById('donateWrapper').style.display = 'block';
-  }, 300);
-}
-
-  </script>
-  
-  <footer style="text-align: center; margin-top: 40px; font-size: 14px; opacity: 0.6;">
-  &copy; 2025 Bank-eze | Designed & Engineered by <strong>Yantento</strong>
-    
-</footer>
-
+  <footer style="text-align:center; margin-top: 40px; font-size: 14px; opacity: 0.6;">
+    &copy; 2025 Bank-eze | Designed by <strong>DrkSpd</strong>
+  </footer>
 </body>
 </html>
