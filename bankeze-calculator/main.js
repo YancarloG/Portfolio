@@ -75,6 +75,7 @@ function shakePage() {
   setTimeout(() => {
     document.body.classList.remove('shake');
     const donate = document.getElementById('donateWrapper');
-    if (donate) donate.style.display = 'block';
+    if (donate) donate.classList.remove('hidden');
   }, 300);
 }
+
