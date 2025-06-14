@@ -148,3 +148,69 @@ th, td {
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
+
+/* Dark Mode Toggle Button Wrapper */
+#darkModeToggleWrapper {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 999;
+}
+
+#darkModeToggle {
+  background-color: #1c1c1e;
+  color: #fff;
+  border: 2px solid #88b04b;
+  border-radius: 20px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+#darkModeToggle:hover {
+  background-color: #2e2e30;
+  border-color: #6f9740;
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+  background: linear-gradient(180deg, #2e2e2e, #121212);
+  color: #e2f4dd;
+}
+
+body.dark-mode .form-container,
+body.dark-mode .results-container {
+  background-color: #1c1c1e;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode select,
+body.dark-mode input {
+  background-color: #2b2b2b;
+  color: #fff;
+  border-color: #555;
+}
+
+body.dark-mode th {
+  background-color: #333;
+  color: #ddd;
+}
+
+body.dark-mode td {
+  color: #ccc;
+}
+
+body.dark-mode .btn {
+  background-color: #3e703a;
+}
+
+body.dark-mode .btn:hover {
+  background-color: #305c2f;
+}
+
+body.dark-mode #entryList li {
+  background: #2c2c2c;
+  color: #ddd;
+}
