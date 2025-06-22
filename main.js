@@ -1,50 +1,54 @@
-// Yan Guzman — JS logic for landing page
+// Yan Guzman — Interactive logic for my styled portfolio
 
-// Run once DOM is fully loaded
+// DOM loaded
 window.addEventListener('DOMContentLoaded', () => {
   const enterBtn = document.getElementById('enter-btn');
   const introScreen = document.getElementById('intro-screen');
   const mainContent = document.getElementById('main-content');
   const glitchGif = document.getElementById('glitch-gif');
   const music = document.getElementById('bg-music');
-
   const wtBtn = document.getElementById('launch-wt-btn');
   const bankBtn = document.getElementById('launch-bank-btn');
+  const toggleBtn = document.getElementById('toggle-darkmode');
 
-  // Show "Enter" button with delay for effect
+  // Show "Enter" button with animation
   setTimeout(() => {
     enterBtn.classList.add('visible');
   }, 300);
 
-  // Handle "Enter" button click
+  // Enter site logic
   enterBtn.addEventListener('click', () => {
-    introScreen.remove(); // Remove intro screen
-    mainContent.classList.remove('hidden'); // Reveal main content
-    wtBtn.classList.add('fade-in-button'); // Animate project buttons
+    introScreen.remove();
+    mainContent.classList.remove('hidden');
+    wtBtn.classList.add('fade-in-button');
     bankBtn.classList.add('fade-in-button');
   });
 
-  // Trigger alternate gif and play background music
+  // GIF click plays music
   glitchGif.addEventListener('click', () => {
-    glitchGif.src = 'assets/gif2.GIF';
+    glitchGif.src = 'assets/gif2.gif';
     music.play();
   });
 
-  // Start glitching tab title loop
+  // Title glitch effect loop
   startGlitchLoop();
+
+  // Dark mode toggle
+  toggleBtn.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+  });
 });
 
-// Function to randomly cycle the document title for glitch effect
+// Browser tab title glitch loop
 function startGlitchLoop(duration = 3000) {
   const glitchTitles = [
     "Yantento.ai", "Y@nt3nto", "Yan Guzman", "Yantento.com", "YanG.dev"
   ];
 
   let glitchIndex = 0;
-  let glitchInterval;
   const stableTitle = "Yantento.com";
 
-  glitchInterval = setInterval(() => {
+  const glitchInterval = setInterval(() => {
     document.title = glitchTitles[glitchIndex % glitchTitles.length];
     glitchIndex++;
   }, 100);
