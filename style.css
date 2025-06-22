@@ -1,37 +1,41 @@
-/* Yan Guzman —  Portfolio Theme */
+/* Yan Guzman — Moonlight Ocean Theme */
 
-/* Base layout styling */
+/* Global layout */
 body {
   margin: 0;
   padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: #f5f6f8;
-  color: #1c1c1e;
+  background-color: #0a0f1e;
+  color: #e6f0ff;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+  transition: background-color 0.5s, color 0.5s;
 }
 
-/* Fullscreen video background */
+/* Video Background */
 #bg-video {
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 50%;
+  left: 50%;
   min-width: 100%;
   min-height: 100%;
+  transform: translate(-50%, -50%);
   object-fit: cover;
   z-index: -1;
 }
 
-/* Frosted-glass container (used for boxes and intro screen) */
+/* Glassmorphic Container */
 .glass {
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(15px);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
   padding: 2rem;
-  color: #1c1c1e;
+  color: inherit;
   text-align: center;
+  transition: background 0.4s ease;
 }
 
 /* Hide until triggered */
@@ -39,53 +43,55 @@ body {
   display: none;
 }
 
-/* Center content inside main section */
+/* Main Content Wrapper */
 .content-box {
-  max-width: 480px;
+  max-width: 500px;
   margin: 100px auto;
 }
 
-/* Main content wrapper */
-main#main-content {
-  position: relative;
-  z-index: 2;
-}
-
-/* Hero heading style */
+/* Title Heading */
 .welcome-heading {
   font-size: 2rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
+  text-decoration: none;
 }
 
-/* Description under heading */
+/* Description Under Heading */
 .intro-text {
   font-size: 1.1rem;
   margin-bottom: 2rem;
 }
 
-/* Consistent modern buttons */
+/* Modern Glowing Buttons */
 .modern-button {
-  background-color: #1c1c1e;
+  background-color: #14213d;
   color: #ffffff;
-  padding: 0.8rem 2rem;
+  padding: 0.9rem 2rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-weight: 500;
   font-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
   width: 100%;
   max-width: 300px;
-  margin-top: 1rem;
+  box-shadow: 0 0 8px rgba(0, 200, 255, 0.3);
 }
-
-/* Button hover style */
 .modern-button:hover {
-  background-color: #2c2c2e;
+  box-shadow: 0 0 20px #00c8ff;
+  transform: scale(1.02);
 }
 
-/* Fade-in for enter button */
+/* Button Stack Layout */
+.button-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+/* Enter Button Fade */
 #enter-btn {
   opacity: 0;
   transform: scale(0.95);
@@ -94,47 +100,69 @@ main#main-content {
   animation: fadeIn 2s forwards;
 }
 
-/* Launch buttons appear after intro */
+/* Launch Button Fade */
 .fade-in-button {
   opacity: 0;
   animation: fadeIn 1.5s forwards;
   transform: scale(0.95);
 }
 
-/* Fade-in animation */
 @keyframes fadeIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
-/* Stack buttons vertically with spacing */
-.button-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: center;
-}
-
-/* Bottom center animation trigger */
+/* GIF Centered at Bottom */
 #gif-trigger {
   position: fixed;
-  bottom: 20px;
+  bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 5;
   cursor: pointer;
 }
 #gif-trigger img {
-  width: 80px;
+  width: 90px;
   height: auto;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, filter 0.3s ease;
 }
 #gif-trigger img:hover {
   transform: scale(1.1);
+  filter: drop-shadow(0 0 10px #00c8ff);
+}
+
+/* Dark Mode Toggle Button */
+#toggle-darkmode {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  background-color: rgba(255,255,255,0.1);
+  color: #ffffff;
+  font-size: 1.1rem;
+  z-index: 10;
+  transition: background 0.3s ease;
+}
+#toggle-darkmode:hover {
+  background-color: rgba(255,255,255,0.2);
+}
+
+/* Dark Mode Active */
+body.dark-mode {
+  background-color: #f5f5f5;
+  color: #111;
+}
+body.dark-mode .glass {
+  background: rgba(255, 255, 255, 0.65);
+  color: #111;
+}
+body.dark-mode .modern-button {
+  background-color: #e3e3e3;
+  color: #111;
+}
+body.dark-mode .modern-button:hover {
+  box-shadow: 0 0 15px #00c8ff;
 }
