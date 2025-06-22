@@ -26,7 +26,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Trigger alternate gif and play background music
   glitchGif.addEventListener('click', () => {
-    glitchGif.src = 'assets/gif2.gif';
+    glitchGif.src = 'assets/gif2.GIF';
     music.play();
   });
 
