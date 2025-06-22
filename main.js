@@ -1,6 +1,5 @@
 // Yan Guzman — Interactive logic for my styled portfolio
 
-// DOM loaded
 window.addEventListener('DOMContentLoaded', () => {
   const enterBtn = document.getElementById('enter-btn');
   const introScreen = document.getElementById('intro-screen');
@@ -11,12 +10,14 @@ window.addEventListener('DOMContentLoaded', () => {
   const bankBtn = document.getElementById('launch-bank-btn');
   const toggleBtn = document.getElementById('toggle-darkmode');
 
-  // Show "Enter" button with animation
+  let isMusicPlaying = false;
+
+  // Show enter button with delay
   setTimeout(() => {
     enterBtn.classList.add('visible');
   }, 300);
 
-  // Enter site logic
+  // Enter site behavior
   enterBtn.addEventListener('click', () => {
     introScreen.remove();
     mainContent.classList.remove('hidden');
@@ -24,22 +25,28 @@ window.addEventListener('DOMContentLoaded', () => {
     bankBtn.classList.add('fade-in-button');
   });
 
-  // GIF click plays music
+  // Toggle play/pause music and switch gif
   glitchGif.addEventListener('click', () => {
-    glitchGif.src = 'assets/gif2.GIF';
-    music.play();
+    if (!isMusicPlaying) {
+      glitchGif.src = 'assets/gif2.gif';
+      music.play();
+    } else {
+      glitchGif.src = 'assets/gif1.gif';
+      music.pause();
+      music.currentTime = 0;
+    }
+    isMusicPlaying = !isMusicPlaying;
   });
 
-  // Title glitch effect loop
+  // Tab glitch title loop
   startGlitchLoop();
 
-  // Dark mode toggle
+  // Toggle dark mode
   toggleBtn.addEventListener('click', () => {
     document.body.classList.toggle('dark-mode');
   });
 });
 
-// Browser tab title glitch loop
 function startGlitchLoop(duration = 3000) {
   const glitchTitles = [
     "Yantento.ai", "Y@nt3nto", "Yan Guzman", "Yantento.com", "YanG.dev"
