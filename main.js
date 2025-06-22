@@ -28,10 +28,10 @@ window.addEventListener('DOMContentLoaded', () => {
   // Toggle play/pause music and switch gif
   glitchGif.addEventListener('click', () => {
     if (!isMusicPlaying) {
-      glitchGif.src = 'assets/gif2.gif';
+      glitchGif.src = 'assets/gif2.GIF';
       music.play();
     } else {
-      glitchGif.src = 'assets/gif1.gif';
+      glitchGif.src = 'assets/gif1.GIF';
       music.pause();
       music.currentTime = 0;
     }
