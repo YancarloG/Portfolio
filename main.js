@@ -1,4 +1,6 @@
-// DOM fully loaded
+// Yan Guzman — JS logic for AI-style landing page
+
+// Run once DOM is fully loaded
 window.addEventListener('DOMContentLoaded', () => {
   const enterBtn = document.getElementById('enter-btn');
   const introScreen = document.getElementById('intro-screen');
@@ -9,43 +11,38 @@ window.addEventListener('DOMContentLoaded', () => {
   const wtBtn = document.getElementById('launch-wt-btn');
   const bankBtn = document.getElementById('launch-bank-btn');
 
-  // Fade in "Enter Site" button after short delay
+  // Show "Enter" button with delay for effect
   setTimeout(() => {
     enterBtn.classList.add('visible');
   }, 300);
 
-  // When "Enter Site" clicked
+  // Handle "Enter" button click
   enterBtn.addEventListener('click', () => {
-    introScreen.remove();
-    mainContent.classList.remove('hidden');
-    wtBtn.classList.add('fade-in-button');
+    introScreen.remove(); // Remove intro screen
+    mainContent.classList.remove('hidden'); // Reveal main content
+    wtBtn.classList.add('fade-in-button'); // Animate project buttons
     bankBtn.classList.add('fade-in-button');
   });
 
-  // Play music and change gif on click
+  // Trigger alternate gif and play background music
   glitchGif.addEventListener('click', () => {
     glitchGif.src = 'assets/gif2.gif';
     music.play();
   });
 
-  // Start glitching the tab title
+  // Start glitching tab title loop
   startGlitchLoop();
 });
 
-// Simulates glitching title in browser tab
+// Function to randomly cycle the document title for glitch effect
 function startGlitchLoop(duration = 3000) {
   const glitchTitles = [
-    "Y4ntent0", "Y@nt3nt0", "Yan7en7o", "Yant3n70", "Yant3nt0",
-    "Y@ntento", "Y4n73n70", "Y4N7EN70", "YANT3NT0", "y4nt3nt0"
+    "Yantento.ai", "Y@nt3nto", "Yan Guzman", "Yantento.com", "YanG.dev"
   ];
 
   let glitchIndex = 0;
   let glitchInterval;
-  let isGlitching = false;
   const stableTitle = "Yantento.com";
-
-  if (isGlitching) return;
-  isGlitching = true;
 
   glitchInterval = setInterval(() => {
     document.title = glitchTitles[glitchIndex % glitchTitles.length];
@@ -55,7 +52,6 @@ function startGlitchLoop(duration = 3000) {
   setTimeout(() => {
     clearInterval(glitchInterval);
     document.title = stableTitle;
-    isGlitching = false;
     const delay = Math.floor(Math.random() * 4000) + 3000;
     setTimeout(() => startGlitchLoop(), delay);
   }, duration);
