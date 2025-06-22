@@ -8,29 +8,30 @@
 </head>
 <body>
 
-  <!-- Background audio (muted until user triggers) -->
+  <!-- Dark Mode Toggle Switch -->
+  <button id="toggle-darkmode">🌓</button>
+
+  <!-- Background Music -->
   <audio id="bg-music" loop>
     <source src="music/song1.mp3" type="audio/mpeg" />
   </audio>
 
-  <!-- Minimal fullscreen background video -->
+  <!-- Fullscreen Background Video -->
   <video id="bg-video" autoplay muted loop playsinline>
     <source src="assets/cyber-bg.mp4" type="video/mp4" />
   </video>
 
-  <!-- Startup screen with subtle glass effect and enter button -->
+  <!-- Intro Screen -->
   <div id="intro-screen" class="glass">
     <h1 class="intro-title">Yantento.com — Created by Yan Guzman</h1>
     <button id="enter-btn" class="modern-button">Enter</button>
   </div>
 
-  <!-- Hidden main content shown after user enters -->
+  <!-- Main Content Hidden Initially -->
   <main id="main-content" class="hidden">
     <div class="glass content-box">
       <h1 class="welcome-heading">Welcome to Yantento.com</h1>
-      <p class="intro-text">Explore My Builds:</p>
-
-      <!-- Project links -->
+      <p class="intro-text">Explore featured builds by Yan Guzman:</p>
       <div class="button-stack">
         <a id="launch-wt-btn" href="weight-tracker/login.html" class="modern-button">Weight Tracker</a>
         <a id="launch-bank-btn" href="bankeze-calculator/index.html" class="modern-button">Bankeze Calculator</a>
@@ -38,12 +39,12 @@
     </div>
   </main>
 
-  <!-- Trigger animation and music -->
+  <!-- Centered GIF Trigger -->
   <div id="gif-trigger">
     <img id="glitch-gif" src="assets/gif1.GIF" alt="Trigger Animation" />
   </div>
 
-  <!-- Custom JS logic -->
+  <!-- Script -->
   <script src="main.js"></script>
 </body>
 </html>
