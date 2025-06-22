@@ -8,12 +8,20 @@
 </head>
 <body>
 
-  <!-- Dark Mode Toggle Button -->
-  <button id="toggle-darkmode">🌓</button>
+  <!-- Control Buttons (Dark, Wave, Music) -->
+  <div id="top-buttons">
+    <button id="toggle-darkmode">🌙</button>
+    <button id="toggle-waves">🌊</button>
+    <button id="toggle-music">🎵</button>
+  </div>
 
-  <!-- Background Music -->
+  <!-- Audio Files -->
   <audio id="bg-music" loop>
     <source src="music/song1.mp3" type="audio/mpeg" />
+  </audio>
+
+  <audio id="wave-sound" loop>
+    <source src="music/waves-sound.mp3" type="audio/mpeg" />
   </audio>
 
   <!-- Fullscreen Background Video -->
@@ -27,7 +35,7 @@
     <button id="enter-btn" class="modern-button">Enter</button>
   </div>
 
-  <!-- Main Content (Hidden at First) -->
+  <!-- Main Content -->
   <main id="main-content" class="hidden">
     <div class="glass content-box">
       <h1 class="welcome-heading">Welcome to Yantento.com</h1>
@@ -39,12 +47,7 @@
     </div>
   </main>
 
-  <!-- Centered GIF Music Toggle -->
-  <div id="gif-trigger">
-    <img id="glitch-gif" src="assets/gif1.GIF" alt="Toggle Music" />
-  </div>
-
-  <!-- Main Script -->
+  <!-- Script -->
   <script src="main.js"></script>
 </body>
 </html>
