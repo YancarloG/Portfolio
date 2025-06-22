@@ -1,6 +1,5 @@
-/* Yan Guzman — Moonlight Ocean Theme */
+/* Yan Guzman - Moonlight Theme with Dark Mode and Glowing Interactions */
 
-/* Global layout */
 body {
   margin: 0;
   padding: 0;
@@ -13,7 +12,7 @@ body {
   transition: background-color 0.5s, color 0.5s;
 }
 
-/* Video Background */
+/* Background video centered properly */
 #bg-video {
   position: fixed;
   top: 50%;
@@ -25,7 +24,7 @@ body {
   z-index: -1;
 }
 
-/* Glassmorphic Container */
+/* Clearer frosted glass effect */
 .glass {
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(20px);
@@ -38,18 +37,15 @@ body {
   transition: background 0.4s ease;
 }
 
-/* Hide until triggered */
 .hidden {
   display: none;
 }
 
-/* Main Content Wrapper */
 .content-box {
   max-width: 500px;
   margin: 100px auto;
 }
 
-/* Title Heading */
 .welcome-heading {
   font-size: 2rem;
   font-weight: 600;
@@ -57,13 +53,12 @@ body {
   text-decoration: none;
 }
 
-/* Description Under Heading */
 .intro-text {
   font-size: 1.1rem;
   margin-bottom: 2rem;
 }
 
-/* Modern Glowing Buttons */
+/* Modern AI-themed buttons */
 .modern-button {
   background-color: #14213d;
   color: #ffffff;
@@ -83,7 +78,6 @@ body {
   transform: scale(1.02);
 }
 
-/* Button Stack Layout */
 .button-stack {
   display: flex;
   flex-direction: column;
@@ -91,7 +85,6 @@ body {
   align-items: center;
 }
 
-/* Enter Button Fade */
 #enter-btn {
   opacity: 0;
   transform: scale(0.95);
@@ -100,7 +93,6 @@ body {
   animation: fadeIn 2s forwards;
 }
 
-/* Launch Button Fade */
 .fade-in-button {
   opacity: 0;
   animation: fadeIn 1.5s forwards;
@@ -112,7 +104,7 @@ body {
   100% { opacity: 1; transform: scale(1); }
 }
 
-/* GIF Centered at Bottom */
+/* Circular blurred edge GIF button */
 #gif-trigger {
   position: fixed;
   bottom: 30px;
@@ -122,16 +114,22 @@ body {
   cursor: pointer;
 }
 #gif-trigger img {
-  width: 90px;
-  height: auto;
-  transition: transform 0.3s ease, filter 0.3s ease;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 0 20px rgba(0, 200, 255, 0.2);
+  backdrop-filter: blur(2px);
+  mask-image: radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0.2) 85%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0.2) 85%, rgba(0,0,0,0) 100%);
 }
 #gif-trigger img:hover {
   transform: scale(1.1);
-  filter: drop-shadow(0 0 10px #00c8ff);
+  box-shadow: 0 0 25px #00c8ff;
 }
 
-/* Dark Mode Toggle Button */
+/* Dark mode toggle button */
 #toggle-darkmode {
   position: fixed;
   top: 20px;
@@ -150,7 +148,7 @@ body {
   background-color: rgba(255,255,255,0.2);
 }
 
-/* Dark Mode Active */
+/* Dark Mode Overrides */
 body.dark-mode {
   background-color: #f5f5f5;
   color: #111;
