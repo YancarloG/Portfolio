@@ -121,8 +121,8 @@ body {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0 0 20px rgba(0, 200, 255, 0.2);
   backdrop-filter: blur(2px);
-  mask-image: radial-gradient(circle, rgba(0,0,0,1) 75%, rgba(0,0,0,0.5) 90%, rgba(0,0,0,0) 100%);
-  -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 75%, rgba(0,0,0,0.5) 90%, rgba(0,0,0,0) 100%);
+  mask-image: radial-gradient(circle, rgba(0,0,0,1) 55%, rgba(0,0,0,0.5) 70%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 55%, rgba(0,0,0,0.5) 70%, rgba(0,0,0,0) 100%);
 
 }
 #gif-trigger img:hover {
