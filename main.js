@@ -1,4 +1,4 @@
-// Yan Guzman — JS logic for AI-style landing page
+// Yan Guzman — JS logic for landing page
 
 // Run once DOM is fully loaded
 window.addEventListener('DOMContentLoaded', () => {
