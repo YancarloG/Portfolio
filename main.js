@@ -1,23 +1,29 @@
-// Yan Guzman — Interactive logic for my styled portfolio
+// Yan Guzman — Interactive AI Portfolio Controls
 
 window.addEventListener('DOMContentLoaded', () => {
   const enterBtn = document.getElementById('enter-btn');
   const introScreen = document.getElementById('intro-screen');
   const mainContent = document.getElementById('main-content');
-  const glitchGif = document.getElementById('glitch-gif');
+
+  const toggleDarkModeBtn = document.getElementById('toggle-darkmode');
+  const toggleMusicBtn = document.getElementById('toggle-music');
+  const toggleWavesBtn = document.getElementById('toggle-waves');
+
   const music = document.getElementById('bg-music');
+  const waveSound = document.getElementById('wave-sound');
+
   const wtBtn = document.getElementById('launch-wt-btn');
   const bankBtn = document.getElementById('launch-bank-btn');
-  const toggleBtn = document.getElementById('toggle-darkmode');
 
   let isMusicPlaying = false;
+  let isWavePlaying = false;
 
-  // Show enter button with delay
+  // Fade in enter button
   setTimeout(() => {
     enterBtn.classList.add('visible');
   }, 300);
 
-  // Enter site behavior
+  // Enter site
   enterBtn.addEventListener('click', () => {
     introScreen.remove();
     mainContent.classList.remove('hidden');
@@ -25,26 +31,35 @@ window.addEventListener('DOMContentLoaded', () => {
     bankBtn.classList.add('fade-in-button');
   });
 
-  // Toggle play/pause music and switch gif
-  glitchGif.addEventListener('click', () => {
+  // Toggle dark mode
+  toggleDarkModeBtn.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+  });
+
+  // Toggle background music
+  toggleMusicBtn.addEventListener('click', () => {
     if (!isMusicPlaying) {
-      glitchGif.src = 'assets/gif2.GIF';
       music.play();
     } else {
-      glitchGif.src = 'assets/gif1.GIF';
       music.pause();
       music.currentTime = 0;
     }
     isMusicPlaying = !isMusicPlaying;
   });
 
-  // Tab glitch title loop
-  startGlitchLoop();
-
-  // Toggle dark mode
-  toggleBtn.addEventListener('click', () => {
-    document.body.classList.toggle('dark-mode');
+  // Toggle wave sounds
+  toggleWavesBtn.addEventListener('click', () => {
+    if (!isWavePlaying) {
+      waveSound.play();
+    } else {
+      waveSound.pause();
+      waveSound.currentTime = 0;
+    }
+    isWavePlaying = !isWavePlaying;
   });
+
+  // Start glitch title loop
+  startGlitchLoop();
 });
 
 function startGlitchLoop(duration = 3000) {
