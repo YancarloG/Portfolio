@@ -1,14 +1,26 @@
-/* Global layout */
+/* Yan Guzman —  Moonlight Theme with Dark Mode and Glowing Interactions */
+
+/* Global layout and font setup */
 body {
   margin: 0;
   padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background-color: #0a0f1e;
   color: #e6f0ff;
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-  transition: background-color 0.5s, color 0.5s;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Background video centered and scaled */
+#bg-video {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+  z-index: -1;
 }
 
 /* Top-right control button group */
@@ -21,7 +33,7 @@ body {
   z-index: 10;
 }
 
-/* Uniform button styles */
+/* Uniform control button styles */
 #top-buttons button {
   padding: 8px 14px;
   border-radius: 20px;
@@ -37,19 +49,7 @@ body {
   box-shadow: 0 0 10px #00c8ff;
 }
 
-/* Background video centered and scaled */
-#bg-video {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  min-width: 100%;
-  min-height: 100%;
-  transform: translate(-50%, -50%);
-  object-fit: cover;
-  z-index: -1;
-}
-
-/* Glass effect */
+/* Glass-style containers */
 .glass {
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(20px);
@@ -60,17 +60,22 @@ body {
   color: inherit;
   text-align: center;
   transition: background 0.4s ease;
+  margin: 2rem auto;
+  max-width: 1000px;
 }
 
+/* Hide initially until JS enables */
 .hidden {
   display: none;
 }
 
 .content-box {
-  max-width: 500px;
+  width: 90%;
+  max-width: 700px;
   margin: 100px auto;
 }
 
+/* Main hero heading */
 .welcome-heading {
   font-size: 2rem;
   font-weight: 600;
@@ -78,12 +83,13 @@ body {
   text-decoration: none;
 }
 
+/* Intro paragraph */
 .intro-text {
   font-size: 1.1rem;
   margin-bottom: 2rem;
 }
 
-/* Glowing modern buttons */
+/* Modern glowing buttons */
 .modern-button {
   background-color: #14213d;
   color: #ffffff;
@@ -97,12 +103,15 @@ body {
   width: 100%;
   max-width: 300px;
   box-shadow: 0 0 8px rgba(0, 200, 255, 0.3);
+  display: block;
+  margin: 1rem auto;
 }
 .modern-button:hover {
   box-shadow: 0 0 20px #00c8ff;
   transform: scale(1.02);
 }
 
+/* Button stack container */
 .button-stack {
   display: flex;
   flex-direction: column;
@@ -110,7 +119,7 @@ body {
   align-items: center;
 }
 
-/* Button entrance animations */
+/* Fade-in animations */
 #enter-btn {
   opacity: 0;
   transform: scale(0.95);
@@ -128,7 +137,31 @@ body {
   100% { opacity: 1; transform: scale(1); }
 }
 
-/* Dark Mode Support */
+/* Responsive text layout in assessments */
+.glass p, .glass ul, .glass h3 {
+  text-align: left;
+  line-height: 1.6;
+}
+
+/* Responsive iframe wrapper */
+.video-wrapper {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+.video-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  box-shadow: 0 0 15px #00c8ff;
+}
+
+/* Dark mode overrides */
 body.dark-mode {
   background-color: #f5f5f5;
   color: #111;
