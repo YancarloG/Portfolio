@@ -8,14 +8,14 @@
 </head>
 <body>
 
-  <!-- Control Buttons (Dark, Wave, Music) -->
+  <!-- Top-right control buttons -->
   <div id="top-buttons">
     <button id="toggle-darkmode">🌙</button>
     <button id="toggle-waves">🌊</button>
     <button id="toggle-music">🎵</button>
   </div>
 
-  <!-- Audio Files -->
+  <!-- Audio players -->
   <audio id="bg-music" loop>
     <source src="music/song1.mp3" type="audio/mpeg" />
   </audio>
@@ -24,30 +24,47 @@
     <source src="music/waves-sound.mp3" type="audio/mpeg" />
   </audio>
 
-  <!-- Fullscreen Background Video -->
+  <!-- Background video -->
   <video id="bg-video" autoplay muted loop playsinline>
     <source src="assets/cyber-bg.mp4" type="video/mp4" />
   </video>
 
-  <!-- Intro Screen -->
+  <!-- Intro screen -->
   <div id="intro-screen" class="glass">
-    <h1 class="intro-title">Yantento.com | Created by Yan Guzman</h1>
+    <h1 class="intro-title">Yantento.com — Created by Yan Guzman</h1>
     <button id="enter-btn" class="modern-button">Enter</button>
   </div>
 
-  <!-- Main Content -->
+  <!-- Main content -->
   <main id="main-content" class="hidden">
     <div class="glass content-box">
-      <h1 class="welcome-heading">Welcome to my portfolio!</h1>
-      <p class="intro-text">Explore my web based builds:</p>
+      <h1 class="welcome-heading">Welcome to Yantento.com</h1>
+      <p class="intro-text">Explore featured builds by Yan Guzman:</p>
+
+      <!-- Project Links -->
       <div class="button-stack">
         <a id="launch-wt-btn" href="weight-tracker/login.html" class="modern-button">Weight Tracker</a>
         <a id="launch-bank-btn" href="bankeze-calculator/index.html" class="modern-button">Bankeze Calculator</a>
+        <a id="launch-review-btn" href="#code-review" class="modern-button">Code Review + Self-Assessment</a>
       </div>
+    </div>
+
+    <!-- Code Review + Self-Assessment Section -->
+    <div class="glass content-box" id="code-review" style="margin-top: 3rem;">
+      <h2 style="margin-bottom: 1rem;">📽️ Capstone Code Review Video</h2>
+      <video controls width="100%" style="border-radius: 12px; box-shadow: 0 0 15px #00c8ff;">
+        <source src="assets/code-review.mov" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+
+      <h2 style="margin-top: 2rem;">🧠 Professional Self-Assessment</h2>
+      <p style="margin-bottom: 1rem;">
+        This document summarizes my technical growth throughout the CS program, highlights the core enhancements in this portfolio, and explains how I plan to apply these skills professionally.
+      </p>
+      <a href="assets/self-assessment.pdf" class="modern-button" target="_blank">📄 View Self-Assessment (PDF)</a>
     </div>
   </main>
 
-  <!-- Script -->
   <script src="main.js"></script>
 </body>
 </html>
