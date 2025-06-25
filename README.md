@@ -10,7 +10,7 @@ This is the source code for my live developer portfolio, hosted at [https://yant
 ## Technologies Used
 HTML • CSS • JavaScript • Chart.js • Responsive Design • GitHub Pages
 
-## 🔗 Live Site
+## Live Site
 Visit the live portfolio: [yantento.com](https://yantento.com)
 
 ---
@@ -18,5 +18,5 @@ Visit the live portfolio: [yantento.com](https://yantento.com)
 Built and maintained by **Yan Guzman**
 
 
-🔗 Website: [Yantento.com](https://yantento.com)  
+
 💸 Support me: [Cash App](https://cash.app/$Yantento)
