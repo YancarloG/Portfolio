@@ -5,67 +5,128 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bankeze for Android (Prototype)</title>
 
-  <!-- External stylesheet ensures this page matches the site's overall theme -->
+  <!-- Shared site styling for consistency -->
   <link rel="stylesheet" href="../style.css" />
 
   <style>
-    /* Style individual app screenshots with spacing, shadow, and interactivity */
-    .screenshot {
+    /* Carousel container styling */
+    .carousel {
+      position: relative;
       width: 100%;
-      max-width: 300px;
-      border-radius: 12px;
-      margin: 1rem;
-      box-shadow: 0 0 20px rgba(0, 200, 255, 0.2);
-      transition: transform 0.3s;
+      max-width: 600px;
+      margin: 2rem auto;
+      overflow: hidden;
+      border-radius: 15px;
+      box-shadow: 0 0 30px rgba(0, 200, 255, 0.2);
     }
 
-    /* Add a subtle zoom effect when the user hovers over the image */
-    .screenshot:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 25px #00c8ff;
+    /* Inner track to hold all images side-by-side */
+    .carousel-track {
+      display: flex;
+      transition: transform 0.5s ease-in-out;
     }
 
-    /* Style the APK download button so it stands out */
+    /* Each image in the carousel */
+    .carousel-slide {
+      min-width: 100%;
+      box-sizing: border-box;
+    }
+
+    .carousel-slide img {
+      width: 100%;
+      border-radius: 15px;
+      display: block;
+    }
+
+    /* Navigation buttons */
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 200, 255, 0.2);
+      border: none;
+      color: white;
+      font-size: 2rem;
+      padding: 0 0.5rem;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .carousel-btn:hover {
+      background: rgba(0, 200, 255, 0.4);
+    }
+
+    .prev-btn {
+      left: 10px;
+    }
+
+    .next-btn {
+      right: 10px;
+    }
+
+    /* APK download button */
     .apk-button {
       margin-top: 2rem;
       font-size: 1.1rem;
       padding: 1rem 2rem;
     }
-
-    /* Flexbox layout for screenshots – adjusts responsively */
-    .image-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1rem;
-    }
   </style>
 </head>
 
 <body>
-  <!-- Main content container styled like other pages (glassmorphism, centered) -->
   <main class="glass content-box">
-
-    <!-- Title of the app section -->
     <h1 class="welcome-heading">Bankeze Calculator for Android</h1>
 
-    <!-- Introductory explanation of what the Android app does -->
     <p class="intro-text">
-      This is the Android version of my Bankeze Calculator - a lightweight tool built to help servers and service workers easily track tips, charges, and payouts. It’s designed for speed, simplicity, and full offline functionality. Ongoing updates will be posted here as new features roll out. My goal is to align the app’s design with the web version, which is also being refined. An iOS version is currently in development as well.
+      This is the Android version of my Bankeze Calculator — a lightweight tool built to help servers and service workers easily track tips, charges, and payouts. It’s designed for speed, simplicity, and full offline functionality. Ongoing updates will be posted here as new features roll out. My goal is to align the app’s design with the web version, which is also being refined. An iOS version is currently in development as well.
     </p>
 
-    <!-- Screenshot preview row for users to see what the app looks like before downloading -->
-    <div class="image-row">
-      <img src="../assets/appOpen1.JPG" alt="Bankeze Android Screenshot 1" class="screenshot" />
-      <img src="../assets/appOpen3.JPG" alt="Bankeze Android Screenshot 2" class="screenshot" />
-      <img src="../assets/appOpen4.JPG" alt="Bankeze Android Screenshot 3" class="screenshot" />
-      <img src="../assets/homeScreenApp.JPG" alt="Home Screen Icon" class="screenshot" />
+    <!-- === Image Carousel === -->
+    <div class="carousel">
+      <button class="carousel-btn prev-btn">&#10094;</button>
+      <div class="carousel-track" id="carouselTrack">
+        <div class="carousel-slide"><img src="../assets/appOpen1.JPG" alt="Screenshot 1"></div>
+        <div class="carousel-slide"><img src="../assets/appOpen3.JPG" alt="Screenshot 2"></div>
+        <div class="carousel-slide"><img src="../assets/appOpen4.JPG" alt="Screenshot 3"></div>
+        <div class="carousel-slide"><img src="../assets/homeScreenApp.JPG" alt="Home Screen"></div>
+      </div>
+      <button class="carousel-btn next-btn">&#10095;</button>
     </div>
 
-    <!-- Download button linked to the actual APK file in the assets folder -->
+    <!-- APK Download Link -->
     <a href="../assets/app-debug.apk" class="modern-button apk-button" download>
-      Download APK
+      ⬇️ Download APK
     </a>
   </main>
+
+  <!-- JavaScript to handle carousel navigation -->
+  <script>
+    const track = document.getElementById("carouselTrack");
+    const slides = Array.from(track.children);
+    const prevBtn = document.querySelector(".prev-btn");
+    const nextBtn = document.querySelector(".next-btn");
+
+    let currentSlide = 0;
+
+    function updateSlidePosition() {
+      track.style.transform = 'translateX(-' + currentSlide * 100 + '%)';
+    }
+
+    nextBtn.addEventListener('click', () => {
+      currentSlide = (currentSlide + 1) % slides.length;
+      updateSlidePosition();
+    });
+
+    prevBtn.addEventListener('click', () => {
+      currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+      updateSlidePosition();
+    });
+
+    // Optional: autoplay
+    setInterval(() => {
+      currentSlide = (currentSlide + 1) % slides.length;
+      updateSlidePosition();
+    }, 5000);
+  </script>
 </body>
 </html>
