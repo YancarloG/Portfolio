@@ -1,21 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Required meta tags for proper layout and scaling on all devices -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  
+  <!-- Title of the site displayed in the browser tab -->
   <title>Yantento.com</title>
+
+  <!-- Link to external stylesheet for global layout and theme consistency -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- Top-right control buttons -->
+  <!-- === HEADER CONTROLS === -->
+  <!-- This top bar contains buttons to toggle dark mode, play wave sounds, and play music -->
   <div id="top-buttons">
-    <button id="toggle-darkmode">🌙</button>
-    <button id="toggle-waves">🌊</button>
-    <button id="toggle-music">🎵</button>
+    <button id="toggle-darkmode">🌙</button>     <!-- Enables dark mode UI -->
+    <button id="toggle-waves">🌊</button>        <!-- Toggles ambient wave sound -->
+    <button id="toggle-music">🎵</button>        <!-- Toggles background music -->
   </div>
 
-  <!-- Audio players -->
+  <!-- === AUDIO SOURCES === -->
+  <!-- These audio files are controlled by the buttons above -->
   <audio id="bg-music" loop>
     <source src="music/song1.mp3" type="audio/mpeg" />
   </audio>
@@ -24,33 +31,48 @@
     <source src="music/waves-sound.mp3" type="audio/mpeg" />
   </audio>
 
-  <!-- Background video -->
+  <!-- === BACKGROUND VIDEO === -->
+  <!-- Sets a dynamic animated video background to give the page an AI/techy vibe -->
   <video id="bg-video" autoplay muted loop playsinline>
     <source src="assets/cyber-bg.mp4" type="video/mp4" />
   </video>
 
-  <!-- Intro screen -->
+  <!-- === INTRO SCREEN === -->
+  <!-- Displays a welcome screen that hides once the user clicks "Enter" -->
   <div id="intro-screen" class="glass">
     <h1 class="intro-title">Yantento.com | Developed by Yan Guzman</h1>
     <button id="enter-btn" class="modern-button">Enter</button>
   </div>
 
-  <!-- Main content -->
+  <!-- === MAIN PAGE CONTENT === -->
   <main id="main-content" class="hidden">
+
+    <!-- Welcome box with intro and project navigation -->
     <div class="glass content-box">
       <h1 class="welcome-heading">Welcome to my Portfolio</h1>
       <p class="intro-text">Explore interactive, web-based previews of the applications I’m currently developing:</p>
 
-      <!-- Project Links -->
+      <!-- Project navigation buttons -->
       <div class="button-stack">
-        <a id="launch-wt-btn" href="weight-tracker/login.html" class="modern-button">Weight Tracker</a>
-        <a id="launch-bank-btn" href="bankeze-calculator/index.html" class="modern-button">Bankeze Calculator</a>
-        <a id="launch-review-btn" href="#code-review" class="modern-button">Code Review + Self-Assessment</a>
+        <a id="launch-wt-btn" href="weight-tracker/login.html" class="modern-button">
+          Weight Tracker
+        </a>
+        <a id="launch-bank-btn" href="bankeze-calculator/index.html" class="modern-button">
+          Bankeze Calculator
+        </a>
+        <a id="launch-review-btn" href="#code-review" class="modern-button">
+          Code Review + Self-Assessment
+        </a>
+        <a href="projects/bankeze-android.html" class="modern-button">
+          Android Bankeze App
+        </a>
       </div>
     </div>
 
-    <!-- Code Review + Self-Assessment Section -->
+    <!-- === CODE REVIEW + SELF-ASSESSMENT SECTION === -->
     <div class="glass content-box" id="code-review" style="margin-top: 3rem;">
+
+      <!-- Embedded video from YouTube showing your CS 499 code walkthrough -->
       <h2 style="margin-bottom: 1rem;">📽️ Capstone Code Review Video</h2>
       <div class="video-wrapper" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin-bottom: 2rem;">
         <iframe 
@@ -61,8 +83,11 @@
         </iframe>
       </div>
 
+      <!-- Full professional self-assessment built into the page (no external PDF required) -->
       <h2 style="margin-top: 2rem;">Professional Self-Assessment</h2>
       <div style="text-align: left; max-width: 900px; margin: auto; line-height: 1.6;">
+
+        <!-- This is the reflective narrative required by CS 499 -->
         <p>As I near the completion of the Bachelor of Science in Computer Science program at Southern New Hampshire University, I’ve taken the time to reflect on the professional and technical journey that has led to the creation of my ePortfolio at Yantento.com. This capstone experience has given me the opportunity to consolidate, enhance, and showcase not only my best work but also the growth I’ve undergone in software engineering, algorithmic thinking, and database design.</p>
 
         <h3>Personal and Professional Growth</h3>
@@ -97,6 +122,7 @@
     </div>
   </main>
 
+  <!-- Load main JavaScript for functionality like dark mode, music toggle, and entrance transitions -->
   <script src="main.js"></script>
 </body>
 </html>
