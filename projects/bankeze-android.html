@@ -20,13 +20,11 @@
       box-shadow: 0 0 30px rgba(0, 200, 255, 0.2);
     }
 
-    /* Inner track to hold all images side-by-side */
     .carousel-track {
       display: flex;
       transition: transform 0.5s ease-in-out;
     }
 
-    /* Each image in the carousel */
     .carousel-slide {
       min-width: 100%;
       box-sizing: border-box;
@@ -38,7 +36,6 @@
       display: block;
     }
 
-    /* Navigation buttons */
     .carousel-btn {
       position: absolute;
       top: 50%;
@@ -64,11 +61,24 @@
       right: 10px;
     }
 
-    /* APK download button */
     .apk-button {
       margin-top: 2rem;
       font-size: 1.1rem;
       padding: 1rem 2rem;
+    }
+
+    .project-explainer {
+      margin-top: 2rem;
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 1.5rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #aaffdd;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
     }
   </style>
 </head>
@@ -78,8 +88,17 @@
     <h1 class="welcome-heading">Bankeze Calculator for Android</h1>
 
     <p class="intro-text">
-      This is the Android version of my Bankeze Calculator — a lightweight tool built to help servers and service workers easily track tips, charges, and payouts. It’s designed for speed, simplicity, and full offline functionality. Ongoing updates will be posted here as new features roll out. My goal is to align the app’s design with the web version, which is also being refined. An iOS version is currently in development as well.
+      This is the Android version of my Bankeze Calculator - a lightweight tool built to help servers and service workers easily track tips, charges, and payouts. It’s designed for speed, simplicity, and full offline functionality. Ongoing updates will be posted here as new features roll out. My goal is to align the app’s design with the web version, which is also being refined. An iOS version is currently in development as well.
     </p>
+
+    <!-- === Project Explainer Block === -->
+    <div class="project-explainer">
+      So this app might look simple, but it was actually my way of getting hands-on with modern Android dev. I rebuilt the original web version of Bankeze using Kotlin and Jetpack Compose - the whole UI is done with Compose components like dropdowns, inputs, summaries, etc. I used a ViewModel to handle all the business logic, which made it clean to manage and easy to scale if I ever want to plug in things like APIs or a local database later. 
+
+      I also set up the whole build using toml-based dependency management and ran into some real-world challenges - like emulator crashes on Intel Mac - which I worked around by building and signing the APK and hosting it externally. It taught me a lot about install flows, build variants, and how to actually ship a working Android app outside of the Play Store.
+
+      Overall, it shows I understand Compose architecture, Kotlin basics, ViewModel usage, and how to organize and deliver a native Android app from start to finish - even if it’s a small one.
+    </div>
 
     <!-- === Image Carousel === -->
     <div class="carousel">
@@ -99,7 +118,6 @@
     </a>
   </main>
 
-  <!-- JavaScript to handle carousel navigation -->
   <script>
     const track = document.getElementById("carouselTrack");
     const slides = Array.from(track.children);
@@ -122,7 +140,6 @@
       updateSlidePosition();
     });
 
-    // Optional: autoplay
     setInterval(() => {
       currentSlide = (currentSlide + 1) % slides.length;
       updateSlidePosition();
