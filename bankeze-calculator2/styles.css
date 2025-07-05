@@ -53,11 +53,11 @@ h1 {
 
 label {
   font-weight: 500;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   display: block;
 }
 
-select, input {
+select, input[type="number"], input[type="date"], input[type="time"] {
   width: 100%;
   padding: 12px;
   border-radius: 12px;
@@ -98,6 +98,16 @@ th, td {
 
 .btn:hover {
   background-color: #6f9740;
+}
+
+/* 🔶 Highlighted main action button */
+.main-btn {
+  background-color: #ffb347;
+  color: #1c1c1e;
+}
+
+.main-btn:hover {
+  background-color: #ffa726;
 }
 
 .donate-btn {
@@ -215,52 +225,23 @@ body.dark-mode #entryList li {
   color: #ddd;
 }
 
-
+/* Chart container */
 #summaryChart {
-  background: white;
+  background: #fff;
   border-radius: 12px;
-  padding: 10px;
+  padding: 12px;
   margin-bottom: 20px;
 }
 
-
-/* Highlight summary view clearly */
-#summaryView {
-  margin-top: 24px;
-}
-
-/* Emphasize work tracking section */
+/* Work tracking clarity */
 .form-container h3 {
   text-align: center;
-  margin-top: 0;
   color: #2b4d1e;
+  margin-bottom: 10px;
 }
 
 #hoursWorked {
   font-weight: bold;
   font-size: 1.1em;
   color: #333;
-}
-
-/* Adjust spacing for work inputs */
-#payRate {
-  margin-bottom: 12px;
-}
-
-/* Improve visual flow */
-.form-group label {
-  margin-bottom: 4px;
-}
-
-/* Layout separation for results containers */
-.results-container {
-  margin-top: 20px;
-}
-
-/* Keep summary canvas stylish */
-#summaryChart {
-  background: #fff;
-  border-radius: 12px;
-  padding: 12px;
-  margin-bottom: 16px;
 }
