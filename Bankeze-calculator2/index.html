@@ -57,11 +57,17 @@
       <input type="date" id="entryDate" value="2025-07-05" />
     </div>
 
-    <button class="btn" onclick="addPayment()">Add Payment</button>
-    <button class="btn" onclick="showResults()">Show Totals</button>
-    <button class="btn" onclick="viewAllEntries()">View All Entries</button>
-    <button class="btn" onclick="clearEntriesForDate()">🗑️ Clear All for Date</button>
-    <button class="btn" onclick="showSummary()">📊 View Summary</button>
+    <button class="btn main-btn" onclick="addPayment()">Add Payment</button>
+
+<!-- Date selector for results & entries -->
+<div class="form-group">
+  <label for="selectDate">Select Date for Viewing</label>
+  <select id="selectDate"></select>
+</div>
+
+<button class="btn" onclick="populateAndShowResults()">Show Totals</button>
+<button class="btn" onclick="populateAndShowEntries()">View All Entries</button>
+
   </div>
 
   <div class="results-container" id="results" style="display: none">
