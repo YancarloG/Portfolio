@@ -100,6 +100,16 @@ th, td {
   background-color: #6f9740;
 }
 
+/* 🔶 Highlighted main action button */
+.main-btn {
+  background-color: #ffb347;
+  color: #1c1c1e;
+}
+
+.main-btn:hover {
+  background-color: #ffa726;
+}
+
 .donate-btn {
   display: inline-block;
   background: #00c244;
@@ -215,19 +225,10 @@ body.dark-mode #entryList li {
   color: #ddd;
 }
 
-
+/* 📊 Chart styling */
 #summaryChart {
   background: white;
   border-radius: 12px;
   padding: 10px;
   margin-bottom: 20px;
-}
-
-.main-btn {
-  background-color: #ffb347;
-  color: #1c1c1e;
-}
-
-.main-btn:hover {
-  background-color: #ffa726;
 }
