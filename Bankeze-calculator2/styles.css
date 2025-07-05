@@ -222,3 +222,12 @@ body.dark-mode #entryList li {
   padding: 10px;
   margin-bottom: 20px;
 }
+
+.main-btn {
+  background-color: #ffb347;
+  color: #1c1c1e;
+}
+
+.main-btn:hover {
+  background-color: #ffa726;
+}
