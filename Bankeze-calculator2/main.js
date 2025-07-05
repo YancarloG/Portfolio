@@ -1,9 +1,25 @@
-
 const storageKey = 'bankezeData';
 let data = JSON.parse(localStorage.getItem(storageKey)) || { entries: [] };
 
 function saveData() {
   localStorage.setItem(storageKey, JSON.stringify(data));
+}
+
+// Called on page load to update dropdown with actual entry dates
+function updateDateDropdown() {
+  const dateDropdown = document.getElementById('selectDate');
+  const uniqueDates = [...new Set(data.entries.map(e => e.date))].sort();
+  dateDropdown.innerHTML = '';
+  uniqueDates.forEach(date => {
+    const opt = document.createElement('option');
+    opt.value = opt.textContent = date;
+    dateDropdown.appendChild(opt);
+  });
+
+  const today = new Date().toISOString().split('T')[0];
+  if (uniqueDates.includes(today)) {
+    dateDropdown.value = today;
+  }
 }
 
 function addPayment() {
@@ -21,6 +37,7 @@ function addPayment() {
 
   data.entries.push({ type, amount, tip, date });
   saveData();
+  updateDateDropdown();
 
   document.getElementById('amount').value = '';
   document.getElementById('tip').value = '';
@@ -32,18 +49,20 @@ function clearEntriesForDate() {
   if (confirm(`Clear all entries for ${date}?`)) {
     data.entries = data.entries.filter(entry => entry.date !== date);
     saveData();
+    updateDateDropdown();
     alert('Entries cleared.');
   }
 }
 
-function showResults() {
+function populateAndShowResults() {
+  const selectedDate = document.getElementById('selectDate').value;
   const tbody = document.querySelector('#resultsTable tbody');
   tbody.innerHTML = '';
 
   const summary = {};
   let totalCash = 0, totalChargeTips = 0, totalCashTips = 0, totalAmount = 0, totalTips = 0;
 
-  data.entries.forEach(({ type, amount, tip }) => {
+  data.entries.filter(e => e.date === selectedDate).forEach(({ type, amount, tip }) => {
     if (!summary[type]) summary[type] = { count: 0, revenue: 0, total: 0 };
     summary[type].count++;
     summary[type].revenue += amount;
@@ -73,15 +92,21 @@ function showResults() {
   document.getElementById('results').style.display = 'block';
 }
 
-function viewAllEntries() {
+function populateAndShowEntries() {
+  const selectedDate = document.getElementById('selectDate').value;
   const ul = document.getElementById('entryList');
   ul.innerHTML = '';
-  data.entries.forEach((entry, index) => {
-    const li = document.createElement('li');
-    li.innerHTML = `${index + 1}. ${entry.date} - ${entry.type} - $${entry.amount.toFixed(2)} + Tip $${entry.tip.toFixed(2)} ` +
-      `<button onclick="deleteEntry(${index})" class="delete-btn">X</button>`;
-    ul.appendChild(li);
-  });
+
+  data.entries
+    .map((entry, index) => ({ ...entry, index }))
+    .filter(e => e.date === selectedDate)
+    .forEach((entry) => {
+      const li = document.createElement('li');
+      li.innerHTML = `${entry.date} - ${entry.type} - $${entry.amount.toFixed(2)} + Tip $${entry.tip.toFixed(2)} ` +
+        `<button onclick="deleteEntry(${entry.index})" class="delete-btn">X</button>`;
+      ul.appendChild(li);
+    });
+
   document.getElementById('entryLog').style.display = 'block';
 }
 
@@ -89,7 +114,8 @@ function deleteEntry(index) {
   if (confirm('Are you sure you want to delete this entry?')) {
     data.entries.splice(index, 1);
     saveData();
-    viewAllEntries();
+    updateDateDropdown();
+    populateAndShowEntries();
   }
 }
 
@@ -159,3 +185,6 @@ function toggleDarkMode() {
   const isDark = body.classList.toggle('dark-mode');
   localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
 }
+
+// Call date dropdown setup on first load
+document.addEventListener('DOMContentLoaded', updateDateDropdown);
