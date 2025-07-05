@@ -1,9 +1,5 @@
-
 const storageKey = 'bankezeData';
 let data = JSON.parse(localStorage.getItem(storageKey)) || { entries: [] };
-
-let clockInTime = null;
-let clockOutTime = null;
 
 function saveData() {
   localStorage.setItem(storageKey, JSON.stringify(data));
@@ -145,30 +141,28 @@ function showSummary() {
   document.getElementById('smallestTip').innerText = `$${smallestTip.toFixed(2)}`;
   document.getElementById('averageTipPercent').innerText = `${avgTipPercent}%`;
 
-  // Calculate hourly
   const payRate = parseFloat(document.getElementById('payRate').value);
-  if (isNaN(payRate) || payRate <= 0 || clockInTime === null || clockOutTime === null) {
+  const inTime = document.getElementById('clockInTime').value;
+  const outTime = document.getElementById('clockOutTime').value;
+
+  if (!payRate || !inTime || !outTime) {
     document.getElementById('averageHourly').innerText = "Missing data";
+    document.getElementById('hoursWorked').innerText = "";
     return;
   }
 
-  const workedHours = (clockOutTime - clockInTime) / 3600000;
-  document.getElementById('hoursWorked').innerText = `${workedHours.toFixed(2)} hrs`;
+  const today = new Date().toISOString().split('T')[0];
+  let start = new Date(`${today}T${inTime}`);
+  let end = new Date(`${today}T${outTime}`);
+  let hours = (end - start) / (1000 * 60 * 60);
 
-  const totalEarnings = payRate * workedHours + totalTips;
-  const hourlyWithTips = (totalEarnings / workedHours).toFixed(2);
+  if (hours < 0) hours += 24;
+
+  document.getElementById('hoursWorked').innerText = `${hours.toFixed(2)} hrs`;
+
+  const totalEarnings = payRate * hours + totalTips;
+  const hourlyWithTips = (totalEarnings / hours).toFixed(2);
   document.getElementById('averageHourly').innerText = `$${hourlyWithTips}`;
-}
-
-function clockIn() {
-  clockInTime = new Date();
-  alert(`Clocked in at ${clockInTime.toLocaleTimeString()}`);
-}
-
-function clockOut() {
-  if (!clockInTime) return alert('You must clock in first!');
-  clockOutTime = new Date();
-  alert(`Clocked out at ${clockOutTime.toLocaleTimeString()}`);
 }
 
 function shakePage() {
