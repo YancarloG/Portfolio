@@ -185,3 +185,16 @@ function toggleDarkMode() {
 }
 
 document.addEventListener('DOMContentLoaded', updateDateDropdown);
+
+function clearAllEntries() {
+  if (confirm("Are you sure you want to permanently delete ALL entries?")) {
+    data.entries = [];
+    saveData();
+    updateDateDropdown();
+    document.getElementById('entryList').innerHTML = '';
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('entryLog').style.display = 'none';
+    document.getElementById('summaryView').style.display = 'none';
+    alert("All entries have been cleared.");
+  }
+}
