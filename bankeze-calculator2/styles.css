@@ -245,3 +245,11 @@ body.dark-mode #entryList li {
   font-size: 1.1em;
   color: #333;
 }
+
+.btn.danger {
+  background-color: #e74c3c;
+}
+
+.btn.danger:hover {
+  background-color: #c0392b;
+}
