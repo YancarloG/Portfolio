@@ -6,17 +6,7 @@
   <title>ATM Status Board | Yantento</title>
   
   <!--
-    Standalone single-file app to crowd-report ATM status (Working / Down).
-    - Uses localStorage by default (no backend required).
-    - Can optionally use Firebase (Firestore + Anonymous Auth) if FB_CONFIG is provided.
-    - Reuses your existing "glass" and "modern-button" vibe; includes minimal fallback styles
-      so the page still looks good if loaded outside your main site.
-
-    HOW TO USE:
-    1) Drop this file somewhere in your site (e.g., /projects/atm-status.html) and link to it.
-    2) (Optional) Fill in the FB_CONFIG object below with your Firebase config to enable shared, multi-user data.
-       If left empty, the app will store votes in localStorage on the current device only.
-    3) (Recommended) If you enable Firebase, see the Firestore security rule snippet near the bottom of this file.
+   Firebase will be added here.
   -->
 
   <style>
@@ -81,15 +71,7 @@
     </div>
   </div>
 
-  <!-- Optional: Firebase Config. Leave blank to use localStorage-only mode.
-       If you want cloud sync, create a Firebase project and paste your config here.
-       Example shape:
-       window.FB_CONFIG = {
-         apiKey: "...",
-         authDomain: "...",
-         projectId: "...",
-         appId: "..."
-       };
+  <!-- Optional: Firebase Config. Leaving blank to use localStorage-only mode...
   -->
   <script>
     window.FB_CONFIG = window.FB_CONFIG || null; // leave null for local demo mode
@@ -353,21 +335,10 @@
   </script>
 
   <!--
-    If enabling Firebase, consider Firestore rules like:
-
-    rules_version = '2';
-    service cloud.firestore {
-      match /databases/{database}/documents {
-        match /atms/{id} {
-          allow read: if true; // public read
-          allow write: if request.auth != null
-                       && request.time - resource.data.updatedAt > duration.value(2, 'minutes'); // throttle per ATM
-          allow create: if request.auth != null; // initial create
-        }
-      }
+    firebase space
     }
 
-    You can adjust throttling, or add per-user rate limits by including a subcollection of reports.
+    adjust throttling, or add per-user rate limits by including a subcollection of reports.
   -->
 </body>
 </html>
