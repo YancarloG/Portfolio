@@ -213,8 +213,8 @@
       setTimeout(() => saveNameBtn.textContent = 'Save Name', 1200);
     });
 
-    // Rate limit: same user cannot vote the same ATM more than once every 10 minutes
-    const RATE_MINUTES = 10;
+    // Rate limit: same user cannot vote the same ATM more than once every x# minutes
+    const RATE_MINUTES = 1;
     function canVote(atmId) {
       const ts = Number(localStorage.getItem(`atm.vote.${atmId}`) || 0);
       return Date.now() - ts > RATE_MINUTES * 60 * 1000;
