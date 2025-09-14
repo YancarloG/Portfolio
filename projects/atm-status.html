@@ -102,7 +102,8 @@
 
     // ---------- Settings ----------
     const EXPIRY_HOURS = 6;     // status becomes Unknown after this many hours
-    const RATE_MINUTES = 1;     // local per-device cooldown
+    const RATE_MINUTES = 1;     // local per-device cooldown (client)
+    const SERVER_COOLDOWN_MS = 45 * 1000; // must match your Firestore rules
 
     // ---------- Elements ----------
     const grid = document.getElementById('atmGrid');
@@ -231,6 +232,17 @@
       }
     }
 
+    // ---------- Server cooldown pre-check ----------
+    async function serverCooldownRemainMs(atmId) {
+      try {
+        const data = await Store.get(atmId); // Firestore mode uses server doc via getDoc()
+        if (!data || !data.updatedAt) return 0;
+        const last = data.updatedAt?.seconds ? data.updatedAt.seconds * 1000 : Number(data.updatedAt);
+        const remain = SERVER_COOLDOWN_MS - (Date.now() - last);
+        return Math.max(0, remain);
+      } catch { return 0; }
+    }
+
     // ---------- UI ----------
     async function render(){
       const all = await Store.getAll();
@@ -259,13 +271,23 @@
     }
 
     async function handleVote(atmId, status){
+      // Client local cooldown (per device)
       if (!canVote(atmId)) {
         alert(`Thanks! You can update this ATM again in about ${RATE_MINUTES} minute(s).`);
         return;
       }
+
+      // Server-side cooldown pre-check (matches rules at 45s)
+      const remainMs = await serverCooldownRemainMs(atmId);
+      if (remainMs > 0) {
+        const secs = Math.ceil(remainMs / 1000);
+        alert(`Server cooldown active. Try again in ~${secs} second(s).`);
+        return;
+      }
+
       const displayName = (nameInput.value || '').trim() || 'Anonymous';
 
-      // optimistic local
+      // Optimistic local update
       const existing = await Store.get(atmId) || {};
       const upVotes = existing.upVotes || 0, downVotes = existing.downVotes || 0;
       const optimistic = {
@@ -278,25 +300,14 @@
 
       try {
         if (Store.vote) {
-          await Store.vote(atmId, status, displayName);
+          await Store.vote(atmId, status, displayName); // cloud mode
         } else {
-          await Store.set(atmId, optimistic);
+          await Store.set(atmId, optimistic);           // local mode
         }
         markVoted(atmId);
         updateCard(atmId, optimistic);
       } catch (e) {
         console.error('Vote failed:', e);
-        try {
-          const data = await Store.get(atmId);
-          if (data && data.updatedAt) {
-            const last = data.updatedAt?.seconds ? data.updatedAt.seconds * 1000 : Number(data.updatedAt);
-            const remain = Math.ceil((60*1000 - (Date.now() - last)) / 1000);
-            if (remain > 0) {
-              alert(`Server cooldown active. Try again in ~${remain} second(s).`);
-              return;
-            }
-          }
-        } catch(_) {}
         alert('Write blocked by server rules or auth. Ensure Anonymous sign-in is enabled and rules are published.');
       }
     }
