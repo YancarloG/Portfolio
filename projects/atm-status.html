@@ -72,8 +72,8 @@
        If you leave this object null, the app will run in localStorage-only mode. */
     window.FB_CONFIG = {
       apiKey: "AIzaSyATTBsFpadqwcAV7Vf92lwPEmQK3P5GzaM",
-      authDomain: "yantento-atm.firebaseapp.com",   
-      projectId: "yantento-atm",     
+      authDomain: "yantento-atm.firebaseapp.com",
+      projectId: "yantento-atm",
       appId: "1:444236583383:web:a42f08ef79375470033b92"
     };
     // To test local-only mode instead, set: window.FB_CONFIG = null;
@@ -171,7 +171,7 @@
     if (window.FB_CONFIG && window.FB_CONFIG.apiKey && window.FB_CONFIG.projectId) {
       try {
         const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js');
-        const { getFirestore, doc, getDoc, setDoc, increment, serverTimestamp, onSnapshot, enableIndexedDbPersistence } =
+        const { getFirestore, doc, getDoc, getDocs, setDoc, increment, serverTimestamp, onSnapshot, enableIndexedDbPersistence, collection } =
           await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js');
         const { getAuth, signInAnonymously } = await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js');
 
@@ -194,10 +194,18 @@
               updatedAt: serverTimestamp()
             },{merge:true});
           }
-          async getAll(){ const out={}; for (const atm of ATM_LIST) out[atm.id]=await this.get(atm.id); return out; }
+          async getAll(){
+            const out = {};
+            // batch fetch for performance
+            const col = collection(db, 'atms');
+            const snaps = await getDocs(col);
+            snaps.forEach(s => out[s.id] = s.data());
+            // ensure all cards exist in map, even if no doc yet
+            for (const atm of ATM_LIST) if (!(atm.id in out)) out[atm.id] = null;
+            return out;
+          }
         }
         Store = new FireStore();
-        console.log('Firebase mode enabled');
         if (cloudBadge){ cloudBadge.textContent='Cloud'; cloudBadge.className='badge up'; }
 
         // Live updates per ATM
@@ -206,6 +214,10 @@
             if (snap.exists()) updateCard(atm.id, snap.data());
           });
         }
+
+        // Re-render so first paint uses server data if available
+        await render();
+
       } catch (e) {
         console.warn('Firebase init failed; using local mode.', e);
       }
@@ -291,24 +303,8 @@
       }
     }
 
+    // Initial render (local or cloud)
     render();
   </script>
-
-  <!-- Firestore RULES reminder (already added in console):
-  rules_version = '2';
-  service cloud.firestore {
-    match /databases/{database}/documents {
-      match /atms/{id} {
-        allow read: if true;
-        function tooSoon() {
-          return resource != null
-                 && ('updatedAt' in resource.data)
-                 && (request.time - resource.data.updatedAt <= duration.value(1, 'minutes'));
-        }
-        allow write: if request.auth != null && !tooSoon();
-      }
-    }
-  }
-  -->
 </body>
 </html>
