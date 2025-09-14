@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- CSP: allow Firebase endpoints + our inline <script type="module"> -->
+  <!-- CSP: allow Firebase + gapi and our inline module -->
   <meta http-equiv="Content-Security-Policy"
         content="
         default-src 'self';
-        connect-src 'self' https://firestore.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://www.googleapis.com https://*.gstatic.com;
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.googleapis.com https://firestore.googleapis.com;
+        connect-src 'self' https://*.googleapis.com https://firestore.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://www.googleapis.com https://*.gstatic.com;
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.googleapis.com https://firestore.googleapis.com https://apis.google.com;
         style-src 'self' 'unsafe-inline';
         img-src 'self' data:;
         font-src 'self' data:;
@@ -47,6 +47,7 @@
     .btn-dir { background:#0c1a32; color:#d5ecff; display:inline-block; }
     .footnote { margin-top:18px; font-size:0.85rem; opacity:0.8; }
     .hr { height:1px; background:rgba(255,255,255,0.1); margin:16px 0; border:0; }
+    .disabled { opacity:.6; pointer-events:none; }
   </style>
 </head>
 <body>
@@ -70,7 +71,7 @@
 
       <div class="footnote">
         <div class="hr"></div>
-        <p><strong>Note:</strong> Community tool; not affiliated with Partners FCU or TWDC. Check access restrictions (e.g., Cast-Only) and verify availability before traveling.</p>
+        <p><strong>Note:</strong> Community tool; not affiliated with Partners FCU or TWDC. Check access restrictions and verify availability before traveling.</p>
       </div>
     </div>
   </div>
@@ -173,24 +174,25 @@
 
     // ---------- Enable Firebase (cloud mode) ----------
     let db = null;
+    let authed = false;
+
     if (window.FB_CONFIG && window.FB_CONFIG.apiKey && window.FB_CONFIG.projectId) {
       try {
         const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js');
         const { getFirestore, doc, getDoc, getDocs, setDoc, increment, serverTimestamp, onSnapshot, enableIndexedDbPersistence, collection } =
           await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js');
-        const { getAuth, signInAnonymously } = await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js');
+        const { getAuth, signInAnonymously, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js');
 
         const app = initializeApp(window.FB_CONFIG);
         db = getFirestore(app);
         try { await enableIndexedDbPersistence(db); } catch (_) { /* OK if multi-tab */ }
 
-        // --- Anonymous auth with logging ---
         const auth = getAuth(app);
-        signInAnonymously(auth).then(() => {
-          console.log("✅ Anon sign-in success:", auth.currentUser?.uid);
-        }).catch(err => {
-          console.error("❌ Anon sign-in failed:", err);
+        onAuthStateChanged(auth, (u) => {
+          authed = !!u;
+          console.log('Auth state:', authed ? `✅ anon ${u.uid}` : '❌ not authed');
         });
+        await signInAnonymously(auth);
 
         class FireStore {
           async get(id){ const ref = doc(db,'atms',id); const snap = await getDoc(ref); return snap.exists()? snap.data(): null; }
@@ -224,7 +226,6 @@
           });
         }
 
-        // Re-render using server data if available
         await render();
 
       } catch (e) {
@@ -235,7 +236,7 @@
     // ---------- Server cooldown pre-check ----------
     async function serverCooldownRemainMs(atmId) {
       try {
-        const data = await Store.get(atmId); // Firestore mode uses server doc via getDoc()
+        const data = await Store.get(atmId);
         if (!data || !data.updatedAt) return 0;
         const last = data.updatedAt?.seconds ? data.updatedAt.seconds * 1000 : Number(data.updatedAt);
         const remain = SERVER_COOLDOWN_MS - (Date.now() - last);
@@ -258,8 +259,8 @@
             <div class="addr">${atm.address}</div>
             <div class="note">Access: ${atm.access}</div>
             <div class="row">
-              <button class="btn-sm btn-up" data-up="${atm.id}">Mark Working</button>
-              <button class="btn-sm btn-down" data-down="${atm.id}">Mark Down</button>
+              <button class="btn-sm btn-up ${authed ? '' : 'disabled'}" data-up="${atm.id}">Mark Working</button>
+              <button class="btn-sm btn-down ${authed ? '' : 'disabled'}" data-down="${atm.id}">Mark Down</button>
               <a class="btn-sm btn-dir" href="${mapsLink(atm.address)}" target="_blank" rel="noopener">Get Directions</a>
             </div>
             <div class="meta" id="meta-${atm.id}">${metaLine(data)}</div>
@@ -271,13 +272,16 @@
     }
 
     async function handleVote(atmId, status){
-      // Client local cooldown (per device)
+      if (!authed && Store.vote) {
+        alert('Signing in… please try again in a moment.');
+        return;
+      }
+
       if (!canVote(atmId)) {
         alert(`Thanks! You can update this ATM again in about ${RATE_MINUTES} minute(s).`);
         return;
       }
 
-      // Server-side cooldown pre-check (matches rules at 45s)
       const remainMs = await serverCooldownRemainMs(atmId);
       if (remainMs > 0) {
         const secs = Math.ceil(remainMs / 1000);
@@ -308,7 +312,7 @@
         updateCard(atmId, optimistic);
       } catch (e) {
         console.error('Vote failed:', e);
-        alert('Write blocked by server rules or auth. Ensure Anonymous sign-in is enabled and rules are published.');
+        alert(`Write blocked by server rules or auth:\n${e?.message || e}`);
       }
     }
 
