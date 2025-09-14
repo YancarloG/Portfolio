@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ATM Status Board | Yantento</title>
 
+  <!-- Minimal built-in styles (works even without your main site CSS) -->
   <style>
     :root { --bg:#0a0f1e; --text:#e6f0ff; --glass:rgba(255,255,255,0.08); --accent:#00c8ff; --card:#14213d; }
     * { box-sizing: border-box; }
@@ -65,16 +66,20 @@
     </div>
   </div>
 
-  <!-- Firebase CONFIG -->
+  <!-- ================= Firebase CONFIG ================= -->
   <script>
+    /* Firebase Web App config.
+       If you leave this object null, the app will run in localStorage-only mode. */
     window.FB_CONFIG = {
       apiKey: "AIzaSyATTBsFpadqwcAV7Vf92lwPEmQK3P5GzaM",
-      authDomain: "yantento-atm.firebaseapp.com",   // e.g., your-project.firebaseapp.com
-      projectId: "yantento-atm",     // e.g., your-project
+      authDomain: "yantento-atm.firebaseapp.com",   
+      projectId: "yantento-atm",     
       appId: "1:444236583383:web:a42f08ef79375470033b92"
     };
+    // To test local-only mode instead, set: window.FB_CONFIG = null;
   </script>
 
+  <!-- ================= App Logic ================= -->
   <script type="module">
     // ---------- Seed list of ATMs ----------
     const ATM_LIST = [
@@ -90,7 +95,7 @@
 
     // ---------- Settings ----------
     const EXPIRY_HOURS = 6;     // status becomes Unknown after this many hours
-    const RATE_MINUTES = 0;     // client cooldown (set 0 to rely on server per-user cooldown)
+    const RATE_MINUTES = 1;     // local per-device cooldown
 
     // ---------- Helpers ----------
     const grid = document.getElementById('atmGrid');
@@ -151,7 +156,7 @@
     const canVote = (id) => Date.now() - Number(localStorage.getItem(RATE_KEY(id))||0) > RATE_MINUTES*60*1000;
     const markVoted = (id) => localStorage.setItem(RATE_KEY(id), String(Date.now()));
 
-    // ---------- Storage Abstraction ----------
+    // ---------- Storage Abstraction (localStorage default; Firebase if configured) ----------
     class LocalStore {
       constructor(prefix='atmStatus.') { this.prefix=prefix; }
       _k(id){ return `${this.prefix}${id}`; }
@@ -161,7 +166,7 @@
     }
     let Store = new LocalStore();
 
-    // ---------- Try Firebase (shared mode) ----------
+    // Try enable Firebase if config present
     let db = null;
     if (window.FB_CONFIG && window.FB_CONFIG.apiKey && window.FB_CONFIG.projectId) {
       try {
@@ -172,41 +177,28 @@
 
         const app = initializeApp(window.FB_CONFIG);
         db = getFirestore(app);
-        try { await enableIndexedDbPersistence(db); } catch (_) {}
+        try { await enableIndexedDbPersistence(db); } catch (_) { /* ignore if multiple tabs */ }
         const auth = getAuth(app);
-
-        await signInAnonymously(auth).catch(e => {
-          console.error('Anon sign-in failed:', e.code, e.message);
-          throw e;
-        });
-        console.log('Anon UID:', auth.currentUser?.uid);
-        if (cloudBadge){ cloudBadge.textContent='Cloud'; cloudBadge.className='badge up'; cloudBadge.title = `UID: ${auth.currentUser?.uid}`; }
+        await signInAnonymously(auth);
 
         class FireStore {
           async get(id){ const ref = doc(db,'atms',id); const snap = await getDoc(ref); return snap.exists()? snap.data(): null; }
           async set(id,data){ const ref=doc(db,'atms',id); await setDoc(ref,{...data, updatedAt: serverTimestamp()},{merge:true}); }
           async vote(id,status,displayName){
-            const uid = auth.currentUser?.uid;
-            if (!uid) throw new Error('No auth user');
-
-            // 1) Write (or refresh) the per-user vote record (enforced 1/min by rules)
-            const voteRef = doc(db, 'atms', id, 'votes', uid);
-            await setDoc(voteRef, { updatedAt: serverTimestamp() }, { merge: true });
-
-            // 2) Within 10s, update the main ATM doc
             const field = status==='up' ? 'upVotes' : 'downVotes';
-            const atmRef = doc(db,'atms',id);
-            await setDoc(atmRef, {
+            const ref = doc(db,'atms',id);
+            await setDoc(ref,{
               status,
               updatedBy: displayName || 'Anonymous',
               [field]: increment(1),
               updatedAt: serverTimestamp()
-            }, { merge: true });
+            },{merge:true});
           }
           async getAll(){ const out={}; for (const atm of ATM_LIST) out[atm.id]=await this.get(atm.id); return out; }
         }
         Store = new FireStore();
         console.log('Firebase mode enabled');
+        if (cloudBadge){ cloudBadge.textContent='Cloud'; cloudBadge.className='badge up'; }
 
         // Live updates per ATM
         for (const atm of ATM_LIST) {
@@ -247,36 +239,76 @@
     }
 
     async function handleVote(atmId, status){
+      // Client-side (per-device) cooldown
       if (!canVote(atmId)) {
-        alert(`Thanks! Try again in a bit.`);
+        alert(`Thanks! You can update this ATM again in about ${RATE_MINUTES} minute(s).`);
         return;
       }
+
       const displayName = (nameInput.value || '').trim() || 'Anonymous';
 
-      // optimistically update UI
+      // Optimistic local update (for snappy UX)
       const existing = await Store.get(atmId) || {};
       const upVotes = existing.upVotes || 0, downVotes = existing.downVotes || 0;
       const optimistic = {
         status,
         updatedBy: displayName,
         updatedAt: Date.now(),
-        upVotes: status==='up' ? upVotes + 1 : upVotes,
-        downVotes: status==='down' ? downVotes + 1 : downVotes
+        upVotes: status === 'up' ? upVotes + 1 : upVotes,
+        downVotes: status === 'down' ? downVotes + 1 : downVotes
       };
 
       try {
-        if (Store.vote) await Store.vote(atmId, status, displayName);
-        else await Store.set(atmId, optimistic);
+        if (Store.vote) {
+          // Firebase mode
+          await Store.vote(atmId, status, displayName);
+        } else {
+          // Local mode
+          await Store.set(atmId, optimistic);
+        }
 
         markVoted(atmId);
-        updateCard(atmId, optimistic);
+        updateCard(atmId, optimistic); // live listeners will also catch real server data
+
       } catch (e) {
-        console.error('Vote failed:', e?.code || e, e?.message || '');
-        alert('Server cooldown (per-user) or auth issue. Make sure Anonymous sign-in is enabled and your domain is Authorized.');
+        console.error('Vote failed:', e);
+
+        // Try to estimate remaining server cooldown from latest doc
+        try {
+          const data = await Store.get(atmId);
+          if (data && data.updatedAt) {
+            const last = data.updatedAt?.seconds ? data.updatedAt.seconds * 1000 : Number(data.updatedAt);
+            const cooldownMs = 60 * 1000; // keep in sync with your server rule (1 minute)
+            const remain = Math.ceil((cooldownMs - (Date.now() - last)) / 1000);
+            if (remain > 0) {
+              alert(`Server cooldown active. Try again in ~${remain} second(s).`);
+              return;
+            }
+          }
+        } catch (_) { /* ignore */ }
+
+        alert('Write blocked by server rules or auth. Ensure Anonymous sign-in is enabled and rules are published.');
       }
     }
 
     render();
   </script>
+
+  <!-- Firestore RULES reminder (already added in console):
+  rules_version = '2';
+  service cloud.firestore {
+    match /databases/{database}/documents {
+      match /atms/{id} {
+        allow read: if true;
+        function tooSoon() {
+          return resource != null
+                 && ('updatedAt' in resource.data)
+                 && (request.time - resource.data.updatedAt <= duration.value(1, 'minutes'));
+        }
+        allow write: if request.auth != null && !tooSoon();
+      }
+    }
+  }
+  -->
 </body>
 </html>
