@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- 🔐 Content Security Policy so Firebase endpoints are allowed -->
+  <!-- CSP: allow Firebase endpoints + our inline <script type="module"> -->
   <meta http-equiv="Content-Security-Policy"
         content="
         default-src 'self';
         connect-src 'self' https://firestore.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://www.googleapis.com https://*.gstatic.com;
-        script-src 'self' 'unsafe-eval' https://www.gstatic.com https://www.googleapis.com https://firestore.googleapis.com;
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.googleapis.com https://firestore.googleapis.com;
         style-src 'self' 'unsafe-inline';
         img-src 'self' data:;
         font-src 'self' data:;
@@ -216,7 +216,7 @@
         Store = new FireStore();
         if (cloudBadge){ cloudBadge.textContent='Cloud'; cloudBadge.className='badge up'; }
 
-        // 🔴 Live updates (realtime listeners)
+        // Live updates
         for (const atm of ATM_LIST) {
           onSnapshot(doc(db, 'atms', atm.id), (snap) => {
             if (snap.exists()) updateCard(atm.id, snap.data());
