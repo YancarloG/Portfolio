@@ -66,14 +66,14 @@
     </div>
   </div>
 
-  <!-- ================= Firebase CONFIG (leave as-is for local mode) ================= -->
+  <!-- ================= Firebase CONFIG ================= -->
   <script>
-    /* Replace the placeholder values below with your Firebase Web App config.
+    /* Firebase Web App config.
        If you leave this object null, the app will run in localStorage-only mode. */
     window.FB_CONFIG = {
       apiKey: "AIzaSyATTBsFpadqwcAV7Vf92lwPEmQK3P5GzaM",
-      authDomain: "yantento-atm.firebaseapp.com",   // 
-      projectId: "yantento-atm",     // 
+      authDomain: "yantento-atm.firebaseapp.com",   
+      projectId: "yantento-atm",     
       appId: "1:444236583383:web:a42f08ef79375470033b92"
     };
     // To test local-only mode instead, set: window.FB_CONFIG = null;
@@ -95,7 +95,7 @@
 
     // ---------- Settings ----------
     const EXPIRY_HOURS = 6;     // status becomes Unknown after this many hours
-    const RATE_MINUTES = 1;     // your local per-device cooldown (you set to 1)
+    const RATE_MINUTES = 1;     // local per-device cooldown
 
     // ---------- Helpers ----------
     const grid = document.getElementById('atmGrid');
@@ -142,6 +142,14 @@
       const up = data.upVotes || 0, down = data.downVotes || 0;
       return `Last update: ${prettyTime(when)} · by ${by} · ▲${up} ▼${down}`;
     }
+    function updateCard(atmId, data) {
+      const meta = document.getElementById(`meta-${atmId}`);
+      const card = document.getElementById(`card-${atmId}`);
+      if (!card) return;
+      if (meta) meta.innerHTML = metaLine(data);
+      const oldBadge = card.querySelector('.badge');
+      if (oldBadge) oldBadge.outerHTML = statusBadge(data);
+    }
 
     // ---------- Local (per-device) cooldown ----------
     const RATE_KEY = (id) => `atm.vote.${id}`;
@@ -159,14 +167,17 @@
     let Store = new LocalStore();
 
     // Try enable Firebase if config present
+    let db = null;
     if (window.FB_CONFIG && window.FB_CONFIG.apiKey && window.FB_CONFIG.projectId) {
       try {
         const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js');
-        const { getFirestore, doc, getDoc, setDoc, increment, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js');
+        const { getFirestore, doc, getDoc, setDoc, increment, serverTimestamp, onSnapshot, enableIndexedDbPersistence } =
+          await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js');
         const { getAuth, signInAnonymously } = await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js');
 
         const app = initializeApp(window.FB_CONFIG);
-        const db = getFirestore(app);
+        db = getFirestore(app);
+        try { await enableIndexedDbPersistence(db); } catch (_) { /* ignore if multiple tabs */ }
         const auth = getAuth(app);
         await signInAnonymously(auth);
 
@@ -188,6 +199,13 @@
         Store = new FireStore();
         console.log('Firebase mode enabled');
         if (cloudBadge){ cloudBadge.textContent='Cloud'; cloudBadge.className='badge up'; }
+
+        // Live updates per ATM
+        for (const atm of ATM_LIST) {
+          onSnapshot(doc(db, 'atms', atm.id), (snap) => {
+            if (snap.exists()) updateCard(atm.id, snap.data());
+          });
+        }
       } catch (e) {
         console.warn('Firebase init failed; using local mode.', e);
       }
@@ -220,38 +238,56 @@
       grid.querySelectorAll('[data-down]').forEach(el => el.addEventListener('click', () => handleVote(el.getAttribute('data-down'),'down')));
     }
 
-    async function handleVote(atmId,status){
-      if (!canVote(atmId)){
-        alert(`Thanks! You can update this ATM again in about ${RATE_MINUTES} minute(s) to prevent spam.`);
+    async function handleVote(atmId, status){
+      // Client-side (per-device) cooldown
+      if (!canVote(atmId)) {
+        alert(`Thanks! You can update this ATM again in about ${RATE_MINUTES} minute(s).`);
         return;
       }
-      const displayName = (nameInput.value||'').trim() || 'Anonymous';
 
-      // optimistic local update (for snappy UX)
+      const displayName = (nameInput.value || '').trim() || 'Anonymous';
+
+      // Optimistic local update (for snappy UX)
       const existing = await Store.get(atmId) || {};
       const upVotes = existing.upVotes || 0, downVotes = existing.downVotes || 0;
-      const newData = {
+      const optimistic = {
         status,
         updatedBy: displayName,
         updatedAt: Date.now(),
-        upVotes: status==='up' ? upVotes+1 : upVotes,
-        downVotes: status==='down' ? downVotes+1 : downVotes
+        upVotes: status === 'up' ? upVotes + 1 : upVotes,
+        downVotes: status === 'down' ? downVotes + 1 : downVotes
       };
 
-      if (Store.vote) { await Store.vote(atmId,status,displayName); }
-      else { await Store.set(atmId,newData); }
+      try {
+        if (Store.vote) {
+          // Firebase mode
+          await Store.vote(atmId, status, displayName);
+        } else {
+          // Local mode
+          await Store.set(atmId, optimistic);
+        }
 
-      markVoted(atmId);
+        markVoted(atmId);
+        updateCard(atmId, optimistic); // live listeners will also catch real server data
 
-      // refresh just this card
-      const meta = document.getElementById(`meta-${atmId}`);
-      const card = document.getElementById(`card-${atmId}`);
-      if (meta && card){
-        meta.innerHTML = metaLine(newData);
-        const oldBadge = card.querySelector('.badge');
-        if (oldBadge) oldBadge.outerHTML = statusBadge(newData);
-      } else {
-        render();
+      } catch (e) {
+        console.error('Vote failed:', e);
+
+        // Try to estimate remaining server cooldown from latest doc
+        try {
+          const data = await Store.get(atmId);
+          if (data && data.updatedAt) {
+            const last = data.updatedAt?.seconds ? data.updatedAt.seconds * 1000 : Number(data.updatedAt);
+            const cooldownMs = 60 * 1000; // keep in sync with your server rule (1 minute)
+            const remain = Math.ceil((cooldownMs - (Date.now() - last)) / 1000);
+            if (remain > 0) {
+              alert(`Server cooldown active. Try again in ~${remain} second(s).`);
+              return;
+            }
+          }
+        } catch (_) { /* ignore */ }
+
+        alert('Write blocked by server rules or auth. Ensure Anonymous sign-in is enabled and rules are published.');
       }
     }
 
@@ -264,13 +300,15 @@
     match /databases/{database}/documents {
       match /atms/{id} {
         allow read: if true;
-        allow write: if request.auth != null
-                     && (!('updatedAt' in resource.data)
-                         || request.time - resource.data.updatedAt > duration.value(1, 'minutes'));
+        function tooSoon() {
+          return resource != null
+                 && ('updatedAt' in resource.data)
+                 && (request.time - resource.data.updatedAt <= duration.value(1, 'minutes'));
+        }
+        allow write: if request.auth != null && !tooSoon();
       }
     }
   }
   -->
 </body>
 </html>
-
