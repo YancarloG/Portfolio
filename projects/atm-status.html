@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ATM Status Board | Yantento</title>
 
-  <!-- Minimal built-in styles (works even without your main site CSS) -->
   <style>
     :root { --bg:#0a0f1e; --text:#e6f0ff; --glass:rgba(255,255,255,0.08); --accent:#00c8ff; --card:#14213d; }
     * { box-sizing: border-box; }
@@ -68,15 +67,13 @@
 
   <!-- ================= Firebase CONFIG ================= -->
   <script>
-    /* Firebase Web App config.
-       If you leave this object null, the app will run in localStorage-only mode. */
+    /* If this object is null, app runs in localStorage-only mode. */
     window.FB_CONFIG = {
       apiKey: "AIzaSyATTBsFpadqwcAV7Vf92lwPEmQK3P5GzaM",
       authDomain: "yantento-atm.firebaseapp.com",
       projectId: "yantento-atm",
       appId: "1:444236583383:web:a42f08ef79375470033b92"
     };
-    // To test local-only mode instead, set: window.FB_CONFIG = null;
   </script>
 
   <!-- ================= App Logic ================= -->
@@ -97,7 +94,7 @@
     const EXPIRY_HOURS = 6;     // status becomes Unknown after this many hours
     const RATE_MINUTES = 1;     // local per-device cooldown
 
-    // ---------- Helpers ----------
+    // ---------- Elements ----------
     const grid = document.getElementById('atmGrid');
     const nameInput = document.getElementById('displayName');
     const saveNameBtn = document.getElementById('saveName');
@@ -110,18 +107,17 @@
       setTimeout(() => saveNameBtn.textContent = 'Save Name', 1200);
     });
 
-    function mapsLink(address){ return `https://www.google.com/maps?q=${encodeURIComponent(address)}`; }
+    // ---------- Helpers ----------
+    const mapsLink = (address) => `https://www.google.com/maps?q=${encodeURIComponent(address)}`;
     function prettyTime(t){
       if (!t) return '—';
       const d = new Date(t);
-      const diff = Date.now() - d.getTime();
-      const m = Math.floor(diff/60000);
+      const m = Math.floor((Date.now() - d.getTime())/60000);
       if (m < 1) return 'just now';
       if (m < 60) return `${m}m ago`;
       const h = Math.floor(m/60);
       if (h < 24) return `${h}h ago`;
-      const days = Math.floor(h/24);
-      return `${days}d ago`;
+      return `${Math.floor(h/24)}d ago`;
     }
     function isExpired(updatedAt){
       if (!updatedAt) return true;
@@ -129,12 +125,10 @@
               : (updatedAt?.seconds ? updatedAt.seconds*1000 : Number(updatedAt));
       return (Date.now() - t) > EXPIRY_HOURS*60*60*1000;
     }
-    function statusBadge(data){
-      if (!data || !data.status || isExpired(data.updatedAt)) return `<span class="badge unknown">Unknown</span>`;
-      if (data.status === 'up') return `<span class="badge up">Working</span>`;
-      if (data.status === 'down') return `<span class="badge down">Down</span>`;
-      return `<span class="badge unknown">Unknown</span>`;
-    }
+    const statusBadge = (data) =>
+      (!data || !data.status || isExpired(data.updatedAt)) ? `<span class="badge unknown">Unknown</span>`
+      : (data.status === 'up' ? `<span class="badge up">Working</span>`
+                              : `<span class="badge down">Down</span>`);
     function metaLine(data){
       if (!data || isExpired(data.updatedAt)) return 'Last update: —';
       const by = data.updatedBy || '—';
@@ -151,12 +145,12 @@
       if (oldBadge) oldBadge.outerHTML = statusBadge(data);
     }
 
-    // ---------- Local (per-device) cooldown ----------
+    // ---------- Local cooldown ----------
     const RATE_KEY = (id) => `atm.vote.${id}`;
     const canVote = (id) => Date.now() - Number(localStorage.getItem(RATE_KEY(id))||0) > RATE_MINUTES*60*1000;
     const markVoted = (id) => localStorage.setItem(RATE_KEY(id), String(Date.now()));
 
-    // ---------- Storage Abstraction (localStorage default; Firebase if configured) ----------
+    // ---------- Storage Abstraction ----------
     class LocalStore {
       constructor(prefix='atmStatus.') { this.prefix=prefix; }
       _k(id){ return `${this.prefix}${id}`; }
@@ -166,7 +160,7 @@
     }
     let Store = new LocalStore();
 
-    // Try enable Firebase if config present
+    // ---------- Try enable Firebase if config present ----------
     let db = null;
     if (window.FB_CONFIG && window.FB_CONFIG.apiKey && window.FB_CONFIG.projectId) {
       try {
@@ -177,9 +171,15 @@
 
         const app = initializeApp(window.FB_CONFIG);
         db = getFirestore(app);
-        try { await enableIndexedDbPersistence(db); } catch (_) { /* ignore if multiple tabs */ }
+        try { await enableIndexedDbPersistence(db); } catch (_) { /* ok if multi-tab */ }
+
+        // --- Anonymous auth with logging ---
         const auth = getAuth(app);
-        await signInAnonymously(auth);
+        signInAnonymously(auth).then(() => {
+          console.log("✅ Anon sign-in success:", auth.currentUser?.uid);
+        }).catch(err => {
+          console.error("❌ Anon sign-in failed:", err);
+        });
 
         class FireStore {
           async get(id){ const ref = doc(db,'atms',id); const snap = await getDoc(ref); return snap.exists()? snap.data(): null; }
@@ -196,11 +196,9 @@
           }
           async getAll(){
             const out = {};
-            // batch fetch for performance
             const col = collection(db, 'atms');
             const snaps = await getDocs(col);
             snaps.forEach(s => out[s.id] = s.data());
-            // ensure all cards exist in map, even if no doc yet
             for (const atm of ATM_LIST) if (!(atm.id in out)) out[atm.id] = null;
             return out;
           }
@@ -208,14 +206,14 @@
         Store = new FireStore();
         if (cloudBadge){ cloudBadge.textContent='Cloud'; cloudBadge.className='badge up'; }
 
-        // Live updates per ATM
+        // Live updates
         for (const atm of ATM_LIST) {
           onSnapshot(doc(db, 'atms', atm.id), (snap) => {
             if (snap.exists()) updateCard(atm.id, snap.data());
           });
         }
 
-        // Re-render so first paint uses server data if available
+        // Re-render using server data if available
         await render();
 
       } catch (e) {
@@ -251,15 +249,13 @@
     }
 
     async function handleVote(atmId, status){
-      // Client-side (per-device) cooldown
       if (!canVote(atmId)) {
         alert(`Thanks! You can update this ATM again in about ${RATE_MINUTES} minute(s).`);
         return;
       }
-
       const displayName = (nameInput.value || '').trim() || 'Anonymous';
 
-      // Optimistic local update (for snappy UX)
+      // optimistic local
       const existing = await Store.get(atmId) || {};
       const upVotes = existing.upVotes || 0, downVotes = existing.downVotes || 0;
       const optimistic = {
@@ -272,38 +268,29 @@
 
       try {
         if (Store.vote) {
-          // Firebase mode
           await Store.vote(atmId, status, displayName);
         } else {
-          // Local mode
           await Store.set(atmId, optimistic);
         }
-
         markVoted(atmId);
-        updateCard(atmId, optimistic); // live listeners will also catch real server data
-
+        updateCard(atmId, optimistic);
       } catch (e) {
         console.error('Vote failed:', e);
-
-        // Try to estimate remaining server cooldown from latest doc
         try {
           const data = await Store.get(atmId);
           if (data && data.updatedAt) {
             const last = data.updatedAt?.seconds ? data.updatedAt.seconds * 1000 : Number(data.updatedAt);
-            const cooldownMs = 60 * 1000; // keep in sync with your server rule (1 minute)
-            const remain = Math.ceil((cooldownMs - (Date.now() - last)) / 1000);
+            const remain = Math.ceil((60*1000 - (Date.now() - last)) / 1000);
             if (remain > 0) {
               alert(`Server cooldown active. Try again in ~${remain} second(s).`);
               return;
             }
           }
-        } catch (_) { /* ignore */ }
-
+        } catch(_) {}
         alert('Write blocked by server rules or auth. Ensure Anonymous sign-in is enabled and rules are published.');
       }
     }
 
-    // Initial render (local or cloud)
     render();
   </script>
 </body>
