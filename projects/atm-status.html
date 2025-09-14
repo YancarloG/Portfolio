@@ -2,48 +2,40 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ATM Status Board | Yantento</title>
-  
-  <!--
-   Firebase will be added here.
-  -->
 
+  <!-- Minimal built-in styles (works even without your main site CSS) -->
   <style>
-    /* ---- Minimal fallback theme (works alongside your main style.css if present) ---- */
     :root { --bg:#0a0f1e; --text:#e6f0ff; --glass:rgba(255,255,255,0.08); --accent:#00c8ff; --card:#14213d; }
-    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif; background:var(--bg); color:var(--text); }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif; background:var(--bg); color:var(--text);}
     a { color: var(--accent); text-decoration: none; }
     .page { max-width:1100px; margin:32px auto; padding:0 16px; }
     .glass { background:var(--glass); backdrop-filter:blur(18px); border-radius:20px; box-shadow:0 8px 32px rgba(0,0,0,0.25); padding:24px; }
     .header { display:flex; flex-wrap:wrap; align-items:center; gap:16px; justify-content:space-between; margin-bottom:16px; }
-    .title { font-size:1.6rem; font-weight:700; margin:0; }
+    .title { font-size:1.6rem; font-weight:800; margin:0; display:flex; align-items:center; gap:8px; }
     .subtitle { opacity:.85; margin:.25rem 0 0 0; }
-
     .controls { display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
     .input { background:#0f1b2f; color:var(--text); border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:10px 12px; min-width:220px; }
     .modern-button { background:var(--card); color:#fff; padding:10px 16px; border:0; border-radius:10px; cursor:pointer; box-shadow:0 0 8px rgba(0,200,255,.25); transition:transform .2s, box-shadow .2s; }
     .modern-button:hover { transform:translateY(-1px); box-shadow:0 0 16px rgba(0,200,255,.45); }
-
-    .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap:16px; margin-top:16px; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(290px,1fr)); gap:16px; margin-top:16px; }
     .card { border-radius:16px; background: rgba(17, 27, 52, 0.7); border:1px solid rgba(255,255,255,0.08); padding:16px; display:flex; flex-direction:column; gap:10px; }
     .card h3 { margin:0; font-size:1.05rem; }
     .addr { font-size:0.95rem; opacity:0.9; line-height:1.4; }
     .note { font-size:0.85rem; opacity:0.8; }
-
     .row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
     .spacer { flex:1; }
-    .badge { padding:4px 10px; border-radius:999px; font-size:0.8rem; font-weight:600; letter-spacing:.2px; }
-    .up { background:rgba(0,180,60,.18); color:#86f7a1; border:1px solid rgba(134,247,161,.35); }
-    .down { background:rgba(200,30,30,.18); color:#ff9a9a; border:1px solid rgba(255,154,154,.35); }
-    .unknown { background:rgba(255,255,255,.08); color:#cfe3ff; border:1px solid rgba(255,255,255,.15); }
+    .badge { padding:4px 10px; border-radius:999px; font-size:0.8rem; font-weight:700; letter-spacing:.2px; border:1px solid transparent; }
+    .up { background:rgba(0,180,60,.18); color:#86f7a1; border-color:rgba(134,247,161,.35); }
+    .down { background:rgba(200,30,30,.18); color:#ff9a9a; border-color:rgba(255,154,154,.35); }
+    .unknown { background:rgba(255,255,255,.08); color:#cfe3ff; border-color:rgba(255,255,255,.15); }
     .meta { font-size:0.8rem; opacity:0.85; }
-
     .btn-sm { padding:8px 12px; border-radius:10px; border:0; cursor:pointer; }
     .btn-up { background:#0b5d35; color:#eafff2; }
     .btn-down { background:#6b1220; color:#ffe9ec; }
-    .btn-dir { background:#0c1a32; color:#d5ecff; }
-
+    .btn-dir { background:#0c1a32; color:#d5ecff; display:inline-block; }
     .footnote { margin-top:18px; font-size:0.85rem; opacity:0.8; }
     .hr { height:1px; background:rgba(255,255,255,0.1); margin:16px 0; border:0; }
   </style>
@@ -53,8 +45,11 @@
     <div class="glass">
       <div class="header">
         <div>
-          <h1 class="title">ATM Status Board (Community-Reported)</h1>
-          <p class="subtitle">Mark an ATM as <em>Working</em> or <em>Down</em>. Statuses auto-expire after 6 hours to keep things fresh.</p>
+          <h1 class="title">
+            ATM Status Board
+            <span id="cloudBadge" class="badge unknown">Local</span>
+          </h1>
+          <p class="subtitle">Mark an ATM as <em>Working</em> or <em>Down</em>. Statuses auto-expire after 6 hours.</p>
         </div>
         <div class="controls">
           <input id="displayName" class="input" type="text" placeholder="Optional: your display name" />
@@ -62,103 +57,112 @@
         </div>
       </div>
 
-      <div class="grid" id="atmGrid"></div>
+      <div id="atmGrid" class="grid"></div>
 
       <div class="footnote">
         <div class="hr"></div>
-        <p><strong>Note:</strong> This is a community tool and is not affiliated with Partners Federal Credit Union or The Walt Disney Company. Please verify availability before traveling long distances. Respect any access restrictions (e.g., Cast-Only locations).</p>
+        <p><strong>Note:</strong> Community tool; not affiliated with Partners FCU or TWDC. Check access restrictions (e.g., Cast-Only) and verify availability before traveling.</p>
       </div>
     </div>
   </div>
 
-  <!-- Optional: Firebase Config. Leaving blank to use localStorage-only mode...
-  -->
+  <!-- ================= Firebase CONFIG (leave as-is for local mode) ================= -->
   <script>
-    window.FB_CONFIG = window.FB_CONFIG || null; // leave null for local demo mode
+    /* Replace the placeholder values below with your Firebase Web App config.
+       If you leave this object null, the app will run in localStorage-only mode. */
+    window.FB_CONFIG = {
+      apiKey: "AIzaSyATTBsFpadqwcAV7Vf92lwPEmQK3P5GzaM",
+      authDomain: "yantento-atm.firebaseapp.com",   // 
+      projectId: "yantento-atm",     // 
+      appId: "1:444236583383:web:a42f08ef79375470033b92"
+    };
+    // To test local-only mode instead, set: window.FB_CONFIG = null;
   </script>
 
+  <!-- ================= App Logic ================= -->
   <script type="module">
-    // ---------- Data: ATM seed list ----------
+    // ---------- Seed list of ATMs ----------
     const ATM_LIST = [
-      {
-        id: "mk-mouseketeria",
-        name: "Partners FCU – Magic Kingdom (TWDC Cast Only, MKT Mouseketeria)",
-        address: "1180 Seven Seas Drive, Lake Buena Vista, FL 32831",
-        access: "TWDC Cast Only",
-      },
-      {
-        id: "epcot",
-        name: "Partners FCU – EPCOT (TWDC Only)",
-        address: "1510 N Avenue of the Stars, Lake Buena Vista, FL 32830",
-        access: "TWDC Only",
-      },
-      {
-        id: "dc2-live-oak",
-        name: "Partners FCU – DC2 Parking (Live Oak Lane)",
-        address: "1825 Live Oak Lane, Lake Buena Vista, FL 32830",
-        access: "Public*",
-      },
-      {
-        id: "lbv-drive-up",
-        name: "Partners FCU – Lake Buena Vista (Drive Up)",
-        address: "1675 Lake Buena Vista Blvd., Lake Buena Vista, FL 32830",
-        access: "Public",
-      },
-      {
-        id: "pride-rock",
-        name: "Partners FCU ATM – Pride Rock (TWDC Cast Only)",
-        address: "660 W. Savannah Circle, Lake Buena Vista, FL 32830",
-        access: "TWDC Cast Only",
-      },
-      {
-        id: "dhs",
-        name: "Partners FCU – Disney's Hollywood Studios (TWDC Cast Only)",
-        address: "228 Cypress Dr., Bay Lake, FL 32830",
-        access: "TWDC Cast Only",
-      },
-      {
-        id: "team-disney",
-        name: "Partners FCU – Team Disney Lobby (temporarily unavailable)",
-        address: "1375 Buena Vista Drive, Lake Buena Vista, FL 32830",
-        access: "TWDC Access",
-      },
-      {
-        id: "maingate",
-        name: "Partners FCU – 3020 Maingate Complex (Residents Only, Withdrawals Only)",
-        address: "3020 Maingate Lane, Orlando, FL 32821",
-        access: "Residents Only",
-      }
+      { id: "mk-mouseketeria", name: "Partners FCU – Magic Kingdom (TWDC Cast Only, MKT Mouseketeria)", address: "1180 Seven Seas Drive, Lake Buena Vista, FL 32831", access: "TWDC Cast Only" },
+      { id: "epcot",           name: "Partners FCU – EPCOT (TWDC Only)", address: "1510 N Avenue of the Stars, Lake Buena Vista, FL 32830", access: "TWDC Only" },
+      { id: "dc2-live-oak",    name: "Partners FCU – DC2 Parking (Live Oak Lane)", address: "1825 Live Oak Lane, Lake Buena Vista, FL 32830", access: "Public*" },
+      { id: "lbv-drive-up",    name: "Partners FCU – Lake Buena Vista (Drive Up)", address: "1675 Lake Buena Vista Blvd., Lake Buena Vista, FL 32830", access: "Public" },
+      { id: "pride-rock",      name: "Partners FCU ATM – Pride Rock (TWDC Cast Only)", address: "660 W. Savannah Circle, Lake Buena Vista, FL 32830", access: "TWDC Cast Only" },
+      { id: "dhs",             name: "Partners FCU – Disney's Hollywood Studios (TWDC Cast Only)", address: "228 Cypress Dr., Bay Lake, FL 32830", access: "TWDC Cast Only" },
+      { id: "team-disney",     name: "Partners FCU – Team Disney Lobby (temporarily unavailable)", address: "1375 Buena Vista Drive, Lake Buena Vista, FL 32830", access: "TWDC Access" },
+      { id: "maingate",        name: "Partners FCU – 3020 Maingate Complex (Residents Only, Withdrawals Only)", address: "3020 Maingate Lane, Orlando, FL 32821", access: "Residents Only" }
     ];
 
-    const EXPIRY_HOURS = 6; // status becomes Unknown after this many hours
+    // ---------- Settings ----------
+    const EXPIRY_HOURS = 6;     // status becomes Unknown after this many hours
+    const RATE_MINUTES = 1;     // your local per-device cooldown (you set to 1)
 
-    // ---------- Storage Abstraction (localStorage or Firebase) ----------
-    class LocalStore {
-      constructor(keyPrefix = 'atmStatus.') { this.keyPrefix = keyPrefix; }
-      _key(id) { return `${this.keyPrefix}${id}`; }
-      async get(id) {
-        const raw = localStorage.getItem(this._key(id));
-        return raw ? JSON.parse(raw) : null;
-      }
-      async set(id, data) {
-        localStorage.setItem(this._key(id), JSON.stringify(data));
-      }
-      async getAll() {
-        const out = {};
-        for (const atm of ATM_LIST) {
-          out[atm.id] = await this.get(atm.id);
-        }
-        return out;
-      }
+    // ---------- Helpers ----------
+    const grid = document.getElementById('atmGrid');
+    const nameInput = document.getElementById('displayName');
+    const saveNameBtn = document.getElementById('saveName');
+    const cloudBadge = document.getElementById('cloudBadge');
+
+    nameInput.value = localStorage.getItem('atm.displayName') || '';
+    saveNameBtn.addEventListener('click', () => {
+      localStorage.setItem('atm.displayName', nameInput.value.trim());
+      saveNameBtn.textContent = 'Saved';
+      setTimeout(() => saveNameBtn.textContent = 'Save Name', 1200);
+    });
+
+    function mapsLink(address){ return `https://www.google.com/maps?q=${encodeURIComponent(address)}`; }
+    function prettyTime(t){
+      if (!t) return '—';
+      const d = new Date(t);
+      const diff = Date.now() - d.getTime();
+      const m = Math.floor(diff/60000);
+      if (m < 1) return 'just now';
+      if (m < 60) return `${m}m ago`;
+      const h = Math.floor(m/60);
+      if (h < 24) return `${h}h ago`;
+      const days = Math.floor(h/24);
+      return `${days}d ago`;
+    }
+    function isExpired(updatedAt){
+      if (!updatedAt) return true;
+      const t = (updatedAt instanceof Date) ? updatedAt.getTime()
+              : (updatedAt?.seconds ? updatedAt.seconds*1000 : Number(updatedAt));
+      return (Date.now() - t) > EXPIRY_HOURS*60*60*1000;
+    }
+    function statusBadge(data){
+      if (!data || !data.status || isExpired(data.updatedAt)) return `<span class="badge unknown">Unknown</span>`;
+      if (data.status === 'up') return `<span class="badge up">Working</span>`;
+      if (data.status === 'down') return `<span class="badge down">Down</span>`;
+      return `<span class="badge unknown">Unknown</span>`;
+    }
+    function metaLine(data){
+      if (!data || isExpired(data.updatedAt)) return 'Last update: —';
+      const by = data.updatedBy || '—';
+      const when = data.updatedAt?.seconds ? new Date(data.updatedAt.seconds*1000) : new Date(data.updatedAt);
+      const up = data.upVotes || 0, down = data.downVotes || 0;
+      return `Last update: ${prettyTime(when)} · by ${by} · ▲${up} ▼${down}`;
     }
 
-    let Store = new LocalStore(); // default
+    // ---------- Local (per-device) cooldown ----------
+    const RATE_KEY = (id) => `atm.vote.${id}`;
+    const canVote = (id) => Date.now() - Number(localStorage.getItem(RATE_KEY(id))||0) > RATE_MINUTES*60*1000;
+    const markVoted = (id) => localStorage.setItem(RATE_KEY(id), String(Date.now()));
 
-    // ---------- Try to enable Firebase if FB_CONFIG present ----------
-    if (window.FB_CONFIG) {
+    // ---------- Storage Abstraction (localStorage default; Firebase if configured) ----------
+    class LocalStore {
+      constructor(prefix='atmStatus.') { this.prefix=prefix; }
+      _k(id){ return `${this.prefix}${id}`; }
+      async get(id){ const raw = localStorage.getItem(this._k(id)); return raw? JSON.parse(raw): null; }
+      async set(id,data){ localStorage.setItem(this._k(id), JSON.stringify(data)); }
+      async getAll(){ const out={}; for (const atm of ATM_LIST) out[atm.id]=await this.get(atm.id); return out; }
+    }
+    let Store = new LocalStore();
+
+    // Try enable Firebase if config present
+    if (window.FB_CONFIG && window.FB_CONFIG.apiKey && window.FB_CONFIG.projectId) {
       try {
         const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js');
-        const { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, increment } = await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js');
+        const { getFirestore, doc, getDoc, setDoc, increment, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js');
         const { getAuth, signInAnonymously } = await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js');
 
         const app = initializeApp(window.FB_CONFIG);
@@ -167,103 +171,30 @@
         await signInAnonymously(auth);
 
         class FireStore {
-          async get(id) {
-            const ref = doc(db, 'atms', id);
-            const snap = await getDoc(ref);
-            return snap.exists() ? snap.data() : null;
-          }
-          async set(id, data) {
-            const ref = doc(db, 'atms', id);
-            await setDoc(ref, { ...data, updatedAt: serverTimestamp() }, { merge: true });
-          }
-          async vote(id, status, displayName) {
-            const ref = doc(db, 'atms', id);
-            const field = status === 'up' ? 'upVotes' : 'downVotes';
-            await setDoc(ref, { // ensures doc exists
+          async get(id){ const ref = doc(db,'atms',id); const snap = await getDoc(ref); return snap.exists()? snap.data(): null; }
+          async set(id,data){ const ref=doc(db,'atms',id); await setDoc(ref,{...data, updatedAt: serverTimestamp()},{merge:true}); }
+          async vote(id,status,displayName){
+            const field = status==='up' ? 'upVotes' : 'downVotes';
+            const ref = doc(db,'atms',id);
+            await setDoc(ref,{
               status,
               updatedBy: displayName || 'Anonymous',
               [field]: increment(1),
               updatedAt: serverTimestamp()
-            }, { merge: true });
+            },{merge:true});
           }
-          async getAll() {
-            // For simplicity, just pull per-id; list is small.
-            const out = {};
-            for (const atm of ATM_LIST) out[atm.id] = await this.get(atm.id);
-            return out;
-          }
+          async getAll(){ const out={}; for (const atm of ATM_LIST) out[atm.id]=await this.get(atm.id); return out; }
         }
         Store = new FireStore();
         console.log('Firebase mode enabled');
+        if (cloudBadge){ cloudBadge.textContent='Cloud'; cloudBadge.className='badge up'; }
       } catch (e) {
-        console.warn('Firebase not available or failed to init; falling back to localStorage.', e);
+        console.warn('Firebase init failed; using local mode.', e);
       }
     }
 
-    // ---------- UI Rendering ----------
-    const grid = document.getElementById('atmGrid');
-    const nameInput = document.getElementById('displayName');
-    const saveNameBtn = document.getElementById('saveName');
-
-    // Persist display name locally
-    nameInput.value = localStorage.getItem('atm.displayName') || '';
-    saveNameBtn.addEventListener('click', () => {
-      localStorage.setItem('atm.displayName', nameInput.value.trim());
-      saveNameBtn.textContent = 'Saved';
-      setTimeout(() => saveNameBtn.textContent = 'Save Name', 1200);
-    });
-
-    // Rate limit: same user cannot vote the same ATM more than once every x# minutes
-    const RATE_MINUTES = 1;
-    function canVote(atmId) {
-      const ts = Number(localStorage.getItem(`atm.vote.${atmId}`) || 0);
-      return Date.now() - ts > RATE_MINUTES * 60 * 1000;
-    }
-    function markVoted(atmId) {
-      localStorage.setItem(`atm.vote.${atmId}`, String(Date.now()));
-    }
-
-    function mapsLink(address) {
-      return `https://www.google.com/maps?q=${encodeURIComponent(address)}`;
-    }
-
-    function prettyTime(t) {
-      if (!t) return '—';
-      const d = new Date(t);
-      const diffMs = Date.now() - d.getTime();
-      const mins = Math.floor(diffMs / 60000);
-      if (mins < 1) return 'just now';
-      if (mins < 60) return `${mins}m ago`;
-      const hrs = Math.floor(mins / 60);
-      if (hrs < 24) return `${hrs}h ago`;
-      const days = Math.floor(hrs / 24);
-      return `${days}d ago`;
-    }
-
-    function isExpired(updatedAt) {
-      if (!updatedAt) return true;
-      const t = (updatedAt instanceof Date) ? updatedAt.getTime() : (updatedAt.seconds ? updatedAt.seconds * 1000 : Number(updatedAt));
-      return (Date.now() - t) > EXPIRY_HOURS * 60 * 60 * 1000;
-    }
-
-    function statusBadge(data) {
-      if (!data || !data.status || isExpired(data.updatedAt)) {
-        return `<span class="badge unknown">Unknown</span>`;
-      }
-      if (data.status === 'up') return `<span class="badge up">Working</span>`;
-      if (data.status === 'down') return `<span class="badge down">Down</span>`;
-      return `<span class="badge unknown">Unknown</span>`;
-    }
-
-    function metaLine(data) {
-      if (!data || isExpired(data.updatedAt)) return 'Last update: —';
-      const by = data.updatedBy || '—';
-      const when = data.updatedAt.seconds ? new Date(data.updatedAt.seconds * 1000) : new Date(data.updatedAt);
-      const up = data.upVotes || 0, down = data.downVotes || 0;
-      return `Last update: ${prettyTime(when)} · by ${by} · ▲${up} ▼${down}`;
-    }
-
-    async function render() {
+    // ---------- UI ----------
+    async function render(){
       const all = await Store.getAll();
       grid.innerHTML = ATM_LIST.map(atm => {
         const data = all[atm.id];
@@ -285,47 +216,40 @@
           </div>
         `;
       }).join('');
-
-      // Attach handlers
-      grid.querySelectorAll('[data-up]').forEach(el => el.addEventListener('click', () => handleVote(el.getAttribute('data-up'), 'up')));
-      grid.querySelectorAll('[data-down]').forEach(el => el.addEventListener('click', () => handleVote(el.getAttribute('data-down'), 'down')));
+      grid.querySelectorAll('[data-up]').forEach(el => el.addEventListener('click', () => handleVote(el.getAttribute('data-up'),'up')));
+      grid.querySelectorAll('[data-down]').forEach(el => el.addEventListener('click', () => handleVote(el.getAttribute('data-down'),'down')));
     }
 
-    async function handleVote(atmId, status) {
-      if (!canVote(atmId)) {
-        alert(`Thanks! You can update this ATM again in about ${RATE_MINUTES} minutes to prevent spam.`);
+    async function handleVote(atmId,status){
+      if (!canVote(atmId)){
+        alert(`Thanks! You can update this ATM again in about ${RATE_MINUTES} minute(s) to prevent spam.`);
         return;
       }
-      const displayName = (nameInput.value || '').trim() || 'Anonymous';
+      const displayName = (nameInput.value||'').trim() || 'Anonymous';
 
-      // Update local structure for immediate UX
+      // optimistic local update (for snappy UX)
       const existing = await Store.get(atmId) || {};
-      const upVotes = existing.upVotes || 0;
-      const downVotes = existing.downVotes || 0;
+      const upVotes = existing.upVotes || 0, downVotes = existing.downVotes || 0;
       const newData = {
         status,
         updatedBy: displayName,
         updatedAt: Date.now(),
-        upVotes: status === 'up' ? upVotes + 1 : upVotes,
-        downVotes: status === 'down' ? downVotes + 1 : downVotes,
+        upVotes: status==='up' ? upVotes+1 : upVotes,
+        downVotes: status==='down' ? downVotes+1 : downVotes
       };
 
-      // Persist
-      if (Store.vote) {
-        await Store.vote(atmId, status, displayName);
-      } else {
-        await Store.set(atmId, newData);
-      }
+      if (Store.vote) { await Store.vote(atmId,status,displayName); }
+      else { await Store.set(atmId,newData); }
+
       markVoted(atmId);
 
-      // Visual refresh just for the one card
+      // refresh just this card
       const meta = document.getElementById(`meta-${atmId}`);
       const card = document.getElementById(`card-${atmId}`);
-      if (meta && card) {
+      if (meta && card){
         meta.innerHTML = metaLine(newData);
-        const badgeHtml = statusBadge(newData);
         const oldBadge = card.querySelector('.badge');
-        if (oldBadge) oldBadge.outerHTML = badgeHtml;
+        if (oldBadge) oldBadge.outerHTML = statusBadge(newData);
       } else {
         render();
       }
@@ -334,11 +258,19 @@
     render();
   </script>
 
-  <!--
-    firebase space
+  <!-- Firestore RULES reminder (already added in console):
+  rules_version = '2';
+  service cloud.firestore {
+    match /databases/{database}/documents {
+      match /atms/{id} {
+        allow read: if true;
+        allow write: if request.auth != null
+                     && (!('updatedAt' in resource.data)
+                         || request.time - resource.data.updatedAt > duration.value(1, 'minutes'));
+      }
     }
-
-    adjust throttling, or add per-user rate limits by including a subcollection of reports.
+  }
   -->
 </body>
 </html>
+
