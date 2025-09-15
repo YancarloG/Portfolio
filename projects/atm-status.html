@@ -219,13 +219,14 @@
           async vote(id,status,displayName){
             const field = status==='up' ? 'upVotes' : 'downVotes';
             const ref = doc(db,'atms',id);
-            await setDoc(ref,{
+            await setDoc(ref, {
               status,
               updatedBy: displayName || 'Anonymous',
               [field]: increment(1),
-              updatedAt: serverTimestamp()
-            },{merge:true});
-          }
+              updatedAt: serverTimestamp(),
+              lastBy: (await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js'))
+                        .then(({getAuth}) => getAuth().currentUser?.uid || 'anon')
+            }, { merge: true }); 
           async getAll(){
             const out = {};
             const col = collection(db, 'atms');
