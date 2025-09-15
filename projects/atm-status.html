@@ -3,15 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <!-- CSP: allow Firebase + gapi and our inline module -->
-  <meta http-equiv="Content-Security-Policy"
-        content="
-        default-src 'self';
-        connect-src 'self' https://*.googleapis.com https://firestore.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://www.googleapis.com https://*.gstatic.com;
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.googleapis.com https://firestore.googleapis.com https://apis.google.com;
-        style-src 'self' 'unsafe-inline';
-        img-src 'self' data:;
-        font-src 'self' data:;
-        " />
+  <meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  connect-src 'self'
+    https://firestore.googleapis.com
+    https://*.googleapis.com
+    https://securetoken.googleapis.com
+    https://identitytoolkit.googleapis.com
+    https://www.googleapis.com
+    https://*.gstatic.com;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval'
+    https://www.gstatic.com
+    https://www.googleapis.com
+    https://firestore.googleapis.com
+    https://apis.google.com;
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' data:;
+  font-src 'self' data:;
+  frame-src 'self'
+    https://yantento-atm.firebaseapp.com
+    https://*.firebaseapp.com
+    https://apis.google.com;
+  child-src 'self'
+    https://yantento-atm.firebaseapp.com
+    https://*.firebaseapp.com
+    https://apis.google.com;
+"/>
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ATM Status Board | Yantento</title>
 
