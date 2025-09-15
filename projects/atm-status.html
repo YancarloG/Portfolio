@@ -78,7 +78,7 @@
             ATM Status Board
             <span id="cloudBadge" class="badge unknown">Local</span>
           </h1>
-          <p class="subtitle">Mark an ATM as <em>Working</em> or <em>Down</em>. Statuses auto-expire after 6 hours.</p>
+          <p class="subtitle">Mark an ATM as <em>Working</em> or <em>Down</em>. Statuses auto-expire after 48 hours.</p>
         </div>
         <div class="controls">
           <input id="displayName" class="input" type="text" placeholder="Optional: your display name" />
@@ -121,7 +121,7 @@
     ];
 
     // ---------- Settings ----------
-    const EXPIRY_HOURS = 6;     // status becomes Unknown after this many hours
+    const EXPIRY_HOURS = 48;     // status becomes Unknown after this many hours
     const RATE_MINUTES = 1;     // local per-device cooldown (client)
     const SERVER_COOLDOWN_MS = 45 * 1000; // must match your Firestore rules
 
