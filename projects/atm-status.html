@@ -11,7 +11,8 @@
       https://securetoken.googleapis.com
       https://identitytoolkit.googleapis.com
       https://www.googleapis.com
-      https://*.gstatic.com;
+      https://*.gstatic.com
+      https://*.googleusercontent.com;
     script-src 'self' 'unsafe-inline' 'unsafe-eval'
       https://www.gstatic.com
       https://www.googleapis.com
@@ -23,11 +24,13 @@
     frame-src 'self'
       https://yantento-atm.firebaseapp.com
       https://*.firebaseapp.com
-      https://apis.google.com;
+      https://apis.google.com
+      https://*.googleusercontent.com;
     child-src 'self'
       https://yantento-atm.firebaseapp.com
       https://*.firebaseapp.com
-      https://apis.google.com;
+      https://apis.google.com
+      https://*.googleusercontent.com;
   " />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ATM Status Board | Yantento</title>
@@ -118,9 +121,9 @@
     ];
 
     // ---------- Settings ----------
-    const EXPIRY_HOURS = 6;     // status becomes Unknown after this many hours
-    const RATE_MINUTES = 0.75;     // client cooldown off; rules handle per-user throttle
-    const SERVER_COOLDOWN_MS = 45 * 1000; // for precheck/readout only
+    const EXPIRY_HOURS = 6;                  // status becomes Unknown after this many hours
+    const RATE_MINUTES = 0.75;               // client-side courtesy cooldown
+    const SERVER_COOLDOWN_MS = 45 * 1000;    // matches Firestore rule cooldown
 
     // ---------- Elements ----------
     const grid = document.getElementById('atmGrid');
@@ -209,6 +212,7 @@
         onAuthStateChanged(auth, (u) => {
           authed = !!u;
           console.log('Auth state:', authed ? `✅ anon ${u.uid}` : '❌ not authed');
+          render(); // ensure buttons enable as soon as auth is ready
         });
         await signInAnonymously(auth);
 
@@ -220,7 +224,7 @@
             const ref = doc(db,'atms',id);
             await setDoc(ref,{
               status,
-              updatedBy: displayName || 'Anonymous',
+              updatedBy: displayName,
               [field]: increment(1),
               updatedAt: serverTimestamp(),
               lastBy: auth.currentUser?.uid || 'anon'
@@ -300,7 +304,8 @@
         return;
       }
 
-      const displayName = (nameInput.value || '').trim() || 'Anonymous';
+      // Defensive cap to avoid huge display names (prevents bloating / weirdness)
+      const displayName = ((nameInput.value || '').trim().slice(0, 80)) || 'Anonymous';
 
       // Optimistic local update
       const existing = await Store.get(atmId) || {};
