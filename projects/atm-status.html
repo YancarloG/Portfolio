@@ -2,35 +2,33 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- CSP: allow Firebase + gapi and our inline module -->
+  <!-- CSP: allow Firebase endpoints + auth iframe -->
   <meta http-equiv="Content-Security-Policy" content="
-  default-src 'self';
-  connect-src 'self'
-    https://firestore.googleapis.com
-    https://*.googleapis.com
-    https://securetoken.googleapis.com
-    https://identitytoolkit.googleapis.com
-    https://www.googleapis.com
-    https://*.gstatic.com;
-  script-src 'self' 'unsafe-inline' 'unsafe-eval'
-    https://www.gstatic.com
-    https://www.googleapis.com
-    https://firestore.googleapis.com
-    https://apis.google.com;
-  style-src 'self' 'unsafe-inline';
-  img-src 'self' data:;
-  font-src 'self' data:;
-  frame-src 'self'
-    https://yantento-atm.firebaseapp.com
-    https://*.firebaseapp.com
-    https://apis.google.com;
-  child-src 'self'
-    https://yantento-atm.firebaseapp.com
-    https://*.firebaseapp.com
-    https://apis.google.com;
-"/>
-
-
+    default-src 'self';
+    connect-src 'self'
+      https://firestore.googleapis.com
+      https://*.googleapis.com
+      https://securetoken.googleapis.com
+      https://identitytoolkit.googleapis.com
+      https://www.googleapis.com
+      https://*.gstatic.com;
+    script-src 'self' 'unsafe-inline' 'unsafe-eval'
+      https://www.gstatic.com
+      https://www.googleapis.com
+      https://firestore.googleapis.com
+      https://apis.google.com;
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+    font-src 'self' data:;
+    frame-src 'self'
+      https://yantento-atm.firebaseapp.com
+      https://*.firebaseapp.com
+      https://apis.google.com;
+    child-src 'self'
+      https://yantento-atm.firebaseapp.com
+      https://*.firebaseapp.com
+      https://apis.google.com;
+  " />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ATM Status Board | Yantento</title>
 
@@ -78,7 +76,7 @@
             ATM Status Board
             <span id="cloudBadge" class="badge unknown">Local</span>
           </h1>
-          <p class="subtitle">Mark an ATM as <em>Working</em> or <em>Down</em>. Statuses auto-expire after 48 hours.</p>
+          <p class="subtitle">Mark an ATM as <em>Working</em> or <em>Down</em>. Statuses auto-expire after 6 hours.</p>
         </div>
         <div class="controls">
           <input id="displayName" class="input" type="text" placeholder="Optional: your display name" />
@@ -97,7 +95,6 @@
 
   <!-- ================= Firebase CONFIG ================= -->
   <script>
-    /* If this object is null, app runs in localStorage-only mode. */
     window.FB_CONFIG = {
       apiKey: "AIzaSyATTBsFpadqwcAV7Vf92lwPEmQK3P5GzaM",
       authDomain: "yantento-atm.firebaseapp.com",
@@ -121,9 +118,9 @@
     ];
 
     // ---------- Settings ----------
-    const EXPIRY_HOURS = 48;     // status becomes Unknown after this many hours
-    const RATE_MINUTES = 1;     // local per-device cooldown (client)
-    const SERVER_COOLDOWN_MS = 45 * 1000; // must match your Firestore rules
+    const EXPIRY_HOURS = 6;     // status becomes Unknown after this many hours
+    const RATE_MINUTES = 0;     // client cooldown off; rules handle per-user throttle
+    const SERVER_COOLDOWN_MS = 45 * 1000; // for precheck/readout only
 
     // ---------- Elements ----------
     const grid = document.getElementById('atmGrid');
@@ -193,6 +190,7 @@
 
     // ---------- Enable Firebase (cloud mode) ----------
     let db = null;
+    let auth = null;
     let authed = false;
 
     if (window.FB_CONFIG && window.FB_CONFIG.apiKey && window.FB_CONFIG.projectId) {
@@ -200,13 +198,14 @@
         const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js');
         const { getFirestore, doc, getDoc, getDocs, setDoc, increment, serverTimestamp, onSnapshot, enableIndexedDbPersistence, collection } =
           await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js');
-        const { getAuth, signInAnonymously, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js');
+        const { getAuth, signInAnonymously, onAuthStateChanged } =
+          await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js');
 
         const app = initializeApp(window.FB_CONFIG);
         db = getFirestore(app);
-        try { await enableIndexedDbPersistence(db); } catch (_) { /* OK if multi-tab */ }
+        try { await enableIndexedDbPersistence(db); } catch (_) {}
 
-        const auth = getAuth(app);
+        auth = getAuth(app);
         onAuthStateChanged(auth, (u) => {
           authed = !!u;
           console.log('Auth state:', authed ? `✅ anon ${u.uid}` : '❌ not authed');
@@ -215,18 +214,18 @@
 
         class FireStore {
           async get(id){ const ref = doc(db,'atms',id); const snap = await getDoc(ref); return snap.exists()? snap.data(): null; }
-          async set(id,data){ const ref=doc(db,'atms',id); await setDoc(ref,{...data, updatedAt: serverTimestamp()},{merge:true}); }
+          async set(id,data){ const ref=doc(db,'atms',id); await setDoc(ref,{...data, updatedAt: serverTimestamp(), lastBy: auth.currentUser?.uid || 'anon'},{merge:true}); }
           async vote(id,status,displayName){
             const field = status==='up' ? 'upVotes' : 'downVotes';
             const ref = doc(db,'atms',id);
-            await setDoc(ref, {
+            await setDoc(ref,{
               status,
               updatedBy: displayName || 'Anonymous',
               [field]: increment(1),
               updatedAt: serverTimestamp(),
-              lastBy: (await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js'))
-                        .then(({getAuth}) => getAuth().currentUser?.uid || 'anon')
-            }, { merge: true }); 
+              lastBy: auth.currentUser?.uid || 'anon'
+            },{merge:true});
+          }
           async getAll(){
             const out = {};
             const col = collection(db, 'atms');
@@ -253,7 +252,7 @@
       }
     }
 
-    // ---------- Server cooldown pre-check ----------
+    // ---------- Server cooldown pre-check (informational only) ----------
     async function serverCooldownRemainMs(atmId) {
       try {
         const data = await Store.get(atmId);
@@ -296,16 +295,8 @@
         alert('Signing in… please try again in a moment.');
         return;
       }
-
       if (!canVote(atmId)) {
-        alert(`Thanks! You can update this ATM again in about ${RATE_MINUTES} minute(s).`);
-        return;
-      }
-
-      const remainMs = await serverCooldownRemainMs(atmId);
-      if (remainMs > 0) {
-        const secs = Math.ceil(remainMs / 1000);
-        alert(`Server cooldown active. Try again in ~${secs} second(s).`);
+        alert(`Thanks! You can update this ATM again soon.`);
         return;
       }
 
