@@ -344,6 +344,66 @@ body.dark-mode #entryList li {
   opacity: 0.75;
 }
 
+/* Quick entry date shortcuts */
+.quick-date-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.quick-date-row .btn {
+  margin-top: 0;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 10000;
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 520px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.modal-close {
+  background: rgba(0,0,0,0.08);
+  border: none;
+  border-radius: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+/* Dark mode modal */
+body.dark-mode .modal-content {
+  background: #1e1e1e;
+  color: #f2f2f2;
+}
+
+body.dark-mode .modal-close {
+  background: rgba(255,255,255,0.12);
+  color: #f2f2f2;
+}
+
 /* Mobile: show 4 summary cards nicely */
 @media (max-width: 420px) {
   .summary-grid {
