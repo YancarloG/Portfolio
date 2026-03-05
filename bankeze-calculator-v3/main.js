@@ -13,12 +13,29 @@ function makeId() {
 }
 
 function normalizeToLocalDateString(isoString) {
-  // Returns YYYY-MM-DD in the user's local timezone.
+  // Returns YYYY-MM-DD in local timezone
   const d = new Date(isoString);
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
+}
+
+function toDatetimeLocalValue(date) {
+  // YYYY-MM-DDTHH:MM (local time)
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  const hh = String(date.getHours()).padStart(2, '0');
+  const mm = String(date.getMinutes()).padStart(2, '0');
+  return `${y}-${m}-${d}T${hh}:${mm}`;
+}
+
+function datetimeLocalToISO(value) {
+  // "2026-03-05T14:30" interpreted as local time -> ISO
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toISOString();
 }
 
 function loadData() {
@@ -31,13 +48,8 @@ function loadData() {
     loaded = { version: 1, entries: [] };
   }
 
-  if (!loaded.version) {
-    loaded.version = 1;
-  }
-
-  if (!Array.isArray(loaded.entries)) {
-    loaded.entries = [];
-  }
+  if (!loaded.version) loaded.version = 1;
+  if (!Array.isArray(loaded.entries)) loaded.entries = [];
 
   // Migrate existing entries to include id + createdAt
   let migrated = false;
@@ -53,17 +65,13 @@ function loadData() {
       migrated = true;
     }
 
-    // Ensure numbers
     entry.amount = Number(entry.amount);
     entry.tip = Number(entry.tip);
 
     return entry;
   });
 
-  if (migrated) {
-    localStorage.setItem(storageKey, JSON.stringify(loaded));
-  }
-
+  if (migrated) localStorage.setItem(storageKey, JSON.stringify(loaded));
   return loaded;
 }
 
@@ -91,8 +99,8 @@ function getFilter() {
 
 function getFilteredEntriesWithIndex() {
   const f = getFilter();
-
   const withIndex = data.entries.map((e, idx) => ({ entry: e, idx }));
+
   if (f.mode === 'all') return withIndex;
 
   return withIndex.filter(({ entry }) => normalizeToLocalDateString(entry.createdAt) === f.date);
@@ -147,15 +155,29 @@ function updateQuickSummary() {
 function onFilterChange() {
   const allDates = document.getElementById('allDates');
   const filterDate = document.getElementById('filterDate');
-  if (allDates && filterDate) {
-    filterDate.disabled = allDates.checked;
-  }
+  if (allDates && filterDate) filterDate.disabled = allDates.checked;
 
   updateQuickSummary();
 
-  // If these panels are open, keep them in sync
   if (document.getElementById('results')?.style.display === 'block') showResults();
   if (document.getElementById('entryLog')?.style.display === 'block') viewAllEntries();
+}
+
+function setEntryDateTime(which) {
+  const el = document.getElementById('entryDateTime');
+  if (!el) return;
+
+  const now = new Date();
+  if (which === 'now') {
+    el.value = toDatetimeLocalValue(now);
+    return;
+  }
+
+  if (which === 'yesterday') {
+    const y = new Date(now);
+    y.setDate(y.getDate() - 1);
+    el.value = toDatetimeLocalValue(y);
+  }
 }
 
 function addPayment() {
@@ -164,10 +186,12 @@ function addPayment() {
   const tipInput = document.getElementById('tip').value;
   const tip = tipInput === '' ? 0 : parseFloat(tipInput);
 
+  const dtVal = document.getElementById('entryDateTime')?.value;
+  const createdAt = dtVal ? datetimeLocalToISO(dtVal) : new Date().toISOString();
+
+  if (!createdAt) return alert('Invalid date/time. Please fix Entry Date/Time.');
   if (!Number.isFinite(amount) || amount <= 0) return alert('Please enter a charge amount greater than 0.');
   if (!Number.isFinite(tip) || tip < 0) return alert('Tip amount cannot be negative.');
-
-  const createdAt = new Date().toISOString();
 
   data.entries.push({
     id: makeId(),
@@ -182,9 +206,10 @@ function addPayment() {
   document.getElementById('amount').value = '';
   document.getElementById('tip').value = '';
 
-  updateQuickSummary();
+  const entryDateTime = document.getElementById('entryDateTime');
+  if (entryDateTime) entryDateTime.value = toDatetimeLocalValue(new Date());
 
-  // Lightweight confirmation (less annoying than alert spam)
+  updateQuickSummary();
   toast('Payment added ✅');
 }
 
@@ -233,7 +258,12 @@ function viewAllEntries() {
   const ul = document.getElementById('entryList');
   ul.innerHTML = '';
 
-  const filtered = getFilteredEntriesWithIndex();
+  const f = getFilter();
+
+  // Show newest first (more useful for servers)
+  const filtered = getFilteredEntriesWithIndex()
+    .slice()
+    .sort((a, b) => new Date(b.entry.createdAt) - new Date(a.entry.createdAt));
 
   if (!filtered.length) {
     const li = document.createElement('li');
@@ -246,8 +276,15 @@ function viewAllEntries() {
 
   filtered.forEach(({ entry }) => {
     const li = document.createElement('li');
+
     const dt = entry.createdAt ? new Date(entry.createdAt) : null;
-    const when = dt ? dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+
+    // If All Dates: show date + time. If filtered to one date: show time.
+    const when = dt
+      ? (f.mode === 'all'
+        ? dt.toLocaleString([], { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+        : dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
+      : '';
 
     li.innerHTML =
       `<div class="entry-line">
@@ -285,33 +322,97 @@ function deleteEntry(id) {
   }
 }
 
-function editEntry(id) {
+/* -------------------- Edit Modal -------------------- */
+
+function getPaymentTypeOptions() {
+  const mainSelect = document.getElementById('paymentType');
+  if (!mainSelect) return [];
+  return Array.from(mainSelect.options).map(o => o.value);
+}
+
+function fillEditTypeSelect(selectedValue) {
+  const editSelect = document.getElementById('editType');
+  if (!editSelect) return;
+
+  const options = getPaymentTypeOptions();
+  editSelect.innerHTML = '';
+
+  options.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v;
+    opt.textContent = v;
+    editSelect.appendChild(opt);
+  });
+
+  editSelect.value = selectedValue || options[0] || '';
+}
+
+function openEditModal(entry) {
+  document.getElementById('editEntryId').value = entry.id;
+
+  fillEditTypeSelect(entry.type);
+
+  document.getElementById('editAmount').value =
+    Number.isFinite(Number(entry.amount)) ? Number(entry.amount).toFixed(2) : '';
+
+  document.getElementById('editTip').value =
+    Number.isFinite(Number(entry.tip)) ? Number(entry.tip).toFixed(2) : '0.00';
+
+  const dt = entry.createdAt ? new Date(entry.createdAt) : new Date();
+  document.getElementById('editDateTime').value = toDatetimeLocalValue(dt);
+
+  document.getElementById('editModal').classList.remove('hidden');
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').classList.add('hidden');
+}
+
+function saveEditModal() {
+  const id = document.getElementById('editEntryId').value;
   const idx = findEntryIndexById(id);
-  if (idx === -1) return;
+  if (idx === -1) return closeEditModal();
 
-  const e = data.entries[idx];
+  const type = document.getElementById('editType').value;
+  const amount = parseFloat(document.getElementById('editAmount').value);
+  const tipInput = document.getElementById('editTip').value;
+  const tip = tipInput === '' ? 0 : parseFloat(tipInput);
 
-  const newType = prompt('Edit payment type:', e.type);
-  if (newType === null) return; // cancelled
-  const newAmountStr = prompt('Edit charge amount (number):', String(e.amount));
-  if (newAmountStr === null) return;
-  const newTipStr = prompt('Edit tip amount (number):', String(e.tip));
-  if (newTipStr === null) return;
+  const dtVal = document.getElementById('editDateTime').value;
+  const createdAt = dtVal ? datetimeLocalToISO(dtVal) : null;
 
-  const newAmount = parseFloat(newAmountStr);
-  const newTip = parseFloat(newTipStr);
+  if (!type.trim()) return alert('Payment type cannot be empty.');
+  if (!Number.isFinite(amount) || amount <= 0) return alert('Charge amount must be > 0.');
+  if (!Number.isFinite(tip) || tip < 0) return alert('Tip amount cannot be negative.');
+  if (!createdAt) return alert('Invalid date/time.');
 
-  if (!newType.trim()) return alert('Payment type cannot be empty.');
-  if (!Number.isFinite(newAmount) || newAmount <= 0) return alert('Charge amount must be > 0.');
-  if (!Number.isFinite(newTip) || newTip < 0) return alert('Tip amount cannot be negative.');
+  const old = data.entries[idx];
+  data.entries[idx] = { ...old, type: type.trim(), amount, tip, createdAt };
 
-  data.entries[idx] = { ...e, type: newType.trim(), amount: newAmount, tip: newTip };
   saveData();
+  closeEditModal();
 
   updateQuickSummary();
   viewAllEntries();
   toast('Entry updated ✏️');
 }
+
+function editEntry(id) {
+  const idx = findEntryIndexById(id);
+  if (idx === -1) return;
+
+  openEditModal(data.entries[idx]);
+}
+
+/* Close modal on Escape */
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('editModal');
+    if (modal && !modal.classList.contains('hidden')) closeEditModal();
+  }
+});
+
+/* -------------------- Clear -------------------- */
 
 function clearAllEntries() {
   if (!data.entries.length) return alert('No entries to clear.');
@@ -339,13 +440,10 @@ function exportCSV() {
 
   if (!filtered.length) return alert('No entries to export for the current filter.');
 
-  // Ask whether to export all if not already in all-dates mode
   let toExport = filtered;
   if (f.mode !== 'all') {
-    const allOk = confirm('Export only the selected date?\n\nOK = Export selected date\nCancel = Export ALL dates');
-    if (!allOk) {
-      toExport = data.entries;
-    }
+    const onlyDate = confirm('Export only the selected date?\n\nOK = Export selected date\nCancel = Export ALL dates');
+    if (!onlyDate) toExport = data.entries;
   }
 
   const headers = ['createdAt', 'type', 'amount', 'tip'];
@@ -410,7 +508,7 @@ function importCSVText(csvText) {
     tip: header.indexOf('tip')
   };
 
-  if (idx.type === -1 || idx.amount === -1 || idx.tip === -1) {
+  if (idx.type === -1 || idx.amount === -1 || idx.tip === -1 || idx.createdAt === -1) {
     return alert('CSV missing required headers: createdAt, type, amount, tip');
   }
 
@@ -421,18 +519,20 @@ function importCSVText(csvText) {
     const type = (cols[idx.type] || '').trim();
     const amount = parseFloat(cols[idx.amount]);
     const tip = parseFloat(cols[idx.tip]);
-    const createdAt = idx.createdAt !== -1 ? (cols[idx.createdAt] || '').trim() : '';
+    const createdAt = (cols[idx.createdAt] || '').trim();
 
     if (!type) continue;
     if (!Number.isFinite(amount) || amount <= 0) continue;
     if (!Number.isFinite(tip) || tip < 0) continue;
 
+    // createdAt should be ISO; if not, fall back to "now"
+    const dateOk = createdAt && !Number.isNaN(new Date(createdAt).getTime());
     imported.push({
       id: makeId(),
       type,
       amount,
       tip,
-      createdAt: createdAt || new Date().toISOString()
+      createdAt: dateOk ? createdAt : new Date().toISOString()
     });
   }
 
@@ -450,7 +550,6 @@ function importCSVText(csvText) {
   toast(`Imported ${imported.length} entries ✅`);
 }
 
-/* Simple CSV parser handling quotes and commas inside quotes */
 function parseCSVLine(line) {
   const out = [];
   let cur = '';
@@ -528,7 +627,10 @@ function handleJSONImport(event) {
         amount: Number(e.amount),
         tip: Number(e.tip),
         createdAt: e.createdAt || new Date().toISOString()
-      })).filter(e => e.type && Number.isFinite(e.amount) && e.amount > 0 && Number.isFinite(e.tip) && e.tip >= 0);
+      })).filter(e => {
+        const dateOk = e.createdAt && !Number.isNaN(new Date(e.createdAt).getTime());
+        return e.type && Number.isFinite(e.amount) && e.amount > 0 && Number.isFinite(e.tip) && e.tip >= 0 && dateOk;
+      });
 
       if (!imported.length) return alert('No valid entries found in JSON.');
 
@@ -568,7 +670,6 @@ if (localStorage.getItem('darkMode') === 'enabled') {
   document.body.classList.add('dark-mode');
 }
 
-// Toggle dark mode and store preference
 function toggleDarkMode() {
   const body = document.body;
   const isDark = body.classList.toggle('dark-mode');
@@ -576,7 +677,6 @@ function toggleDarkMode() {
 }
 
 function toast(message) {
-  // Very small toast (no dependencies)
   let t = document.getElementById('toast');
   if (!t) {
     t = document.createElement('div');
@@ -612,6 +712,7 @@ function toast(message) {
 document.addEventListener('DOMContentLoaded', () => {
   const filterDate = document.getElementById('filterDate');
   const allDates = document.getElementById('allDates');
+  const entryDateTime = document.getElementById('entryDateTime');
 
   if (filterDate) {
     const today = new Date();
@@ -619,9 +720,11 @@ document.addEventListener('DOMContentLoaded', () => {
     filterDate.value = todayStr;
   }
 
-  if (allDates && filterDate) {
-    filterDate.disabled = allDates.checked;
+  if (entryDateTime) {
+    entryDateTime.value = toDatetimeLocalValue(new Date());
   }
+
+  if (allDates && filterDate) filterDate.disabled = allDates.checked;
 
   updateQuickSummary();
 });
