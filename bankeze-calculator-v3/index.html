@@ -86,6 +86,15 @@
       <input type="number" id="tip" step="0.01" inputmode="decimal" />
     </div>
 
+    <div class="form-group">
+      <label for="entryDateTime">Entry Date/Time</label>
+      <input type="datetime-local" id="entryDateTime" />
+      <div class="quick-date-row">
+        <button class="btn btn-secondary btn-small" type="button" onclick="setEntryDateTime('now')">Now</button>
+        <button class="btn btn-secondary btn-small" type="button" onclick="setEntryDateTime('yesterday')">Yesterday</button>
+      </div>
+    </div>
+
     <button class="btn" onclick="addPayment()">Add Payment</button>
     <button class="btn" onclick="showResults()">Show Totals</button>
     <button class="btn" onclick="viewAllEntries()">View All Entries</button>
@@ -146,6 +155,43 @@
       <button class="btn btn-secondary btn-small" onclick="viewAllEntries()">Refresh</button>
     </div>
     <ul id="entryList"></ul>
+  </div>
+
+  <!-- Edit Entry Modal -->
+  <div id="editModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="editTitle">Edit Entry</h3>
+        <button class="modal-close" onclick="closeEditModal()">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label for="editType">Payment Type</label>
+        <select id="editType"></select>
+      </div>
+
+      <div class="form-group">
+        <label for="editAmount">Charge Amount ($)</label>
+        <input type="number" id="editAmount" step="0.01" inputmode="decimal" />
+      </div>
+
+      <div class="form-group">
+        <label for="editTip">Tip Amount ($)</label>
+        <input type="number" id="editTip" step="0.01" inputmode="decimal" />
+      </div>
+
+      <div class="form-group">
+        <label for="editDateTime">Entry Date/Time</label>
+        <input type="datetime-local" id="editDateTime" />
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+        <button class="btn" onclick="saveEditModal()">Save Changes</button>
+      </div>
+
+      <input type="hidden" id="editEntryId" />
+    </div>
   </div>
 
   <div id="donateWrapper" class="hidden">
