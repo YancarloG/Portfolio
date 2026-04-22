@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Bankeze Calculator</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="main.js" defer></script>
+</head>
+<body>
+  <img src="Bank-eze.png" alt="Bankeze Logo" class="logo" onclick="shakePage()" />
+
+  <!-- Dark Mode Toggle Button -->
+  <div id="darkModeToggleWrapper">
+    <button id="darkModeToggle" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+  </div>
+
+  <h1>Bankeze Calculator</h1>
+
+  <!-- Back to Home Button (Main Site Index) -->
+  <a href="../index.html" class="back-button">← Back to Home</a>
+
+  <!-- Quick Summary (always visible) -->
+  <div class="results-container" id="quickSummary">
+    <div class="summary-header">
+      <h3 id="summaryTitle">Today’s Summary</h3>
+      <div class="summary-controls">
+        <label class="checkbox">
+          <input type="checkbox" id="allDates" onchange="onFilterChange()" />
+          All dates
+        </label>
+        <input type="date" id="filterDate" onchange="onFilterChange()" />
+      </div>
+    </div>
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-label">Total Revenue</div>
+        <div class="summary-value" id="sumRevenue">$0.00</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Total Tips</div>
+        <div class="summary-value" id="sumTips">$0.00</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Avg Tip %</div>
+        <div class="summary-value" id="sumAvgTip">0%</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label"># of Slips</div>
+        <div class="summary-value" id="sumSlips">0</div>
+      </div>
+    </div>
+
+    <p class="helper-text">
+      Your entries are saved on this device (local storage). Export CSV/JSON for backups or moving to a new device.
+    </p>
+  </div>
+
+  <div class="form-container">
+    <div class="form-group">
+      <label for="paymentType">Payment Type</label>
+      <select id="paymentType">
+        <option>American Express</option>
+        <option>Discover</option>
+        <option>Disney Rewards Card</option>
+        <option>Guest ID</option>
+        <option>JCB Card</option>
+        <option>Mastercard</option>
+        <option>Value Card</option>
+        <option>Visa</option>
+        <option>Adult Dining Plan</option>
+        <option>Child Dining Plan</option>
+        <option>Coupons</option>
+        <option>Cash</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="amount">Charge Amount ($)</label>
+      <input type="number" id="amount" step="0.01" inputmode="decimal" />
+    </div>
+
+    <div class="form-group">
+      <label for="tip">Tip Amount ($)</label>
+      <input type="number" id="tip" step="0.01" inputmode="decimal" />
+    </div>
+
+    <div class="form-group">
+      <label for="entryDateTime">Entry Date/Time</label>
+      <input type="datetime-local" id="entryDateTime" />
+      <div class="quick-date-row">
+        <button class="btn btn-secondary btn-small" type="button" onclick="setEntryDateTime('now')">Now</button>
+        <button class="btn btn-secondary btn-small" type="button" onclick="setEntryDateTime('yesterday')">Yesterday</button>
+      </div>
+    </div>
+
+    <button class="btn" onclick="addPayment()">Add Payment</button>
+    <button class="btn" onclick="showResults()">Show Totals</button>
+    <button class="btn" onclick="viewAllEntries()">View All Entries</button>
+    <button class="btn" onclick="showBankoutFormVisualization()">Bankout Form Visualization</button>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="exportCSV()">Export CSV</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('csvFileInput').click()">Import CSV</button>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="exportJSON()">Export JSON</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('jsonFileInput').click()">Import JSON</button>
+    </div>
+
+    <button class="btn btn-danger" onclick="clearAllEntries()">New Day (Clear Entries)</button>
+
+    <input
+      type="file"
+      id="csvFileInput"
+      accept=".csv,text/csv"
+      style="display:none"
+      onchange="handleCSVImport(event)"
+    />
+
+    <input
+      type="file"
+      id="jsonFileInput"
+      accept=".json,application/json"
+      style="display:none"
+      onchange="handleJSONImport(event)"
+    />
+  </div>
+
+  <div class="results-container" id="results" style="display: none">
+    <h3 style="text-align:center; margin: 0 0 8px 0;" id="resultsTitle">Totals</h3>
+    <table id="resultsTable">
+      <thead>
+        <tr>
+          <th>Payment Type</th>
+          <th># of Slips</th>
+          <th>$ Revenue</th>
+          <th>Total w/ Tips</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="form-group"><label>Total in Cash Transactions:</label><div id="totalCash"></div></div>
+    <div class="form-group"><label>Cash Tips:</label><div id="cashTips"></div></div>
+    <div class="form-group"><label>Less Charge Tips:</label><div id="lessTips"></div></div>
+    <div class="form-group"><label>Total Cash Responsibility:</label><div id="cashResponsibility"></div></div>
+    <div class="form-group"><label>Average Tip %:</label><div id="avgTip"></div></div>
+  </div>
+
+  <div class="results-container" id="entryLog" style="display:none">
+    <div class="entrylog-header">
+      <h3 style="text-align:center; margin: 0;" id="entryLogTitle">All Entries</h3>
+      <button class="btn btn-secondary btn-small" onclick="viewAllEntries()">Refresh</button>
+    </div>
+    <ul id="entryList"></ul>
+  </div>
+
+  <!-- Bankout Form Visualization (paper-style) -->
+  <div class="results-container" id="bankoutForm" style="display:none">
+    <div class="entrylog-header">
+      <h3 style="text-align:center; margin: 0;" id="bankoutFormTitle">Bankout Form</h3>
+      <button class="btn btn-secondary btn-small" onclick="hideBankoutFormVisualization()">Back</button>
+    </div>
+
+    <div class="bankout-sheet" aria-label="Server Bank Out Form">
+      <div class="bankout-header">Server Bank Out Form</div>
+
+      <div class="bankout-top">
+        <div class="bankout-row">
+          <div class="bankout-label">Location Name:</div>
+          <input id="bankoutLocation" class="bankout-input" type="text" placeholder="" />
+        </div>
+
+        <div class="bankout-row bankout-row-split">
+          <div class="bankout-split">
+            <div class="bankout-label">CM Name:</div>
+            <input id="bankoutCM" class="bankout-input" type="text" placeholder="" />
+          </div>
+          <div class="bankout-split bankout-date">
+            <div class="bankout-label">Date:</div>
+            <div id="bankoutDate" class="bankout-date-value"></div>
+          </div>
+        </div>
+      </div>
+
+      <table class="bankout-table" id="bankoutTable">
+        <thead>
+          <tr>
+            <th>Payment Type:</th>
+            <th># Of Slips:</th>
+            <th>Total w/ Tips:</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="bankout-bottom">
+        <div class="bankout-bottom-row">
+          <div class="bankout-bottom-left">
+            <div class="bankout-bottom-title">Total in Cash<br/>Transactions:</div>
+          </div>
+          <div class="bankout-bottom-right"><span id="bankoutTotalCash">$0.00</span></div>
+        </div>
+
+        <div class="bankout-bottom-row bankout-subtract">
+          <div class="bankout-bottom-left">
+            <div class="bankout-bottom-title">SUBTRACT</div>
+            <div class="bankout-bottom-title">Less Charge Tips:</div>
+          </div>
+          <div class="bankout-bottom-right"><span id="bankoutLessChargeTips">$0.00</span></div>
+        </div>
+
+        <div class="bankout-bottom-row bankout-total">
+          <div class="bankout-bottom-left">
+            <div class="bankout-bottom-title">Total Cash Responsibility:</div>
+          </div>
+          <div class="bankout-bottom-right"><span id="bankoutCashResponsibility">$0.00</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="helper-text" style="margin-top: 12px;">
+      This mirrors your paper bankout form using the currently selected date filter.
+    </p>
+  </div>
+
+  <!-- Edit Entry Modal -->
+  <div id="editModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="editTitle">Edit Entry</h3>
+        <button class="modal-close" onclick="closeEditModal()">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label for="editType">Payment Type</label>
+        <select id="editType"></select>
+      </div>
+
+      <div class="form-group">
+        <label for="editAmount">Charge Amount ($)</label>
+        <input type="number" id="editAmount" step="0.01" inputmode="decimal" />
+      </div>
+
+      <div class="form-group">
+        <label for="editTip">Tip Amount ($)</label>
+        <input type="number" id="editTip" step="0.01" inputmode="decimal" />
+      </div>
+
+      <div class="form-group">
+        <label for="editDateTime">Entry Date/Time</label>
+        <input type="datetime-local" id="editDateTime" />
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+        <button class="btn" onclick="saveEditModal()">Save Changes</button>
+      </div>
+
+      <input type="hidden" id="editEntryId" />
+    </div>
+  </div>
+
+  <div id="donateWrapper" class="hidden">
+    <a href="https://cash.app/$Yantento" target="_blank" class="donate-btn">💸Donate💸</a>
+  </div>
+
+  <footer style="text-align:center; margin-top: 40px; font-size: 14px; opacity: 0.6;">
+    &copy; 2025 Bankeze Calculator | Designed by <strong>Yantento</strong>
+  </footer>
+</body>
+</html>
