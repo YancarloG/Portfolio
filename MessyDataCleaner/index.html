@@ -1,0 +1,4058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <!--
+    This viewport tag makes the page scale correctly on phones and tablets.
+    Without it, mobile browsers may render the page as if it were a desktop site.
+  -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!--
+    The text shown in the browser tab.
+  -->
+  <title>DataRefine — Messy Data Cleaner | Developed by Yancarlo Guzman</title>
+
+  <!--
+    SheetJS lets a normal browser read and write Excel files (.xlsx / .xls).
+    The application itself is still one HTML file; this library is loaded from a CDN.
+    CSV files do NOT depend on SheetJS and will still work if the library cannot load.
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    /* ============================================================
+       1) DESIGN TOKENS / VARIABLES
+       ------------------------------------------------------------
+       Keeping commonly reused values here makes the design easy
+       to maintain. Experienced developers may recognize this as a
+       light-weight design system.
+       ============================================================ */
+    :root {
+      --bg: #f5f7fb;
+      --surface: #ffffff;
+      --surface-soft: #f9fafc;
+      --surface-hover: #f3f5f9;
+      --text: #172033;
+      --muted: #68738a;
+      --border: #dfe4ec;
+      --border-strong: #cbd3df;
+      --primary: #315bea;
+      --primary-hover: #2749c5;
+      --primary-soft: #eef2ff;
+      --success: #16794b;
+      --success-soft: #eaf7f0;
+      --warning: #a15c00;
+      --warning-soft: #fff6df;
+      --danger: #bb2b3c;
+      --danger-soft: #fff0f2;
+      --info: #2368a2;
+      --info-soft: #eef6fd;
+
+      --shadow-sm: 0 1px 2px rgba(17, 24, 39, 0.05);
+      --shadow-md: 0 12px 32px rgba(31, 41, 55, 0.08);
+      --shadow-lg: 0 24px 70px rgba(31, 41, 55, 0.12);
+
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+
+      --max-width: 1440px;
+    }
+
+    /* ============================================================
+       2) BASIC PAGE RESET
+       ------------------------------------------------------------
+       Browsers ship with slightly different default spacing.
+       Resetting a few defaults gives us predictable layout.
+       ============================================================ */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family:
+        Inter,
+        ui-sans-serif,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    /* ============================================================
+       3) APP SHELL
+       ============================================================ */
+    .app-shell {
+      width: min(100% - 28px, var(--max-width));
+      margin: 0 auto;
+      padding-bottom: 80px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+
+      /* Blur lets content faintly show through the sticky bar. */
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+
+      background: rgba(245, 247, 251, 0.88);
+      border-bottom: 1px solid rgba(223, 228, 236, 0.9);
+    }
+
+    .topbar-inner {
+      width: min(100% - 28px, var(--max-width));
+      margin: 0 auto;
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+
+      color: white;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+
+      /* The subtle gradient gives the mark personality without
+         making the rest of the interface overly flashy. */
+      background:
+        radial-gradient(circle at 25% 20%, rgba(255,255,255,.35), transparent 30%),
+        linear-gradient(145deg, #315bea, #1d3cba);
+      box-shadow: 0 7px 18px rgba(49, 91, 234, 0.28);
+    }
+
+    .brand-copy {
+      min-width: 0;
+    }
+
+    .brand-name {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+
+    .brand-subtitle {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* ============================================================
+       4) BUTTON SYSTEM
+       ============================================================ */
+    .btn {
+      border: 1px solid transparent;
+      border-radius: 12px;
+      min-height: 42px;
+      padding: 9px 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 700;
+      transition:
+        transform 120ms ease,
+        background 120ms ease,
+        border-color 120ms ease,
+        color 120ms ease,
+        box-shadow 120ms ease;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    .btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 7px 16px rgba(49, 91, 234, 0.18);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .btn-ghost:hover:not(:disabled) {
+      background: var(--surface-hover);
+      color: var(--text);
+    }
+
+    .btn-danger-ghost {
+      background: transparent;
+      color: var(--danger);
+    }
+
+    .btn-danger-ghost:hover:not(:disabled) {
+      background: var(--danger-soft);
+    }
+
+    .btn-small {
+      min-height: 34px;
+      padding: 6px 10px;
+      font-size: 13px;
+      border-radius: 9px;
+    }
+
+    /* ============================================================
+       5) HERO / LANDING AREA
+       ============================================================ */
+    .hero {
+      padding: 72px 0 34px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(340px, 0.9fr);
+      gap: 42px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      color: var(--primary);
+      background: var(--primary-soft);
+      border: 1px solid #dbe3ff;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      margin: 18px 0 16px;
+      max-width: 800px;
+      font-size: clamp(40px, 6vw, 72px);
+      line-height: 0.98;
+      letter-spacing: -0.055em;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 720px;
+      color: var(--muted);
+      font-size: clamp(16px, 2vw, 19px);
+    }
+
+    .hero-notes {
+      margin-top: 25px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .hero-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 11px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      color: #47516a;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    /* ============================================================
+       6) UPLOAD CARD
+       ============================================================ */
+    .upload-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: 18px;
+    }
+
+    .upload-zone {
+      border: 2px dashed #cdd5e2;
+      border-radius: 20px;
+      padding: 34px 24px;
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(49, 91, 234, 0.08), transparent 38%),
+        #fbfcfe;
+      transition:
+        border-color 140ms ease,
+        background 140ms ease,
+        transform 140ms ease;
+    }
+
+    /* JavaScript adds .dragging while a file is physically dragged
+       over the drop area. */
+    .upload-zone.dragging {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      transform: scale(1.005);
+    }
+
+    .upload-icon {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 27px;
+      margin-bottom: 14px;
+    }
+
+    .upload-title {
+      font-size: 19px;
+      font-weight: 800;
+      margin-bottom: 4px;
+      letter-spacing: -0.02em;
+    }
+
+    .upload-copy {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 18px;
+      max-width: 430px;
+    }
+
+    .upload-formats {
+      margin-top: 14px;
+      color: #8a94a7;
+      font-size: 12px;
+    }
+
+    .upload-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    /* The actual operating-system file input is visually hidden.
+       The custom "Choose file" button triggers it with JavaScript. */
+    #fileInput {
+      display: none;
+    }
+
+    .privacy-note {
+      margin-top: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      background: var(--success-soft);
+      color: #37614d;
+      font-size: 12px;
+    }
+
+    /* ============================================================
+       7) MAIN WORKSPACE
+       ------------------------------------------------------------
+       Hidden before a dataset is loaded.
+       ============================================================ */
+    .workspace {
+      display: none;
+      margin-top: 24px;
+    }
+
+    .workspace.active {
+      display: block;
+    }
+
+    .file-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 16px 18px;
+      margin-bottom: 16px;
+    }
+
+    .file-meta {
+      min-width: 0;
+    }
+
+    .file-name {
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      overflow-wrap: anywhere;
+    }
+
+    .file-stats {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .file-banner-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      padding: 16px;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-value {
+      margin-top: 4px;
+      font-size: 28px;
+      font-weight: 850;
+      letter-spacing: -0.04em;
+    }
+
+    .stat-footnote {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* ============================================================
+       8) TWO-COLUMN APPLICATION LAYOUT
+       ============================================================ */
+    .app-grid {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 16px 17px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-title {
+      font-weight: 850;
+      letter-spacing: -0.02em;
+    }
+
+    .panel-subtitle {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .issues-panel {
+      position: sticky;
+      top: 90px;
+      max-height: calc(100vh - 110px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .issue-list {
+      overflow: auto;
+      padding: 8px;
+    }
+
+    .issue-item {
+      width: 100%;
+      text-align: left;
+      border: 1px solid transparent;
+      background: transparent;
+      border-radius: 11px;
+      padding: 11px;
+      display: grid;
+      grid-template-columns: 36px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: start;
+      transition: background 120ms ease, border-color 120ms ease;
+    }
+
+    .issue-item:hover,
+    .issue-item.active {
+      background: var(--surface-hover);
+      border-color: var(--border);
+    }
+
+    .issue-item + .issue-item {
+      margin-top: 3px;
+    }
+
+    .issue-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      flex: 0 0 auto;
+    }
+
+    .issue-icon.warning {
+      background: var(--warning-soft);
+      color: var(--warning);
+    }
+
+    .issue-icon.danger {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .issue-icon.info {
+      background: var(--info-soft);
+      color: var(--info);
+    }
+
+    .issue-icon.success {
+      background: var(--success-soft);
+      color: var(--success);
+    }
+
+    .issue-name {
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .issue-description {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .issue-count {
+      min-width: 28px;
+      height: 25px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: #edf0f5;
+      color: #4c566d;
+      font-size: 11px;
+      font-weight: 850;
+      padding: 0 7px;
+    }
+
+    /* ============================================================
+       9) DATA TOOLBAR AND TABLE
+       ============================================================ */
+    .data-panel {
+      min-width: 0;
+    }
+
+    .data-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      background: #fcfdff;
+    }
+
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: white;
+      padding: 0 10px;
+      min-height: 38px;
+      width: min(320px, 70vw);
+    }
+
+    .search-box input {
+      width: 100%;
+      border: none;
+      outline: none;
+      color: var(--text);
+      background: transparent;
+    }
+
+    .view-toggle {
+      display: inline-flex;
+      padding: 3px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #f6f8fb;
+    }
+
+    .view-toggle button {
+      border: none;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--muted);
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .view-toggle button.active {
+      background: white;
+      color: var(--text);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .table-wrap {
+      overflow: auto;
+      max-height: 620px;
+    }
+
+    table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: max-content;
+      min-width: 100%;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+      white-space: nowrap;
+      max-width: 340px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      background: white;
+    }
+
+    th:last-child,
+    td:last-child {
+      border-right: none;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: #f7f9fc;
+      color: #4e5870;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 850;
+    }
+
+    tbody tr:hover td {
+      background: #fafbfe;
+    }
+
+    .row-number {
+      color: #9aa3b4;
+      background: #fafbfc !important;
+      text-align: right;
+      width: 54px;
+      min-width: 54px;
+      position: sticky;
+      left: 0;
+      z-index: 3;
+    }
+
+    th.row-number {
+      z-index: 7;
+    }
+
+    /* Highlighting classes are added by JavaScript when the user
+       clicks an issue category in the sidebar. */
+    td.cell-warning {
+      background: var(--warning-soft) !important;
+      box-shadow: inset 0 0 0 1px #f4cf77;
+    }
+
+    td.cell-danger {
+      background: var(--danger-soft) !important;
+      box-shadow: inset 0 0 0 1px #f1a5ad;
+    }
+
+    td.cell-info {
+      background: var(--info-soft) !important;
+      box-shadow: inset 0 0 0 1px #a9cee9;
+    }
+
+    tr.row-duplicate td {
+      background: #fff7ed !important;
+    }
+
+    .empty-cell {
+      color: #a0a8b8;
+      font-style: italic;
+    }
+
+    .table-footer {
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      background: #fcfdff;
+    }
+
+    /* ============================================================
+       10) REVIEW DRAWER / ISSUE EXPLANATION
+       ============================================================ */
+    .review-box {
+      margin-top: 16px;
+      display: none;
+    }
+
+    .review-box.active {
+      display: block;
+    }
+
+    .review-content {
+      padding: 16px;
+    }
+
+    .review-explanation {
+      padding: 13px 14px;
+      border-radius: 12px;
+      background: var(--info-soft);
+      color: #315f82;
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
+
+    .suggestion-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .suggestion-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fcfdff;
+    }
+
+    .suggestion-main {
+      min-width: 0;
+    }
+
+    .suggestion-title {
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .suggestion-detail {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .suggestion-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    /* ============================================================
+       11) CLEANING SUMMARY
+       ============================================================ */
+    .summary-card {
+      display: none;
+      margin-top: 16px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(180deg, #f8fffb, #ffffff);
+      border: 1px solid #cfe7d9;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .summary-card.active {
+      display: block;
+    }
+
+    .summary-header {
+      padding: 17px;
+      border-bottom: 1px solid #d9ebe1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .summary-heading {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .summary-check {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--success);
+      color: white;
+      font-weight: 900;
+    }
+
+    .summary-grid {
+      padding: 16px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .summary-metric {
+      padding: 12px;
+      border-radius: 12px;
+      background: white;
+      border: 1px solid #dcece3;
+    }
+
+    .summary-metric strong {
+      display: block;
+      font-size: 22px;
+      letter-spacing: -0.03em;
+    }
+
+    .summary-metric span {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    /* ============================================================
+       12) EMPTY STATE
+       ============================================================ */
+    .empty-state {
+      padding: 42px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .empty-state strong {
+      display: block;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    /* ============================================================
+       13) TOAST NOTIFICATIONS
+       ------------------------------------------------------------
+       Toasts are small temporary messages, e.g. "CSV downloaded".
+       ============================================================ */
+    .toast-container {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 100;
+      display: grid;
+      gap: 9px;
+      pointer-events: none;
+    }
+
+    .toast {
+      width: min(380px, calc(100vw - 36px));
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #172033;
+      color: white;
+      box-shadow: var(--shadow-lg);
+      font-size: 13px;
+      animation: toastIn 180ms ease both;
+    }
+
+    .toast.success {
+      background: #125f3d;
+    }
+
+    .toast.warning {
+      background: #7e4c0a;
+    }
+
+    .toast.error {
+      background: #932334;
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ============================================================
+       14) MODAL
+       ============================================================ */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      background: rgba(17, 24, 39, 0.46);
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-backdrop.active {
+      display: grid;
+    }
+
+    .modal {
+      width: min(650px, 100%);
+      max-height: min(760px, 90vh);
+      overflow: auto;
+      background: white;
+      border-radius: 22px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(255,255,255,.8);
+    }
+
+    .modal-header {
+      padding: 19px 20px 13px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 850;
+      letter-spacing: -0.02em;
+    }
+
+    .modal-body {
+      padding: 20px;
+      color: #48536a;
+      font-size: 14px;
+    }
+
+    .modal-body h3 {
+      color: var(--text);
+      margin: 18px 0 6px;
+      font-size: 14px;
+    }
+
+    .modal-body p {
+      margin: 0 0 10px;
+    }
+
+    .modal-body code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      padding: 2px 5px;
+      border-radius: 5px;
+      background: #f0f2f6;
+      color: #3b455d;
+      font-size: 12px;
+    }
+
+    /* ============================================================
+       15) FOOTER
+       ============================================================ */
+    .footer {
+      margin-top: 48px;
+      padding: 24px 0;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .footer strong {
+      color: var(--text);
+    }
+
+    /* ============================================================
+       16) RESPONSIVE DESIGN
+       ============================================================ */
+    @media (max-width: 1040px) {
+      .hero {
+        grid-template-columns: 1fr;
+        padding-top: 48px;
+      }
+
+      .app-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .issues-panel {
+        position: static;
+        max-height: none;
+      }
+
+      .issue-list {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app-shell {
+        width: min(100% - 18px, var(--max-width));
+      }
+
+      .topbar-inner {
+        width: min(100% - 18px, var(--max-width));
+      }
+
+      .hero {
+        padding-top: 32px;
+        gap: 24px;
+      }
+
+      .hero h1 {
+        font-size: 44px;
+      }
+
+      .stats-grid,
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .file-banner {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .issue-list {
+        grid-template-columns: 1fr;
+      }
+
+      .suggestion-row {
+        grid-template-columns: 1fr;
+      }
+
+      .suggestion-actions {
+        justify-content: flex-start;
+      }
+
+      .brand-subtitle {
+        display: none;
+      }
+
+      .topbar .btn-secondary {
+        display: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid,
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h1 {
+        font-size: 38px;
+      }
+
+      .upload-zone {
+        padding: 26px 14px;
+      }
+
+      .topbar-actions .btn span.label {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ============================================================
+       TOP NAVIGATION
+       ============================================================ -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand" aria-label="DataRefine home">
+        <div class="brand-mark">D</div>
+
+        <div class="brand-copy">
+          <div class="brand-name">DataRefine</div>
+          <div class="brand-subtitle">A browser-based messy data cleaner</div>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <button class="btn btn-secondary btn-small" id="howItWorksButton">
+          How it works
+        </button>
+
+        <button class="btn btn-primary btn-small" id="topChooseFileButton">
+          <span aria-hidden="true">＋</span>
+          <span class="label">Open data file</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <!-- ==========================================================
+         LANDING / INTRODUCTION
+         ========================================================== -->
+    <section class="hero" id="heroSection">
+      <div>
+        <span class="eyebrow">Portfolio Project · Data Quality</span>
+
+        <h1>Turn messy spreadsheets into cleaner, more trustworthy data.</h1>
+
+        <p>
+          DataRefine checks CSV and Excel files for common quality problems,
+          explains what it finds in plain English, and lets you review safe
+          corrections before exporting a cleaner copy.
+        </p>
+
+        <div class="hero-notes" aria-label="Key features">
+          <span class="hero-note">✓ Runs in your browser</span>
+          <span class="hero-note">✓ CSV + Excel support</span>
+          <span class="hero-note">✓ Beginner-friendly explanations</span>
+          <span class="hero-note">✓ Review before changing data</span>
+        </div>
+      </div>
+
+      <!--
+        This upload card is the user's main entry point.
+        It supports clicking AND drag-and-drop.
+      -->
+      <div class="upload-card">
+        <div
+          class="upload-zone"
+          id="uploadZone"
+          role="button"
+          tabindex="0"
+          aria-label="Upload a CSV or Excel file"
+        >
+          <div class="upload-icon" aria-hidden="true">⇧</div>
+
+          <div class="upload-title">Drop a spreadsheet here</div>
+
+          <div class="upload-copy">
+            I’ll scan it for duplicates, missing values, inconsistent text,
+            suspicious numbers, extra whitespace, and other common issues.
+          </div>
+
+          <div class="upload-actions">
+            <button class="btn btn-primary" id="chooseFileButton">
+              Choose file
+            </button>
+
+            <button class="btn btn-secondary" id="loadDemoButton">
+              Try sample data
+            </button>
+          </div>
+
+          <div class="upload-formats">
+            Supports .csv, .xlsx and .xls · Best with a header row
+          </div>
+        </div>
+
+        <div class="privacy-note">
+          <span aria-hidden="true">🔒</span>
+          <span>
+            <strong>Your file stays on this device.</strong>
+            DataRefine processes the file in your browser and does not upload
+            the spreadsheet to a server.
+          </span>
+        </div>
+      </div>
+
+      <!--
+        The real <input type="file"> is hidden and is triggered by the
+        prettier buttons above.
+      -->
+      <input
+        id="fileInput"
+        type="file"
+        accept=".csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+      />
+    </section>
+
+    <!-- ==========================================================
+         APPLICATION WORKSPACE
+         Hidden until a user loads data.
+         ========================================================== -->
+    <section class="workspace" id="workspace">
+      <!-- File information + reset/export buttons -->
+      <div class="file-banner">
+        <div class="file-meta">
+          <div class="file-name" id="fileName">No file loaded</div>
+          <div class="file-stats" id="fileStats">—</div>
+        </div>
+
+        <div class="file-banner-actions">
+          <button class="btn btn-secondary btn-small" id="rescanButton">
+            Rescan
+          </button>
+
+          <button class="btn btn-secondary btn-small" id="resetChangesButton">
+            Reset changes
+          </button>
+
+          <button class="btn btn-danger-ghost btn-small" id="closeFileButton">
+            Close file
+          </button>
+        </div>
+      </div>
+
+      <!-- High-level numbers give the user a quick understanding of
+           the dataset before they inspect individual issues. -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Rows</div>
+          <div class="stat-value" id="rowCountStat">0</div>
+          <div class="stat-footnote">records in the current dataset</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">Columns</div>
+          <div class="stat-value" id="columnCountStat">0</div>
+          <div class="stat-footnote">fields detected from the header row</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">Issues found</div>
+          <div class="stat-value" id="issueCountStat">0</div>
+          <div class="stat-footnote">potential data-quality problems</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">Quality score</div>
+          <div class="stat-value" id="qualityScoreStat">100</div>
+          <div class="stat-footnote">simple portfolio-demo health score</div>
+        </div>
+      </div>
+
+      <div class="app-grid">
+        <!-- ======================================================
+             LEFT SIDEBAR: ISSUE CATEGORIES
+             ====================================================== -->
+        <aside class="panel issues-panel">
+          <div class="panel-header">
+            <div class="panel-title">What needs attention</div>
+            <div class="panel-subtitle">
+              Choose a category to highlight affected cells.
+            </div>
+          </div>
+
+          <div class="issue-list" id="issueList">
+            <!-- JavaScript creates issue cards here. -->
+          </div>
+        </aside>
+
+        <!-- ======================================================
+             RIGHT SIDE: TABLE + CONTROLS
+             ====================================================== -->
+        <div>
+          <section class="panel data-panel">
+            <div class="data-toolbar">
+              <div class="toolbar-group">
+                <div class="search-box">
+                  <span aria-hidden="true">⌕</span>
+
+                  <input
+                    id="tableSearch"
+                    type="search"
+                    placeholder="Search visible data…"
+                    aria-label="Search rows"
+                  />
+                </div>
+
+                <button class="btn btn-secondary btn-small" id="safeFixButton">
+                  Apply safe fixes
+                </button>
+              </div>
+
+              <div class="toolbar-group">
+                <div class="view-toggle" aria-label="Data view">
+                  <button class="active" id="currentViewButton">
+                    Current
+                  </button>
+                  <button id="originalViewButton">
+                    Original
+                  </button>
+                </div>
+
+                <button
+                  class="btn btn-primary btn-small"
+                  id="exportButton"
+                  disabled
+                >
+                  Export clean file
+                </button>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table id="dataTable" aria-label="Uploaded spreadsheet data">
+                <thead id="tableHead"></thead>
+                <tbody id="tableBody"></tbody>
+              </table>
+            </div>
+
+            <div class="table-footer">
+              <span id="tableFooterText">No rows displayed.</span>
+              <span>Showing up to 250 rows for browser performance.</span>
+            </div>
+          </section>
+
+          <!-- ====================================================
+               REVIEW / EXPLANATION AREA
+               Appears after an issue category is selected.
+               ==================================================== -->
+          <section class="panel review-box" id="reviewBox">
+            <div class="panel-header">
+              <div class="panel-title" id="reviewTitle">Review issue</div>
+              <div class="panel-subtitle" id="reviewSubtitle">
+                Understand the issue before changing your data.
+              </div>
+            </div>
+
+            <div class="review-content">
+              <div
+                class="review-explanation"
+                id="reviewExplanation"
+              ></div>
+
+              <div class="suggestion-list" id="suggestionList"></div>
+            </div>
+          </section>
+
+          <!-- ====================================================
+               CLEANING SUMMARY
+               Appears once changes have been made.
+               ==================================================== -->
+          <section class="summary-card" id="summaryCard">
+            <div class="summary-header">
+              <div class="summary-heading">
+                <div class="summary-check">✓</div>
+                <div>
+                  <div class="panel-title">Cleaner copy ready</div>
+                  <div class="panel-subtitle">
+                    Your original file has not been overwritten.
+                  </div>
+                </div>
+              </div>
+
+              <button class="btn btn-primary" id="summaryExportButton">
+                Download cleaned file
+              </button>
+            </div>
+
+            <div class="summary-grid">
+              <div class="summary-metric">
+                <strong id="summaryDuplicates">0</strong>
+                <span>duplicate rows removed</span>
+              </div>
+
+              <div class="summary-metric">
+                <strong id="summaryWhitespace">0</strong>
+                <span>whitespace fixes</span>
+              </div>
+
+              <div class="summary-metric">
+                <strong id="summaryText">0</strong>
+                <span>safe text-format fixes</span>
+              </div>
+
+              <div class="summary-metric">
+                <strong id="summaryRemaining">0</strong>
+                <span>items still worth reviewing</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         FOOTER / CREDIT
+         ========================================================== -->
+    <footer class="footer">
+      <div>
+        <strong>DataRefine</strong> · Portfolio project developed by
+        <strong>Yancarlo Guzman</strong>
+      </div>
+
+      <div>
+        Built with HTML, CSS and JavaScript · Spreadsheet processing happens locally
+      </div>
+    </footer>
+  </main>
+
+  <!-- ============================================================
+       HOW-IT-WORKS MODAL
+       ============================================================ -->
+  <div class="modal-backdrop" id="howModal">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="howModalTitle"
+    >
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="howModalTitle">
+            How DataRefine works
+          </div>
+
+          <div class="panel-subtitle">
+            A plain-English look at what this project is doing.
+          </div>
+        </div>
+
+        <button class="btn btn-ghost btn-small" id="closeHowModalButton">
+          ✕
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p>
+          DataRefine is a browser-based data-quality project. It takes a
+          spreadsheet, converts it into a JavaScript data structure, checks
+          that data against a small set of quality rules, and highlights
+          records that may deserve attention.
+        </p>
+
+        <h3>1. Read the file</h3>
+        <p>
+          CSV files are parsed directly by JavaScript. Excel files use the
+          open-source <code>SheetJS</code> library so the browser can read
+          workbook cells without needing a backend server.
+        </p>
+
+        <h3>2. Scan for common issues</h3>
+        <p>
+          The current rules look for blank values, exact duplicate rows,
+          leading/trailing whitespace, inconsistent capitalization,
+          numeric outliers and a few category-format inconsistencies.
+        </p>
+
+        <h3>3. Separate safe fixes from uncertain ones</h3>
+        <p>
+          Trimming accidental spaces is usually safe. Guessing whether
+          <code>Flordia</code> means <code>Florida</code> is not. The tool
+          automatically offers low-risk corrections and leaves uncertain
+          changes for human review.
+        </p>
+
+        <h3>4. Keep the original intact</h3>
+        <p>
+          Changes are made to a copy of the loaded dataset. The original is
+          preserved inside the browser session so the user can compare or
+          reset at any time.
+        </p>
+
+        <h3>5. Export a cleaner copy</h3>
+        <p>
+          The user can download a CSV or Excel copy of the cleaned data.
+          Nothing is silently uploaded or written back to the original file.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast messages are inserted here by JavaScript. -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    "use strict";
+
+    /* ============================================================
+       JAVASCRIPT GUIDE
+       ------------------------------------------------------------
+       This script is intentionally heavily commented.
+
+       At a high level, the application does five jobs:
+
+       1. Load a spreadsheet.
+       2. Turn rows/cells into normal JavaScript data.
+       3. Scan that data for common quality problems.
+       4. Let a human review or apply corrections.
+       5. Export the cleaned copy.
+
+       No application server is required.
+       ============================================================ */
+
+    /* ============================================================
+       1) CENTRAL APPLICATION STATE
+       ------------------------------------------------------------
+       Rather than spreading important data across many unrelated
+       variables, we keep the current state in one object.
+
+       This is a common front-end pattern. Frameworks such as React,
+       Vue and Redux formalize the same general idea.
+       ============================================================ */
+    const appState = {
+      /* Basic information about the currently loaded file. */
+      fileName: "",
+      fileType: "",
+      activeSheetName: "",
+
+      /*
+        headers:
+        An array containing column names.
+
+        Example:
+        ["Name", "Email", "State", "Age"]
+      */
+      headers: [],
+
+      /*
+        originalRows:
+        The untouched data as it existed when first loaded.
+
+        currentRows:
+        The editable copy that fixes are applied to.
+      */
+      originalRows: [],
+      currentRows: [],
+
+      /*
+        issues:
+        Results from the most recent quality scan.
+        Each issue includes a type, affected cells/rows and metadata.
+      */
+      issues: [],
+
+      /*
+        selectedIssueType controls which problem is highlighted.
+      */
+      selectedIssueType: "all",
+
+      /*
+        tableView decides whether the table displays original data
+        or the current, potentially cleaned copy.
+      */
+      tableView: "current",
+
+      /*
+        searchText stores the user's table search.
+      */
+      searchText: "",
+
+      /*
+        changeLog tracks what the cleaner has changed.
+        This is useful for the summary card and is also a basic form
+        of audit trail.
+      */
+      changeLog: {
+        duplicatesRemoved: 0,
+        whitespaceFixed: 0,
+        textFixed: 0,
+        manualFixes: 0
+      },
+
+      /*
+        maximumRowsToRender prevents a giant spreadsheet from trying
+        to place tens of thousands of HTML rows onto the page at once.
+        The underlying data can still contain more records.
+      */
+      maximumRowsToRender: 250
+    };
+
+    /* ============================================================
+       2) CACHE IMPORTANT HTML ELEMENTS
+       ------------------------------------------------------------
+       document.getElementById(...) searches the page for an element.
+
+       We save references here once so later code is easier to read.
+       ============================================================ */
+    const elements = {
+      fileInput: document.getElementById("fileInput"),
+      chooseFileButton: document.getElementById("chooseFileButton"),
+      topChooseFileButton: document.getElementById("topChooseFileButton"),
+      loadDemoButton: document.getElementById("loadDemoButton"),
+      uploadZone: document.getElementById("uploadZone"),
+
+      workspace: document.getElementById("workspace"),
+      heroSection: document.getElementById("heroSection"),
+
+      fileName: document.getElementById("fileName"),
+      fileStats: document.getElementById("fileStats"),
+
+      rowCountStat: document.getElementById("rowCountStat"),
+      columnCountStat: document.getElementById("columnCountStat"),
+      issueCountStat: document.getElementById("issueCountStat"),
+      qualityScoreStat: document.getElementById("qualityScoreStat"),
+
+      issueList: document.getElementById("issueList"),
+
+      tableHead: document.getElementById("tableHead"),
+      tableBody: document.getElementById("tableBody"),
+      tableSearch: document.getElementById("tableSearch"),
+      tableFooterText: document.getElementById("tableFooterText"),
+
+      currentViewButton: document.getElementById("currentViewButton"),
+      originalViewButton: document.getElementById("originalViewButton"),
+
+      safeFixButton: document.getElementById("safeFixButton"),
+      exportButton: document.getElementById("exportButton"),
+      summaryExportButton: document.getElementById("summaryExportButton"),
+      rescanButton: document.getElementById("rescanButton"),
+      resetChangesButton: document.getElementById("resetChangesButton"),
+      closeFileButton: document.getElementById("closeFileButton"),
+
+      reviewBox: document.getElementById("reviewBox"),
+      reviewTitle: document.getElementById("reviewTitle"),
+      reviewSubtitle: document.getElementById("reviewSubtitle"),
+      reviewExplanation: document.getElementById("reviewExplanation"),
+      suggestionList: document.getElementById("suggestionList"),
+
+      summaryCard: document.getElementById("summaryCard"),
+      summaryDuplicates: document.getElementById("summaryDuplicates"),
+      summaryWhitespace: document.getElementById("summaryWhitespace"),
+      summaryText: document.getElementById("summaryText"),
+      summaryRemaining: document.getElementById("summaryRemaining"),
+
+      howItWorksButton: document.getElementById("howItWorksButton"),
+      howModal: document.getElementById("howModal"),
+      closeHowModalButton: document.getElementById("closeHowModalButton"),
+
+      toastContainer: document.getElementById("toastContainer")
+    };
+
+    /* ============================================================
+       3) SMALL GENERAL-PURPOSE HELPERS
+       ============================================================ */
+
+    /**
+     * Creates a completely separate copy of JSON-like data.
+     *
+     * Why:
+     * JavaScript arrays/objects normally share references.
+     * We do not want edits to currentRows to accidentally change
+     * originalRows.
+     */
+    function deepClone(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    /**
+     * Escapes HTML special characters before data is inserted into
+     * innerHTML.
+     *
+     * Why:
+     * A spreadsheet cell could contain text such as "<script>".
+     * We want to DISPLAY that as text, not let the browser interpret
+     * it as actual HTML.
+     */
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    /**
+     * Returns true for values that should be treated as "missing".
+     *
+     * We count:
+     * - null
+     * - undefined
+     * - an empty string
+     * - a string made only of whitespace
+     *
+     * We intentionally DO NOT treat 0 as missing.
+     */
+    function isBlank(value) {
+      return (
+        value === null ||
+        value === undefined ||
+        (typeof value === "string" && value.trim() === "")
+      );
+    }
+
+    /**
+     * Converts a value into a stable string for duplicate comparison.
+     *
+     * Example:
+     * "  Florida " becomes "florida"
+     *
+     * This makes comparison a little more forgiving.
+     */
+    function normalizeForComparison(value) {
+      if (value === null || value === undefined) {
+        return "";
+      }
+
+      return String(value).trim().toLowerCase();
+    }
+
+    /**
+     * Creates a simple fingerprint for an entire row.
+     *
+     * We join normalized cell values with a rare separator so rows
+     * can be quickly compared using a Set/Map.
+     */
+    function rowFingerprint(row) {
+      return appState.headers
+        .map((header) => normalizeForComparison(row[header]))
+        .join("␟");
+    }
+
+    /**
+     * Checks whether a JavaScript value represents a finite number.
+     *
+     * Numeric strings such as "42" are accepted.
+     * Blank strings are not.
+     */
+    function isNumeric(value) {
+      if (isBlank(value)) {
+        return false;
+      }
+
+      const number = Number(value);
+
+      return Number.isFinite(number);
+    }
+
+    /**
+     * Displays a temporary message in the lower-right corner.
+     */
+    function showToast(message, type = "default") {
+      const toast = document.createElement("div");
+
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+
+      elements.toastContainer.appendChild(toast);
+
+      /*
+        Remove the toast after a few seconds.
+        The browser schedules this function without blocking the app.
+      */
+      window.setTimeout(() => {
+        toast.remove();
+      }, 3200);
+    }
+
+    /**
+     * Converts a filename into a safer cleaned filename.
+     *
+     * Example:
+     * customer-data.xlsx
+     * becomes
+     * customer-data-cleaned.xlsx
+     */
+    function cleanedFileName(extension) {
+      const original = appState.fileName || "cleaned-data";
+
+      const baseName = original.replace(/\.[^/.]+$/, "");
+
+      return `${baseName}-cleaned.${extension}`;
+    }
+
+    /* ============================================================
+       4) CSV PARSER
+       ------------------------------------------------------------
+       This is a small CSV parser written for the project instead of
+       depending on another library.
+
+       It supports:
+       - commas inside quoted cells
+       - line breaks inside quoted cells
+       - escaped quotes written as ""
+
+       For very unusual CSV dialects, a production system might use
+       a dedicated parser such as Papa Parse.
+       ============================================================ */
+    function parseCsvText(csvText) {
+      const rows = [];
+
+      let currentRow = [];
+      let currentCell = "";
+      let insideQuotes = false;
+
+      for (let index = 0; index < csvText.length; index += 1) {
+        const character = csvText[index];
+        const nextCharacter = csvText[index + 1];
+
+        /* When inside quotes, most characters belong to the cell. */
+        if (insideQuotes) {
+          /*
+            CSV represents a literal quote inside a quoted value as:
+            ""
+          */
+          if (character === '"' && nextCharacter === '"') {
+            currentCell += '"';
+            index += 1;
+            continue;
+          }
+
+          /* A single quote ends the quoted section. */
+          if (character === '"') {
+            insideQuotes = false;
+            continue;
+          }
+
+          currentCell += character;
+          continue;
+        }
+
+        /* Outside quotes, a quote begins a quoted cell. */
+        if (character === '"') {
+          insideQuotes = true;
+          continue;
+        }
+
+        /* A comma ends the current cell. */
+        if (character === ",") {
+          currentRow.push(currentCell);
+          currentCell = "";
+          continue;
+        }
+
+        /*
+          A newline ends the current row.
+
+          Windows often stores a newline as two characters:
+          carriage return + line feed (\r\n)
+
+          We skip the \r and let \n close the row.
+        */
+        if (character === "\r" && nextCharacter === "\n") {
+          continue;
+        }
+
+        if (character === "\n" || character === "\r") {
+          currentRow.push(currentCell);
+          rows.push(currentRow);
+
+          currentRow = [];
+          currentCell = "";
+          continue;
+        }
+
+        currentCell += character;
+      }
+
+      /*
+        Add the final cell/row because most files do not end with an
+        extra comma or newline.
+      */
+      currentRow.push(currentCell);
+      rows.push(currentRow);
+
+      /*
+        Remove fully blank rows at the very end.
+        We leave blank rows inside the dataset alone.
+      */
+      while (
+        rows.length > 0 &&
+        rows[rows.length - 1].every((cell) => String(cell).trim() === "")
+      ) {
+        rows.pop();
+      }
+
+      return rows;
+    }
+
+    /* ============================================================
+       5) CONVERT 2D SHEET ARRAYS INTO OBJECT ROWS
+       ------------------------------------------------------------
+       Spreadsheet libraries often return data as:
+       [
+         ["Name", "Email", "State"],
+         ["Ana", "a@email.com", "FL"]
+       ]
+
+       Our UI is easier to work with when each row becomes:
+       {
+         Name: "Ana",
+         Email: "a@email.com",
+         State: "FL"
+       }
+       ============================================================ */
+    function arraySheetToObjects(sheetRows) {
+      if (!Array.isArray(sheetRows) || sheetRows.length === 0) {
+        throw new Error("The spreadsheet appears to be empty.");
+      }
+
+      /*
+        Use the first row as the header row.
+        If a header is blank, create a readable fallback name.
+      */
+      const rawHeaders = sheetRows[0];
+
+      const seenHeaders = new Map();
+
+      const headers = rawHeaders.map((value, index) => {
+        let candidate = String(value ?? "").trim();
+
+        if (!candidate) {
+          candidate = `Column ${index + 1}`;
+        }
+
+        /*
+          Duplicate header names create ambiguous objects, e.g.
+          { Name: "A", Name: "B" }.
+
+          To keep all columns accessible we rename repeated headers:
+          Name, Name (2), Name (3), ...
+        */
+        const count = seenHeaders.get(candidate) || 0;
+
+        seenHeaders.set(candidate, count + 1);
+
+        if (count > 0) {
+          return `${candidate} (${count + 1})`;
+        }
+
+        return candidate;
+      });
+
+      /*
+        Every remaining spreadsheet row becomes an object.
+      */
+      const rows = sheetRows.slice(1).map((sheetRow) => {
+        const objectRow = {};
+
+        headers.forEach((header, columnIndex) => {
+          objectRow[header] =
+            sheetRow[columnIndex] === undefined
+              ? ""
+              : sheetRow[columnIndex];
+        });
+
+        return objectRow;
+      });
+
+      return { headers, rows };
+    }
+
+    /* ============================================================
+       6) FILE READING
+       ============================================================ */
+
+    /**
+     * Main entry point for a user-selected file.
+     */
+    async function loadUserFile(file) {
+      if (!file) {
+        return;
+      }
+
+      const extension =
+        file.name.split(".").pop()?.toLowerCase() || "";
+
+      try {
+        if (extension === "csv") {
+          await loadCsvFile(file);
+          return;
+        }
+
+        if (extension === "xlsx" || extension === "xls") {
+          await loadExcelFile(file);
+          return;
+        }
+
+        throw new Error(
+          "Unsupported file type. Please choose a CSV, XLSX or XLS file."
+        );
+      } catch (error) {
+        console.error(error);
+        showToast(error.message || "Could not read that file.", "error");
+      } finally {
+        /*
+          Clearing the file input lets a user choose the SAME file
+          again later and still trigger the change event.
+        */
+        elements.fileInput.value = "";
+      }
+    }
+
+    /**
+     * Reads a normal CSV using the browser's built-in FileReader API.
+     */
+    function loadCsvFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          try {
+            const rawRows = parseCsvText(String(reader.result || ""));
+
+            const { headers, rows } = arraySheetToObjects(rawRows);
+
+            initializeDataset({
+              fileName: file.name,
+              fileType: "csv",
+              sheetName: "CSV",
+              headers,
+              rows
+            });
+
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        };
+
+        reader.onerror = () => {
+          reject(new Error("The browser could not read that CSV file."));
+        };
+
+        reader.readAsText(file);
+      });
+    }
+
+    /**
+     * Reads an Excel workbook using SheetJS.
+     */
+    function loadExcelFile(file) {
+      return new Promise((resolve, reject) => {
+        /*
+          SheetJS is loaded from the <script> tag in <head>.
+          If the CDN is blocked or offline, XLSX will be undefined.
+        */
+        if (typeof XLSX === "undefined") {
+          reject(
+            new Error(
+              "Excel support could not load. CSV files still work, or reconnect to the internet and refresh."
+            )
+          );
+          return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          try {
+            const workbook = XLSX.read(reader.result, {
+              type: "array",
+              cellDates: true
+            });
+
+            if (!workbook.SheetNames.length) {
+              throw new Error("No worksheets were found in that workbook.");
+            }
+
+            /*
+              To keep the interface simple, this portfolio version loads
+              the first worksheet in the workbook.
+            */
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+
+            /*
+              header: 1 tells SheetJS to return a two-dimensional array.
+              defval: "" prevents missing cells from becoming undefined.
+            */
+            const rawRows = XLSX.utils.sheet_to_json(sheet, {
+              header: 1,
+              defval: "",
+              raw: false
+            });
+
+            const { headers, rows } = arraySheetToObjects(rawRows);
+
+            initializeDataset({
+              fileName: file.name,
+              fileType: "excel",
+              sheetName,
+              headers,
+              rows
+            });
+
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        };
+
+        reader.onerror = () => {
+          reject(new Error("The browser could not read that Excel file."));
+        };
+
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    /* ============================================================
+       7) SAMPLE DATA
+       ------------------------------------------------------------
+       A recruiter/hiring manager should be able to understand the
+       project without finding a spreadsheet first.
+
+       The demo intentionally includes:
+       - exact/near duplicates
+       - blank email
+       - inconsistent capitalization
+       - extra whitespace
+       - suspicious ages
+       - inconsistent state formats
+       ============================================================ */
+    function loadDemoData() {
+      const headers = [
+        "Customer",
+        "Email",
+        "State",
+        "Age",
+        "Plan",
+        "Monthly Spend"
+      ];
+
+      const rows = [
+        {
+          Customer: "Maya Chen",
+          Email: "maya.chen@example.com",
+          State: "FL",
+          Age: "29",
+          Plan: "Premium",
+          "Monthly Spend": "82.40"
+        },
+        {
+          Customer: "David Ortiz ",
+          Email: " DAVID.ORTIZ@example.com ",
+          State: "florida",
+          Age: "44",
+          Plan: "premium",
+          "Monthly Spend": "91.15"
+        },
+        {
+          Customer: "Jordan Lee",
+          Email: "",
+          State: "New York",
+          Age: "31",
+          Plan: "Standard",
+          "Monthly Spend": "51.20"
+        },
+        {
+          Customer: "Chris Patel",
+          Email: "chris.patel@example.com",
+          State: "Flordia",
+          Age: "-4",
+          Plan: "Basic",
+          "Monthly Spend": "22.10"
+        },
+        {
+          Customer: "Maya Chen",
+          Email: "maya.chen@example.com",
+          State: "FL",
+          Age: "29",
+          Plan: "Premium",
+          "Monthly Spend": "82.40"
+        },
+        {
+          Customer: "Noah Williams",
+          Email: "noah@example.com",
+          State: "CA",
+          Age: "118",
+          Plan: "STANDARD",
+          "Monthly Spend": "47.05"
+        },
+        {
+          Customer: "Ava Thompson",
+          Email: "ava@example.com",
+          State: "CA",
+          Age: "36",
+          Plan: "Standard",
+          "Monthly Spend": "54.80"
+        },
+        {
+          Customer: "Marcus Reed",
+          Email: "marcus@example.com",
+          State: "NY",
+          Age: "40",
+          Plan: "Basic",
+          "Monthly Spend": "25.60"
+        },
+        {
+          Customer: "Sofia Gomez",
+          Email: "sofia@example.com",
+          State: "NY",
+          Age: "35",
+          Plan: "Basic",
+          "Monthly Spend": "26.10"
+        },
+        {
+          Customer: "Ian Brooks",
+          Email: "ian@example.com",
+          State: "FL",
+          Age: "33",
+          Plan: "Premium",
+          "Monthly Spend": "89.70"
+        }
+      ];
+
+      initializeDataset({
+        fileName: "sample-customer-data.csv",
+        fileType: "csv",
+        sheetName: "Demo",
+        headers,
+        rows
+      });
+
+      showToast("Sample dataset loaded.", "success");
+    }
+
+    /* ============================================================
+       8) INITIALIZE A NEW DATASET
+       ============================================================ */
+    function initializeDataset({
+      fileName,
+      fileType,
+      sheetName,
+      headers,
+      rows
+    }) {
+      appState.fileName = fileName;
+      appState.fileType = fileType;
+      appState.activeSheetName = sheetName;
+      appState.headers = headers;
+
+      appState.originalRows = deepClone(rows);
+      appState.currentRows = deepClone(rows);
+
+      appState.selectedIssueType = "all";
+      appState.tableView = "current";
+      appState.searchText = "";
+
+      appState.changeLog = {
+        duplicatesRemoved: 0,
+        whitespaceFixed: 0,
+        textFixed: 0,
+        manualFixes: 0
+      };
+
+      elements.tableSearch.value = "";
+
+      scanDataset();
+      renderApplication();
+
+      /*
+        Show the workspace and bring it into view.
+      */
+      elements.workspace.classList.add("active");
+
+      elements.workspace.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+
+    /* ============================================================
+       9) DATA-QUALITY SCANNING
+       ------------------------------------------------------------
+       This is the "brain" of the project.
+
+       The scanner returns issue objects. It DOES NOT automatically
+       mutate the dataset.
+
+       Separating DETECTION from CORRECTION is intentional:
+       software should first identify a problem, then decide whether
+       it is safe to correct.
+       ============================================================ */
+    function scanDataset() {
+      const issues = [];
+
+      detectMissingValues(issues);
+      detectDuplicateRows(issues);
+      detectWhitespace(issues);
+      detectInconsistentCapitalization(issues);
+      detectSuspiciousNumbers(issues);
+      detectPossibleStateInconsistencies(issues);
+
+      appState.issues = issues;
+    }
+
+    /**
+     * Missing values
+     */
+    function detectMissingValues(issues) {
+      appState.currentRows.forEach((row, rowIndex) => {
+        appState.headers.forEach((header) => {
+          if (isBlank(row[header])) {
+            issues.push({
+              type: "missing",
+              severity: "warning",
+              rowIndex,
+              column: header,
+              value: row[header],
+              message: `Blank value in "${header}".`
+            });
+          }
+        });
+      });
+    }
+
+    /**
+     * Exact/normalized duplicate rows
+     */
+    function detectDuplicateRows(issues) {
+      const firstSeen = new Map();
+
+      appState.currentRows.forEach((row, rowIndex) => {
+        const fingerprint = rowFingerprint(row);
+
+        if (firstSeen.has(fingerprint)) {
+          issues.push({
+            type: "duplicate",
+            severity: "warning",
+            rowIndex,
+            duplicateOfRowIndex: firstSeen.get(fingerprint),
+            message: `Row ${rowIndex + 2} appears to duplicate row ${
+              firstSeen.get(fingerprint) + 2
+            }.`
+          });
+        } else {
+          firstSeen.set(fingerprint, rowIndex);
+        }
+      });
+    }
+
+    /**
+     * Leading / trailing whitespace
+     *
+     * Example:
+     * "  David Ortiz " -> "David Ortiz"
+     */
+    function detectWhitespace(issues) {
+      appState.currentRows.forEach((row, rowIndex) => {
+        appState.headers.forEach((header) => {
+          const value = row[header];
+
+          if (
+            typeof value === "string" &&
+            value.length > 0 &&
+            value !== value.trim()
+          ) {
+            issues.push({
+              type: "whitespace",
+              severity: "info",
+              rowIndex,
+              column: header,
+              value,
+              suggestedValue: value.trim(),
+              safeFix: true,
+              message: `Extra spaces detected in "${header}".`
+            });
+          }
+        });
+      });
+    }
+
+    /**
+     * Inconsistent capitalization
+     *
+     * We only attempt this for columns that behave like categories:
+     * - enough repeated values
+     * - not mostly unique identifiers
+     *
+     * Example:
+     * Premium
+     * premium
+     * PREMIUM
+     */
+    function detectInconsistentCapitalization(issues) {
+      appState.headers.forEach((header) => {
+        const values = appState.currentRows
+          .map((row) => row[header])
+          .filter((value) => typeof value === "string" && value.trim() !== "");
+
+        if (values.length < 3) {
+          return;
+        }
+
+        /*
+          Build a map where differently-cased versions share one key.
+        */
+        const groups = new Map();
+
+        values.forEach((value) => {
+          const trimmed = value.trim();
+          const key = trimmed.toLowerCase();
+
+          if (!groups.has(key)) {
+            groups.set(key, []);
+          }
+
+          groups.get(key).push(trimmed);
+        });
+
+        /*
+          Columns like emails/names often contain mostly unique values.
+          We avoid pretending those are category fields.
+        */
+        const uniqueRatio = groups.size / values.length;
+
+        if (uniqueRatio > 0.7) {
+          return;
+        }
+
+        groups.forEach((groupValues, key) => {
+          const distinctForms = [...new Set(groupValues)];
+
+          if (distinctForms.length < 2) {
+            return;
+          }
+
+          /*
+            Choose the most common formatting as the suggested format.
+          */
+          const frequency = new Map();
+
+          groupValues.forEach((value) => {
+            frequency.set(value, (frequency.get(value) || 0) + 1);
+          });
+
+          const canonicalValue = [...frequency.entries()]
+            .sort((a, b) => b[1] - a[1])[0][0];
+
+          appState.currentRows.forEach((row, rowIndex) => {
+            const rawValue = row[header];
+
+            if (
+              typeof rawValue === "string" &&
+              rawValue.trim().toLowerCase() === key &&
+              rawValue.trim() !== canonicalValue
+            ) {
+              issues.push({
+                type: "capitalization",
+                severity: "info",
+                rowIndex,
+                column: header,
+                value: rawValue,
+                suggestedValue: canonicalValue,
+                safeFix: true,
+                message: `"${rawValue}" uses different capitalization than "${canonicalValue}".`
+              });
+            }
+          });
+        });
+      });
+    }
+
+    /**
+     * Suspicious numeric values
+     *
+     * Two checks are used:
+     *
+     * A) domain-inspired "Age" sanity range
+     * B) generic IQR outlier detection for numeric columns
+     *
+     * An outlier is NOT automatically an error, so these remain
+     * review-only suggestions.
+     */
+    function detectSuspiciousNumbers(issues) {
+      appState.headers.forEach((header) => {
+        const numericCells = [];
+
+        appState.currentRows.forEach((row, rowIndex) => {
+          if (isNumeric(row[header])) {
+            numericCells.push({
+              rowIndex,
+              value: Number(row[header])
+            });
+          }
+        });
+
+        if (numericCells.length < 4) {
+          return;
+        }
+
+        /*
+          Special case for fields whose header contains the word "age".
+          This is deliberately transparent and easy to explain.
+        */
+        if (header.toLowerCase().includes("age")) {
+          numericCells.forEach(({ rowIndex, value }) => {
+            if (value < 0 || value > 110) {
+              issues.push({
+                type: "number",
+                severity: "danger",
+                rowIndex,
+                column: header,
+                value,
+                message: `${value} is outside the expected age range of 0–110.`
+              });
+            }
+          });
+
+          return;
+        }
+
+        /*
+          Generic IQR (interquartile range) outlier check.
+          This is a common statistical rule for spotting unusually
+          distant values without assuming a normal distribution.
+        */
+        const sorted = numericCells
+          .map((cell) => cell.value)
+          .sort((a, b) => a - b);
+
+        const q1 = percentile(sorted, 0.25);
+        const q3 = percentile(sorted, 0.75);
+        const iqr = q3 - q1;
+
+        /*
+          If all values are basically identical, there is no useful
+          spread for an outlier calculation.
+        */
+        if (iqr === 0) {
+          return;
+        }
+
+        const lowerBound = q1 - 1.5 * iqr;
+        const upperBound = q3 + 1.5 * iqr;
+
+        numericCells.forEach(({ rowIndex, value }) => {
+          if (value < lowerBound || value > upperBound) {
+            issues.push({
+              type: "number",
+              severity: "danger",
+              rowIndex,
+              column: header,
+              value,
+              message: `${value} is unusually far from most values in "${header}".`
+            });
+          }
+        });
+      });
+    }
+
+    /**
+     * Percentile helper used by the IQR calculation.
+     */
+    function percentile(sortedValues, percentileValue) {
+      if (sortedValues.length === 0) {
+        return 0;
+      }
+
+      const position =
+        (sortedValues.length - 1) * percentileValue;
+
+      const baseIndex = Math.floor(position);
+      const remainder = position - baseIndex;
+
+      if (sortedValues[baseIndex + 1] !== undefined) {
+        return (
+          sortedValues[baseIndex] +
+          remainder *
+            (sortedValues[baseIndex + 1] - sortedValues[baseIndex])
+        );
+      }
+
+      return sortedValues[baseIndex];
+    }
+
+    /**
+     * Lightweight state-format check.
+     *
+     * This demonstrates category normalization without pretending to
+     * be a full geographic data-cleaning system.
+     *
+     * The function recognizes a small set of commonly demonstrated
+     * state names/abbreviations. It can easily be expanded.
+     */
+    function detectPossibleStateInconsistencies(issues) {
+      const stateMap = {
+        florida: "FL",
+        fl: "FL",
+        "new york": "NY",
+        ny: "NY",
+        california: "CA",
+        ca: "CA",
+        texas: "TX",
+        tx: "TX"
+      };
+
+      appState.headers.forEach((header) => {
+        if (!header.toLowerCase().includes("state")) {
+          return;
+        }
+
+        appState.currentRows.forEach((row, rowIndex) => {
+          const rawValue = row[header];
+
+          if (isBlank(rawValue)) {
+            return;
+          }
+
+          const normalizedKey =
+            String(rawValue).trim().toLowerCase();
+
+          if (stateMap[normalizedKey]) {
+            const canonical = stateMap[normalizedKey];
+
+            if (String(rawValue).trim() !== canonical) {
+              issues.push({
+                type: "category",
+                severity: "info",
+                rowIndex,
+                column: header,
+                value: rawValue,
+                suggestedValue: canonical,
+                safeFix: true,
+                message: `"${rawValue}" can be standardized as "${canonical}".`
+              });
+            }
+
+            return;
+          }
+
+          /*
+            A value such as "Flordia" is not confidently auto-fixed.
+            We mark it for human review instead.
+          */
+          issues.push({
+            type: "category-review",
+            severity: "warning",
+            rowIndex,
+            column: header,
+            value: rawValue,
+            message: `"${rawValue}" is not recognized by this demo's state-format rules.`
+          });
+        });
+      });
+    }
+
+    /* ============================================================
+       10) ISSUE PRESENTATION HELPERS
+       ============================================================ */
+
+    /**
+     * Metadata that controls how each issue category is described
+     * in the sidebar.
+     */
+    const issueDefinitions = {
+      all: {
+        label: "All issues",
+        icon: "◉",
+        severity: "info",
+        description: "Every potential issue found in the current scan."
+      },
+
+      missing: {
+        label: "Missing values",
+        icon: "□",
+        severity: "warning",
+        description: "Cells with no usable value."
+      },
+
+      duplicate: {
+        label: "Duplicate rows",
+        icon: "⧉",
+        severity: "warning",
+        description: "Rows that appear to repeat another record."
+      },
+
+      whitespace: {
+        label: "Extra whitespace",
+        icon: "↔",
+        severity: "info",
+        description: "Leading or trailing spaces around text."
+      },
+
+      capitalization: {
+        label: "Capitalization",
+        icon: "Aa",
+        severity: "info",
+        description: "Category values written with inconsistent casing."
+      },
+
+      number: {
+        label: "Suspicious numbers",
+        icon: "!",
+        severity: "danger",
+        description: "Values outside expected or statistical ranges."
+      },
+
+      category: {
+        label: "Category format",
+        icon: "≡",
+        severity: "info",
+        description: "Values that can be standardized safely."
+      },
+
+      "category-review": {
+        label: "Needs human review",
+        icon: "?",
+        severity: "warning",
+        description: "Values the tool should not guess about."
+      }
+    };
+
+    /**
+     * Return only issues matching a selected category.
+     */
+    function issuesForType(type) {
+      if (type === "all") {
+        return appState.issues;
+      }
+
+      return appState.issues.filter((issue) => issue.type === type);
+    }
+
+    /**
+     * Count issues by category.
+     */
+    function issueCount(type) {
+      return issuesForType(type).length;
+    }
+
+    /**
+     * A simple visual score for portfolio/demo purposes.
+     *
+     * This is NOT an industry-standard data quality score.
+     * It gives users a fast "how messy is this?" signal.
+     */
+    function calculateQualityScore() {
+      const totalCells =
+        Math.max(1, appState.currentRows.length * appState.headers.length);
+
+      /*
+        Each issue subtracts a little from 100.
+        The penalty is capped so the score remains readable.
+      */
+      const issueRatio =
+        Math.min(1, appState.issues.length / totalCells);
+
+      const score =
+        Math.round(100 - issueRatio * 100);
+
+      return Math.max(0, Math.min(100, score));
+    }
+
+    /* ============================================================
+       11) RENDER THE APPLICATION
+       ------------------------------------------------------------
+       "Render" means taking the current JavaScript state and turning
+       it into visible HTML.
+       ============================================================ */
+    function renderApplication() {
+      renderFileBanner();
+      renderStats();
+      renderIssueList();
+      renderTable();
+      renderReviewPanel();
+      renderSummary();
+      updateViewButtons();
+    }
+
+    function renderFileBanner() {
+      elements.fileName.textContent = appState.fileName;
+
+      const sheetText =
+        appState.activeSheetName &&
+        appState.activeSheetName !== "CSV"
+          ? ` · Sheet: ${appState.activeSheetName}`
+          : "";
+
+      elements.fileStats.textContent =
+        `${appState.currentRows.length.toLocaleString()} rows · ` +
+        `${appState.headers.length.toLocaleString()} columns${sheetText}`;
+    }
+
+    function renderStats() {
+      elements.rowCountStat.textContent =
+        appState.currentRows.length.toLocaleString();
+
+      elements.columnCountStat.textContent =
+        appState.headers.length.toLocaleString();
+
+      elements.issueCountStat.textContent =
+        appState.issues.length.toLocaleString();
+
+      elements.qualityScoreStat.textContent =
+        calculateQualityScore();
+    }
+
+    function renderIssueList() {
+      const categories = [
+        "all",
+        "missing",
+        "duplicate",
+        "whitespace",
+        "capitalization",
+        "number",
+        "category",
+        "category-review"
+      ];
+
+      elements.issueList.innerHTML = categories
+        .map((type) => {
+          const definition = issueDefinitions[type];
+          const count = issueCount(type);
+
+          /*
+            We still show zero-count categories because they teach the
+            user what the tool checks for.
+          */
+          return `
+            <button
+              class="issue-item ${
+                appState.selectedIssueType === type ? "active" : ""
+              }"
+              data-issue-type="${escapeHtml(type)}"
+              type="button"
+            >
+              <span class="issue-icon ${definition.severity}">
+                ${escapeHtml(definition.icon)}
+              </span>
+
+              <span>
+                <span class="issue-name">
+                  ${escapeHtml(definition.label)}
+                </span>
+
+                <span class="issue-description">
+                  ${escapeHtml(definition.description)}
+                </span>
+              </span>
+
+              <span class="issue-count">
+                ${count}
+              </span>
+            </button>
+          `;
+        })
+        .join("");
+
+      /*
+        Because the issue buttons are generated dynamically, we attach
+        their event listeners AFTER writing them into the page.
+      */
+      elements.issueList
+        .querySelectorAll("[data-issue-type]")
+        .forEach((button) => {
+          button.addEventListener("click", () => {
+            appState.selectedIssueType =
+              button.dataset.issueType;
+
+            renderIssueList();
+            renderTable();
+            renderReviewPanel();
+          });
+        });
+    }
+
+    /**
+     * Determine which data set the table should display.
+     */
+    function activeTableRows() {
+      if (appState.tableView === "original") {
+        return appState.originalRows;
+      }
+
+      return appState.currentRows;
+    }
+
+    /**
+     * Filter rows based on the user's search term.
+     */
+    function filteredRowsWithIndexes() {
+      const rows = activeTableRows();
+
+      const search =
+        appState.searchText.trim().toLowerCase();
+
+      const indexedRows = rows.map((row, rowIndex) => ({
+        row,
+        rowIndex
+      }));
+
+      if (!search) {
+        return indexedRows;
+      }
+
+      return indexedRows.filter(({ row }) => {
+        return appState.headers.some((header) => {
+          return String(row[header] ?? "")
+            .toLowerCase()
+            .includes(search);
+        });
+      });
+    }
+
+    /**
+     * Find issue-based CSS class for a specific table cell.
+     */
+    function cellIssueClass(rowIndex, column) {
+      /*
+        We only highlight the currently selected issue category.
+        "All issues" highlights everything.
+      */
+      const relevantIssues = issuesForType(
+        appState.selectedIssueType
+      );
+
+      const matchingIssue = relevantIssues.find((issue) => {
+        return (
+          issue.rowIndex === rowIndex &&
+          issue.column === column
+        );
+      });
+
+      if (!matchingIssue) {
+        return "";
+      }
+
+      if (matchingIssue.severity === "danger") {
+        return "cell-danger";
+      }
+
+      if (matchingIssue.severity === "warning") {
+        return "cell-warning";
+      }
+
+      return "cell-info";
+    }
+
+    /**
+     * Determine whether a whole row is a duplicate.
+     */
+    function isDuplicateRow(rowIndex) {
+      if (
+        appState.selectedIssueType !== "all" &&
+        appState.selectedIssueType !== "duplicate"
+      ) {
+        return false;
+      }
+
+      return issuesForType("duplicate").some(
+        (issue) => issue.rowIndex === rowIndex
+      );
+    }
+
+    function renderTable() {
+      /* Build the table header. */
+      elements.tableHead.innerHTML = `
+        <tr>
+          <th class="row-number">#</th>
+          ${appState.headers
+            .map(
+              (header) =>
+                `<th title="${escapeHtml(header)}">${escapeHtml(header)}</th>`
+            )
+            .join("")}
+        </tr>
+      `;
+
+      const filteredRows =
+        filteredRowsWithIndexes();
+
+      const rowsToRender =
+        filteredRows.slice(
+          0,
+          appState.maximumRowsToRender
+        );
+
+      if (rowsToRender.length === 0) {
+        elements.tableBody.innerHTML = `
+          <tr>
+            <td colspan="${
+              appState.headers.length + 1
+            }">
+              <div class="empty-state">
+                <strong>No matching rows.</strong>
+                Try clearing your search or selecting a different issue.
+              </div>
+            </td>
+          </tr>
+        `;
+
+        elements.tableFooterText.textContent =
+          "0 rows displayed.";
+
+        return;
+      }
+
+      elements.tableBody.innerHTML = rowsToRender
+        .map(({ row, rowIndex }) => {
+          const duplicateClass =
+            isDuplicateRow(rowIndex)
+              ? "row-duplicate"
+              : "";
+
+          const cells = appState.headers
+            .map((header) => {
+              const value = row[header];
+
+              const displayValue = isBlank(value)
+                ? `<span class="empty-cell">blank</span>`
+                : escapeHtml(value);
+
+              const issueClass =
+                appState.tableView === "current"
+                  ? cellIssueClass(rowIndex, header)
+                  : "";
+
+              return `
+                <td
+                  class="${issueClass}"
+                  title="${escapeHtml(value)}"
+                >
+                  ${displayValue}
+                </td>
+              `;
+            })
+            .join("");
+
+          /*
+            +2 below reflects the human spreadsheet row number:
+            row 1 = header
+            array index 0 = spreadsheet row 2
+          */
+          return `
+            <tr class="${duplicateClass}">
+              <td class="row-number">${rowIndex + 2}</td>
+              ${cells}
+            </tr>
+          `;
+        })
+        .join("");
+
+      elements.tableFooterText.textContent =
+        `${Math.min(
+          filteredRows.length,
+          appState.maximumRowsToRender
+        ).toLocaleString()} of ` +
+        `${filteredRows.length.toLocaleString()} matching rows displayed.`;
+    }
+
+    /* ============================================================
+       12) REVIEW PANEL
+       ============================================================ */
+    function renderReviewPanel() {
+      const selectedType =
+        appState.selectedIssueType;
+
+      if (
+        selectedType === "all" ||
+        !issueDefinitions[selectedType]
+      ) {
+        elements.reviewBox.classList.remove("active");
+        return;
+      }
+
+      const definition =
+        issueDefinitions[selectedType];
+
+      const relevantIssues =
+        issuesForType(selectedType);
+
+      elements.reviewBox.classList.add("active");
+
+      elements.reviewTitle.textContent =
+        definition.label;
+
+      elements.reviewSubtitle.textContent =
+        `${relevantIssues.length} item${
+          relevantIssues.length === 1 ? "" : "s"
+        } in this category`;
+
+      elements.reviewExplanation.textContent =
+        issueExplanation(selectedType);
+
+      if (relevantIssues.length === 0) {
+        elements.suggestionList.innerHTML = `
+          <div class="empty-state">
+            <strong>Nothing to review here.</strong>
+            This scan did not find any current issues in this category.
+          </div>
+        `;
+        return;
+      }
+
+      /*
+        Show at most 50 issue cards so the review panel remains usable
+        even for large datasets.
+      */
+      elements.suggestionList.innerHTML =
+        relevantIssues
+          .slice(0, 50)
+          .map((issue, issueIndex) => {
+            return issueReviewCard(
+              issue,
+              issueIndex
+            );
+          })
+          .join("");
+
+      attachSuggestionButtonEvents(
+        relevantIssues.slice(0, 50)
+      );
+    }
+
+    function issueExplanation(type) {
+      const explanations = {
+        missing:
+          "A blank cell is not automatically wrong, but missing data can break calculations, joins, reports or machine-learning inputs. DataRefine highlights blanks rather than inventing values.",
+
+        duplicate:
+          "Duplicate records can double-count customers, transactions or events. DataRefine can remove later copies while keeping the first matching row.",
+
+        whitespace:
+          "Invisible spaces are easy to miss. “Florida” and “ Florida ” may look identical to a person but can behave like different values in software. Trimming outer spaces is usually a low-risk fix.",
+
+        capitalization:
+          "Category values should usually use one consistent format. For example, “Premium”, “premium” and “PREMIUM” may otherwise appear as separate categories in a report.",
+
+        number:
+          "An unusual number is a clue, not proof of bad data. A 118-year-old person may be real. Because outliers can be legitimate, DataRefine asks a human to review them instead of deleting them automatically.",
+
+        category:
+          "Some text values can safely be standardized into the same category, such as Florida and FL. This improves grouping and reporting.",
+
+        "category-review":
+          "The program found a value it cannot confidently standardize. A real data-quality system should avoid making up corrections when confidence is low."
+      };
+
+      return explanations[type] || "";
+    }
+
+    function issueReviewCard(issue, issueIndex) {
+      const rowNumber = issue.rowIndex + 2;
+
+      const columnText =
+        issue.column
+          ? ` · ${issue.column}`
+          : "";
+
+      const valueText =
+        issue.value === undefined ||
+        issue.value === null ||
+        issue.value === ""
+          ? "blank"
+          : String(issue.value);
+
+      let actionsHtml = "";
+
+      if (issue.type === "duplicate") {
+        actionsHtml = `
+          <button
+            class="btn btn-secondary btn-small"
+            data-action="remove-duplicate"
+            data-issue-index="${issueIndex}"
+          >
+            Remove duplicate
+          </button>
+        `;
+      } else if (issue.safeFix && issue.suggestedValue !== undefined) {
+        actionsHtml = `
+          <button
+            class="btn btn-primary btn-small"
+            data-action="apply-suggestion"
+            data-issue-index="${issueIndex}"
+          >
+            Use “${escapeHtml(issue.suggestedValue)}”
+          </button>
+
+          <button
+            class="btn btn-ghost btn-small"
+            data-action="ignore"
+            data-issue-index="${issueIndex}"
+          >
+            Leave it
+          </button>
+        `;
+      } else {
+        actionsHtml = `
+          <button
+            class="btn btn-ghost btn-small"
+            data-action="ignore"
+            data-issue-index="${issueIndex}"
+          >
+            Keep as-is
+          </button>
+        `;
+      }
+
+      return `
+        <div class="suggestion-row">
+          <div class="suggestion-main">
+            <div class="suggestion-title">
+              Row ${rowNumber}${escapeHtml(columnText)}
+            </div>
+
+            <div class="suggestion-detail">
+              ${escapeHtml(issue.message)}
+              <br />
+              Current value: <strong>${escapeHtml(valueText)}</strong>
+            </div>
+          </div>
+
+          <div class="suggestion-actions">
+            ${actionsHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    /**
+     * Attach click behavior to buttons inside review cards.
+     */
+    function attachSuggestionButtonEvents(relevantIssues) {
+      elements.suggestionList
+        .querySelectorAll("[data-action]")
+        .forEach((button) => {
+          button.addEventListener("click", () => {
+            const issueIndex =
+              Number(button.dataset.issueIndex);
+
+            const issue =
+              relevantIssues[issueIndex];
+
+            if (!issue) {
+              return;
+            }
+
+            if (
+              button.dataset.action ===
+              "apply-suggestion"
+            ) {
+              applySingleSuggestion(issue);
+              return;
+            }
+
+            if (
+              button.dataset.action ===
+              "remove-duplicate"
+            ) {
+              removeDuplicateIssue(issue);
+              return;
+            }
+
+            if (button.dataset.action === "ignore") {
+              showToast(
+                "No change made. Human review can be the correct decision.",
+                "warning"
+              );
+            }
+          });
+        });
+    }
+
+    /* ============================================================
+       13) APPLYING FIXES
+       ============================================================ */
+
+    /**
+     * Apply one safe suggestion.
+     */
+    function applySingleSuggestion(issue) {
+      const row =
+        appState.currentRows[issue.rowIndex];
+
+      if (!row || !issue.column) {
+        return;
+      }
+
+      const before = row[issue.column];
+      const after = issue.suggestedValue;
+
+      if (before === after) {
+        return;
+      }
+
+      row[issue.column] = after;
+
+      if (issue.type === "whitespace") {
+        appState.changeLog.whitespaceFixed += 1;
+      } else {
+        appState.changeLog.textFixed += 1;
+      }
+
+      appState.changeLog.manualFixes += 1;
+
+      scanDataset();
+      renderApplication();
+
+      showToast(
+        `Updated row ${issue.rowIndex + 2}, ${issue.column}.`,
+        "success"
+      );
+    }
+
+    /**
+     * Remove the duplicate row represented by an issue.
+     *
+     * Important:
+     * Removing an array element changes the indexes of rows that come
+     * after it, so we rescan immediately afterward.
+     */
+    function removeDuplicateIssue(issue) {
+      if (
+        issue.rowIndex < 0 ||
+        issue.rowIndex >= appState.currentRows.length
+      ) {
+        return;
+      }
+
+      appState.currentRows.splice(issue.rowIndex, 1);
+
+      appState.changeLog.duplicatesRemoved += 1;
+      appState.changeLog.manualFixes += 1;
+
+      scanDataset();
+      renderApplication();
+
+      showToast("Duplicate row removed.", "success");
+    }
+
+    /**
+     * Apply only low-risk corrections automatically.
+     *
+     * Current safe fixes:
+     * - trim outer whitespace
+     * - capitalization normalization
+     * - recognized category normalization
+     * - remove later duplicate copies
+     *
+     * We do NOT:
+     * - fill blanks
+     * - delete outliers
+     * - guess unknown spellings
+     */
+    function applySafeFixes() {
+      if (!appState.currentRows.length) {
+        return;
+      }
+
+      /*
+        1) First apply cell-level safe fixes.
+
+        We use the current issue list as our instruction set.
+      */
+      const safeCellIssues =
+        appState.issues.filter(
+          (issue) =>
+            issue.safeFix &&
+            issue.column &&
+            issue.suggestedValue !== undefined
+        );
+
+      safeCellIssues.forEach((issue) => {
+        const row =
+          appState.currentRows[issue.rowIndex];
+
+        if (!row) {
+          return;
+        }
+
+        if (
+          row[issue.column] ===
+          issue.suggestedValue
+        ) {
+          return;
+        }
+
+        row[issue.column] =
+          issue.suggestedValue;
+
+        if (issue.type === "whitespace") {
+          appState.changeLog.whitespaceFixed += 1;
+        } else {
+          appState.changeLog.textFixed += 1;
+        }
+      });
+
+      /*
+        2) Re-detect duplicates AFTER normalizing safe text.
+        This can reveal duplicates that only differed because of spaces
+        or capitalization.
+      */
+      scanDataset();
+
+      const duplicateIndexes = appState.issues
+        .filter((issue) => issue.type === "duplicate")
+        .map((issue) => issue.rowIndex)
+        /*
+          Remove larger indexes first.
+          Otherwise deleting an early row would shift later indexes.
+        */
+        .sort((a, b) => b - a);
+
+      duplicateIndexes.forEach((rowIndex) => {
+        appState.currentRows.splice(rowIndex, 1);
+        appState.changeLog.duplicatesRemoved += 1;
+      });
+
+      scanDataset();
+      renderApplication();
+
+      const totalChanges =
+        safeCellIssues.length +
+        duplicateIndexes.length;
+
+      if (totalChanges === 0) {
+        showToast(
+          "No additional low-risk automatic fixes were available.",
+          "warning"
+        );
+      } else {
+        showToast(
+          `${totalChanges} safe fix${
+            totalChanges === 1 ? "" : "es"
+          } applied.`,
+          "success"
+        );
+      }
+    }
+
+    /**
+     * Restore the editable copy to the original imported data.
+     */
+    function resetChanges() {
+      appState.currentRows =
+        deepClone(appState.originalRows);
+
+      appState.changeLog = {
+        duplicatesRemoved: 0,
+        whitespaceFixed: 0,
+        textFixed: 0,
+        manualFixes: 0
+      };
+
+      scanDataset();
+      renderApplication();
+
+      showToast("Changes reset to the original file.", "warning");
+    }
+
+    /* ============================================================
+       14) CLEANING SUMMARY
+       ============================================================ */
+    function hasChanges() {
+      return (
+        appState.changeLog.duplicatesRemoved > 0 ||
+        appState.changeLog.whitespaceFixed > 0 ||
+        appState.changeLog.textFixed > 0 ||
+        appState.changeLog.manualFixes > 0 ||
+        JSON.stringify(appState.currentRows) !==
+          JSON.stringify(appState.originalRows)
+      );
+    }
+
+    function renderSummary() {
+      const changed = hasChanges();
+
+      elements.summaryCard.classList.toggle(
+        "active",
+        changed
+      );
+
+      elements.exportButton.disabled =
+        appState.currentRows.length === 0;
+
+      if (!changed) {
+        return;
+      }
+
+      elements.summaryDuplicates.textContent =
+        appState.changeLog.duplicatesRemoved;
+
+      elements.summaryWhitespace.textContent =
+        appState.changeLog.whitespaceFixed;
+
+      elements.summaryText.textContent =
+        appState.changeLog.textFixed;
+
+      elements.summaryRemaining.textContent =
+        appState.issues.length;
+    }
+
+    /* ============================================================
+       15) EXPORT
+       ============================================================ */
+
+    /**
+     * Escape one CSV cell according to standard CSV rules.
+     */
+    function csvEscape(value) {
+      const text =
+        value === null || value === undefined
+          ? ""
+          : String(value);
+
+      /*
+        If a cell contains commas, quotes or newlines, wrap it in
+        double quotes and double any existing quotes.
+      */
+      if (/[",\n\r]/.test(text)) {
+        return `"${text.replaceAll('"', '""')}"`;
+      }
+
+      return text;
+    }
+
+    /**
+     * Convert the current dataset into CSV text.
+     */
+    function currentRowsToCsv() {
+      const lines = [];
+
+      lines.push(
+        appState.headers
+          .map(csvEscape)
+          .join(",")
+      );
+
+      appState.currentRows.forEach((row) => {
+        const line = appState.headers
+          .map((header) =>
+            csvEscape(row[header])
+          )
+          .join(",");
+
+        lines.push(line);
+      });
+
+      return lines.join("\r\n");
+    }
+
+    /**
+     * Trigger a browser download from a Blob.
+     */
+    function downloadBlob(blob, fileName) {
+      const url =
+        URL.createObjectURL(blob);
+
+      const anchor =
+        document.createElement("a");
+
+      anchor.href = url;
+      anchor.download = fileName;
+
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+
+      /*
+        Revoke the temporary browser URL so memory can be reclaimed.
+      */
+      URL.revokeObjectURL(url);
+    }
+
+    /**
+     * Export based on the original file type.
+     *
+     * CSV input -> CSV output
+     * Excel input -> XLSX output when SheetJS is available
+     */
+    function exportCleanFile() {
+      if (!appState.currentRows.length) {
+        showToast(
+          "There is no data to export.",
+          "error"
+        );
+        return;
+      }
+
+      if (
+        appState.fileType === "excel" &&
+        typeof XLSX !== "undefined"
+      ) {
+        exportAsExcel();
+        return;
+      }
+
+      exportAsCsv();
+    }
+
+    function exportAsCsv() {
+      const csvText =
+        currentRowsToCsv();
+
+      /*
+        A UTF-8 BOM helps Excel recognize Unicode characters in CSV
+        files more reliably.
+      */
+      const blob = new Blob(
+        ["\ufeff", csvText],
+        {
+          type: "text/csv;charset=utf-8"
+        }
+      );
+
+      downloadBlob(
+        blob,
+        cleanedFileName("csv")
+      );
+
+      showToast(
+        "Cleaned CSV downloaded.",
+        "success"
+      );
+    }
+
+    function exportAsExcel() {
+      /*
+        Turn our array of row objects back into a worksheet.
+      */
+      const sheet =
+        XLSX.utils.json_to_sheet(
+          appState.currentRows,
+          {
+            header: appState.headers
+          }
+        );
+
+      const workbook =
+        XLSX.utils.book_new();
+
+      XLSX.utils.book_append_sheet(
+        workbook,
+        sheet,
+        "Cleaned Data"
+      );
+
+      /*
+        SheetJS handles the browser download for XLSX.
+      */
+      XLSX.writeFile(
+        workbook,
+        cleanedFileName("xlsx")
+      );
+
+      showToast(
+        "Cleaned Excel workbook downloaded.",
+        "success"
+      );
+    }
+
+    /* ============================================================
+       16) VIEW / FILE MANAGEMENT
+       ============================================================ */
+    function updateViewButtons() {
+      elements.currentViewButton.classList.toggle(
+        "active",
+        appState.tableView === "current"
+      );
+
+      elements.originalViewButton.classList.toggle(
+        "active",
+        appState.tableView === "original"
+      );
+
+      /*
+        Only current data should receive issue highlighting because
+        issue indexes describe appState.currentRows.
+      */
+      if (appState.tableView === "original") {
+        elements.safeFixButton.disabled = true;
+      } else {
+        elements.safeFixButton.disabled = false;
+      }
+    }
+
+    function closeCurrentFile() {
+      appState.fileName = "";
+      appState.fileType = "";
+      appState.activeSheetName = "";
+      appState.headers = [];
+      appState.originalRows = [];
+      appState.currentRows = [];
+      appState.issues = [];
+      appState.selectedIssueType = "all";
+      appState.tableView = "current";
+      appState.searchText = "";
+
+      elements.workspace.classList.remove("active");
+      elements.reviewBox.classList.remove("active");
+      elements.summaryCard.classList.remove("active");
+      elements.tableSearch.value = "";
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+
+    /* ============================================================
+       17) MODAL MANAGEMENT
+       ============================================================ */
+    function openHowModal() {
+      elements.howModal.classList.add("active");
+    }
+
+    function closeHowModal() {
+      elements.howModal.classList.remove("active");
+    }
+
+    /* ============================================================
+       18) EVENT LISTENERS
+       ------------------------------------------------------------
+       Event listeners are how JavaScript reacts to user actions.
+       ============================================================ */
+
+    /*
+      Both "Choose file" buttons open the hidden file input.
+    */
+    elements.chooseFileButton.addEventListener(
+      "click",
+      () => elements.fileInput.click()
+    );
+
+    elements.topChooseFileButton.addEventListener(
+      "click",
+      () => elements.fileInput.click()
+    );
+
+    /*
+      Keyboard accessibility for the drop zone:
+      Enter or Space opens the file picker.
+    */
+    elements.uploadZone.addEventListener(
+      "keydown",
+      (event) => {
+        if (
+          event.key === "Enter" ||
+          event.key === " "
+        ) {
+          event.preventDefault();
+          elements.fileInput.click();
+        }
+      }
+    );
+
+    /*
+      The upload zone itself is clickable, but we avoid double-opening
+      the picker when a real button inside it was clicked.
+    */
+    elements.uploadZone.addEventListener(
+      "click",
+      (event) => {
+        if (
+          event.target.closest("button")
+        ) {
+          return;
+        }
+
+        elements.fileInput.click();
+      }
+    );
+
+    /*
+      When the operating-system file picker returns a file,
+      loadUserFile decides whether it is CSV or Excel.
+    */
+    elements.fileInput.addEventListener(
+      "change",
+      (event) => {
+        const file =
+          event.target.files?.[0];
+
+        loadUserFile(file);
+      }
+    );
+
+    /*
+      Demo mode is valuable for a portfolio reviewer who does not have
+      a spreadsheet ready.
+    */
+    elements.loadDemoButton.addEventListener(
+      "click",
+      loadDemoData
+    );
+
+    /*
+      Drag-and-drop behavior.
+    */
+    ["dragenter", "dragover"].forEach(
+      (eventName) => {
+        elements.uploadZone.addEventListener(
+          eventName,
+          (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            elements.uploadZone.classList.add(
+              "dragging"
+            );
+          }
+        );
+      }
+    );
+
+    ["dragleave", "drop"].forEach(
+      (eventName) => {
+        elements.uploadZone.addEventListener(
+          eventName,
+          (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            elements.uploadZone.classList.remove(
+              "dragging"
+            );
+          }
+        );
+      }
+    );
+
+    elements.uploadZone.addEventListener(
+      "drop",
+      (event) => {
+        const file =
+          event.dataTransfer.files?.[0];
+
+        loadUserFile(file);
+      }
+    );
+
+    /*
+      Searching re-renders only the visible table.
+    */
+    elements.tableSearch.addEventListener(
+      "input",
+      (event) => {
+        appState.searchText =
+          event.target.value;
+
+        renderTable();
+      }
+    );
+
+    /*
+      Toggle between original data and the editable cleaned copy.
+    */
+    elements.currentViewButton.addEventListener(
+      "click",
+      () => {
+        appState.tableView = "current";
+        renderTable();
+        updateViewButtons();
+      }
+    );
+
+    elements.originalViewButton.addEventListener(
+      "click",
+      () => {
+        appState.tableView = "original";
+        renderTable();
+        updateViewButtons();
+      }
+    );
+
+    /*
+      Main data actions.
+    */
+    elements.safeFixButton.addEventListener(
+      "click",
+      applySafeFixes
+    );
+
+    elements.rescanButton.addEventListener(
+      "click",
+      () => {
+        scanDataset();
+        renderApplication();
+
+        showToast(
+          "Dataset rescanned.",
+          "success"
+        );
+      }
+    );
+
+    elements.resetChangesButton.addEventListener(
+      "click",
+      resetChanges
+    );
+
+    elements.closeFileButton.addEventListener(
+      "click",
+      closeCurrentFile
+    );
+
+    elements.exportButton.addEventListener(
+      "click",
+      exportCleanFile
+    );
+
+    elements.summaryExportButton.addEventListener(
+      "click",
+      exportCleanFile
+    );
+
+    /*
+      Modal buttons.
+    */
+    elements.howItWorksButton.addEventListener(
+      "click",
+      openHowModal
+    );
+
+    elements.closeHowModalButton.addEventListener(
+      "click",
+      closeHowModal
+    );
+
+    /*
+      Clicking the dark backdrop outside the modal closes it.
+    */
+    elements.howModal.addEventListener(
+      "click",
+      (event) => {
+        if (event.target === elements.howModal) {
+          closeHowModal();
+        }
+      }
+    );
+
+    /*
+      Escape is a standard keyboard shortcut for closing dialogs.
+    */
+    document.addEventListener(
+      "keydown",
+      (event) => {
+        if (
+          event.key === "Escape" &&
+          elements.howModal.classList.contains(
+            "active"
+          )
+        ) {
+          closeHowModal();
+        }
+      }
+    );
+
+    /* ============================================================
+       19) INITIAL PAGE STATE
+       ------------------------------------------------------------
+       There is no dataset on first load, so nothing else needs to
+       render yet. This console message is useful while developing.
+       ============================================================ */
+    console.info(
+      "DataRefine loaded. Developed by Yancarlo Guzman."
+    );
+  </script>
+</body>
+</html>
